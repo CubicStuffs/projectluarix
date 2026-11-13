@@ -34,7 +34,6 @@
   .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; }
   .hero h1 .highlight { color: var(--gold); }
-  
   .pricing-section { padding: 2rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
   .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
@@ -243,7 +242,7 @@
 
       <h2 id="script-loader">How to Use Loaders</h2>
       <p>Once you create a script on the dashboard, you will receive a loader URL. It looks like this:</p>
-      <div class="code-block">script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("https://luarix-eight.vercel.app/api/loader?id=YOUR_SCRIPT_ID"))()</div>
+      <div class="code-block">script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader?id=YOUR_SCRIPT_ID"))()</div>
       <p>If the script is <strong>Keyless</strong>, users do not need a key. If it requires a key, users must redeem a key via your Discord panel and paste it into the <code>script_key</code> variable.</p>
 
       <h2 id="cmd-setpanel">/setpanel</h2>
@@ -301,16 +300,21 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
         <span class="menu-text">Blacklists</span>
       </div>
-      
       <div class="menu-item" id="tab-monetize" onclick="switchTab('monetize')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
         <span class="menu-text">Monetization</span>
       </div>
-
       <div class="menu-item" id="tab-discord" onclick="switchTab('discord')">
         <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
         <span class="menu-text">Add to Discord</span>
       </div>
+
+      <!-- NEW TAB: ADMIN KEYS -->
+      <div class="menu-item" id="tab-admin-keys" style="display: none;" onclick="switchTab('admin-keys')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+        <span class="menu-text" style="color: var(--gold);">Admin API Keys</span>
+      </div>
+
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span class="menu-text">Log Out</span>
@@ -403,11 +407,27 @@
             <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
               Invite our official Discord Bot to your server to start generating keys, managing whitelists, and creating control panels for your buyers automatically.
             </p>
-            <!-- Using user's Client ID -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
               <svg width="24" height="24" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
               Invite Bot
             </a>
+          </div>
+        </div>
+
+        <!-- TAB: ADMIN KEYS -->
+        <div id="content-admin-keys" style="display: none;">
+          <div class="monetize-container" style="max-width: 800px;">
+            <h3 style="color: var(--gold);">Admin API Key Generator</h3>
+            <p>Generate paid subscription keys to sell or give to users. They can enter these keys on the login screen to upgrade their account.</p>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+              <button class="btn-gold" style="flex: 1;" onclick="generateAdminKey('basic')">Generate Basic Key ($5/mo)</button>
+              <button class="btn-gold" style="flex: 1; background: #222; color: #fff;" onclick="generateAdminKey('premium')">Generate Premium Key ($10/yr)</button>
+            </div>
+
+            <div id="admin-key-result" style="display: none; background: #000; padding: 2rem; border-radius: 8px; border: 1px solid var(--gold); text-align: center;">
+              <!-- Generated key will appear here -->
+            </div>
           </div>
         </div>
 
@@ -513,6 +533,7 @@ function switchTab(tab) {
     document.getElementById('content-blacklist').style.display = tab === 'blacklist' ? 'block' : 'none';
     document.getElementById('content-discord').style.display = tab === 'discord' ? 'flex' : 'none';
     document.getElementById('content-monetize').style.display = tab === 'monetize' ? 'block' : 'none';
+    document.getElementById('content-admin-keys').style.display = tab === 'admin-keys' ? 'block' : 'none';
     
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
@@ -640,10 +661,16 @@ function loadDashboard() {
         else plan = 'free';
     }
 
-    if (plan === 'free') {
-        document.getElementById('stat-limit').textContent = 20 - (currentAuth.usage || 0);
-    } else {
+    if (plan === 'admin') {
+        document.getElementById('tab-admin-keys').style.display = 'flex';
         document.getElementById('stat-limit').textContent = "∞";
+    } else {
+        document.getElementById('tab-admin-keys').style.display = 'none';
+        if (plan === 'free') {
+            document.getElementById('stat-limit').textContent = 20 - (currentAuth.usage || 0);
+        } else {
+            document.getElementById('stat-limit').textContent = "∞";
+        }
     }
 
     fetch('/api/manage?action=get_stats&api_key=' + currentAuth.api_key)
@@ -797,6 +824,26 @@ async function saveMonetization() {
     } else {
         showToast("Failed to save monetization.");
     }
+}
+
+/* ==========================================
+   6. ADMIN KEY GENERATOR (NEW)
+   ========================================== */
+function generateAdminKey(type) {
+    const chars = 'ABCDEF0123456789';
+    let rand = '';
+    for (let i = 0; i < 8; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREM-';
+    const key = prefix + rand;
+    
+    const resBox = document.getElementById('admin-key-result');
+    resBox.style.display = 'block';
+    resBox.innerHTML = `
+        <h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4>
+        <div style="font-family: monospace; font-size: 1.5rem; color: var(--gold); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div>
+        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')">Copy Key</button>
+    `;
 }
 
 async function resetKey(key) {
