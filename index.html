@@ -47,6 +47,7 @@
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
   .stat-info h2 { font-size: 1.5rem; }
+  
   .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
   .api-key-box code { color: var(--gold); font-size: 1.2rem; font-weight: bold; font-family: monospace; }
 
@@ -200,7 +201,7 @@
 </div>
 
 <script>
-let allProjects = []; // Store fetched projects
+let allProjects = [];
 
 function openLogin() { document.getElementById('login-modal').classList.add('show'); }
 function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
@@ -276,7 +277,6 @@ function loadDashboard() {
     fetchProjects();
 }
 
-// Fetch projects from LocalStorage (For immediate UI sync)
 function fetchProjects() {
     const auth = getAuth();
     allProjects = JSON.parse(localStorage.getItem('luarix_projects_' + auth.email) || '[]');
@@ -326,7 +326,7 @@ async function doObfuscate() {
     document.getElementById('loader-code').value = "Connecting to database...";
 
     try {
-        // Encrypt (Simple XOR for now)
+        // Simple XOR Encryption
         const key = Math.floor(Math.random() * 200) + 10;
         const bytes = new TextEncoder().encode(source);
         let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
@@ -339,7 +339,10 @@ async function doObfuscate() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
+        // THIS IS THE FIX: We define customUrl FIRST, then use it.
+        const customUrl = `https://${window.location.host}/api/loader?id=${data.id}`;
         const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}"))()`;
+        
         document.getElementById('loader-code').value = loader;
         document.getElementById('status-title').textContent = "Saved successfully!";
 
@@ -359,7 +362,6 @@ async function doObfuscate() {
     finally { btn.textContent = "Obfuscate & Save Project"; btn.disabled = false; }
 }
 
-// NEW: Toggle Keyless API
 async function toggleKeyless(id, currentStatus) {
     const auth = getAuth();
     try {
@@ -368,7 +370,6 @@ async function toggleKeyless(id, currentStatus) {
             body: JSON.stringify({ script_id: id, api_key: auth.api_key, keyless: !currentStatus })
         });
         
-        // Update local
         const p = allProjects.find(x => x.id === id);
         if (p) p.keyless = !currentStatus;
         localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
@@ -376,7 +377,6 @@ async function toggleKeyless(id, currentStatus) {
     } catch (err) { alert("Failed to toggle"); }
 }
 
-// NEW: Generate Key from Dashboard
 async function generateProjectKey(id) {
     const auth = getAuth();
     try {
@@ -393,13 +393,9 @@ async function generateProjectKey(id) {
     } catch (err) { alert("Error generating key"); }
 }
 
-// NEW: Edit Project
 function editProject(id) {
     const p = allProjects.find(x => x.id === id);
     if (!p) return;
-    
-    // For simplicity, we fetch from db (but in this UI we just use saved local text if we had it)
-    // To keep it fast, we just let them re-paste.
     document.getElementById('project-name').value = p.name;
     document.getElementById('lua-source').value = "Please re-paste your code here to edit.";
     document.getElementById('obfuscator-panel').style.display = 'block';
@@ -422,31 +418,11 @@ function copyLoader(id) {
 
 function logout() { localStorage.removeItem('luarix_active_user'); showView('landing'); }
 function promptAdmin() {
-    const pass = prompt("Enter Admin Password:");
-    if (pass === "cubic%is@luarix^owner") {
-        const adminEmail = 'admin@luarix.com';
-        
-        // Generate a secure, random Admin API key
-        const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const secureAdminKey = `LXR-ADMIN-${randomHex}`;
-        
-        let auth = { 
-            email: adminEmail, 
-            api_key: secureAdminKey, 
-            plan: 'admin', 
-            usage: 0, 
-            expires: null 
-        };
-        
-        localStorage.setItem('luarix_auth_' + adminEmail, JSON.stringify(auth));
-        localStorage.setItem('luarix_active_user', adminEmail);
-        
-        closeLogin();
-        showView('dashboard');
-        loadDashboard();
-        alert("Admin Access Granted. Your secure key is: " + secureAdminKey);
-    } else if (pass !== null) {
-        alert("Incorrect password.");
+    if (prompt("Password:") === "cubic%is@luarix^owner") {
+        const secureAdminKey = `LXR-ADMIN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        localStorage.setItem('luarix_active_user', 'admin@luarix.com');
+        localStorage.setItem('luarix_auth_admin@luarix.com', JSON.stringify({ email: 'admin@luarix.com', api_key: secureAdminKey, plan: 'admin' }));
+        closeLogin(); showView('dashboard'); loadDashboard();
     }
 }
 function toggleAdminPanel() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
