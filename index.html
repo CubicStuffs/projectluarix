@@ -301,7 +301,6 @@
         <span class="menu-text">Blacklists</span>
       </div>
       
-      <!-- NEW TAB: MONETIZATION -->
       <div class="menu-item" id="tab-monetize" onclick="switchTab('monetize')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
         <span class="menu-text">Monetization</span>
@@ -372,17 +371,14 @@
           </div>
         </div>
 
-        <!-- TAB: MONETIZATION -->
         <div id="content-monetize" style="display: none;">
           <div class="monetize-container">
             <h3>Monetize Your Scripts</h3>
             <p>Turn on monetization for Keyless scripts. When users run the script, a GUI will open asking them to complete a link to get a 1-time key.</p>
-            
             <div class="form-group">
               <label>Select Project</label>
               <select id="mon-script-select"></select>
             </div>
-            
             <div class="form-group">
               <label>Provider</label>
               <select id="mon-provider">
@@ -391,12 +387,10 @@
                 <option value="Linkvertise">Linkvertise</option>
               </select>
             </div>
-            
             <div class="form-group">
               <label>Provider Link</label>
               <input type="text" id="mon-link" placeholder="e.g. https://work.ink/abc/xyz" />
             </div>
-            
             <button class="btn-gold" onclick="saveMonetization()">Save Monetization</button>
           </div>
         </div>
@@ -408,6 +402,7 @@
             <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
               Invite our official Discord Bot to your server to start generating keys, managing whitelists, and creating control panels for your buyers automatically.
             </p>
+            <!-- Using user's Client ID -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
               <svg width="24" height="24" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
               Invite Bot
@@ -440,7 +435,7 @@
 </div>
 
 <div class="modal-bg" id="login-modal">
-  <div class="modal">
+  <div class="modal" style="position: relative;">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
     <h2 id="auth-title">Welcome Back</h2>
     <p id="auth-desc" style="color: var(--text-muted); margin-bottom: 1.5rem;">Login to your account</p>
@@ -450,6 +445,9 @@
     <div style="display: flex; align-items: center; gap: 10px; margin: 1rem 0; color: var(--text-muted); font-size: 0.8rem;"><div style="flex:1; height:1px; background:var(--border);"></div> OR <div style="flex:1; height:1px; background:var(--border);"></div></div>
     <button class="btn-gold" style="width: 100%; background: var(--discord); color: white;" onclick="loginDiscord()">Login with Discord</button>
     <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);"><span id="toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: var(--gold); text-decoration: none;" id="toggle-link">Sign Up</a></p>
+
+    <!-- SECRET ADMIN LOGO -->
+    <img src="logo.png" style="position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s; mix-blend-mode: screen;" onclick="promptAdmin()" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.2'" alt="Admin">
   </div>
 </div>
 
@@ -513,19 +511,38 @@ function switchTab(tab) {
     document.getElementById('content-keys').style.display = tab === 'keys' ? 'block' : 'none';
     document.getElementById('content-blacklist').style.display = tab === 'blacklist' ? 'block' : 'none';
     document.getElementById('content-discord').style.display = tab === 'discord' ? 'flex' : 'none';
-    document.getElementById('content-monetize').style.display = tab === 'monetize' ? 'block' : 'none'; // ADDED
+    document.getElementById('content-monetize').style.display = tab === 'monetize' ? 'block' : 'none';
     
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
 
     if (tab === 'keys') loadKeys();
     if (tab === 'blacklist') loadBlacklists();
-    if (tab === 'monetize') loadMonetizationSelect(); // ADDED
+    if (tab === 'monetize') loadMonetizationSelect();
 }
 
 /* ==========================================
-   2. AUTHENTICATION
+   2. AUTHENTICATION & ADMIN
    ========================================== */
+function promptAdmin() {
+    const pass = prompt("Enter Admin Password:");
+    if (pass === "cubic%is@luarix^owner") {
+        const adminEmail = 'admin@luarix.com';
+        const secureAdminKey = `LXR-ADMIN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        
+        let auth = { email: adminEmail, api_key: secureAdminKey, plan: 'admin', usage: 0, expires: null };
+        
+        currentAuth = auth;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        
+        closeLogin();
+        loadDashboard();
+        showToast("Admin Access Granted.");
+    } else if (pass !== null) {
+        alert("Incorrect password.");
+    }
+}
+
 async function handleAuth() {
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value.trim();
@@ -571,7 +588,6 @@ if (urlParams.has('discord_auth')) {
         document.getElementById('dc-welcome-name').textContent = tempDiscordData.discord_tag;
         document.getElementById('discord-link-modal').classList.add('show');
     } catch (err) {
-        console.error("Failed to parse Discord Auth:", err);
         window.history.replaceState({}, document.title, "/");
         showToast("Authentication error. Please try again.");
     }
@@ -698,7 +714,7 @@ async function createScript() {
 }
 
 /* ==========================================
-   5. TABS: KEYS & BLACKLISTS & MONETIZATION
+   5. TABS: KEYS, BLACKLISTS, MONETIZATION
    ========================================== */
 async function loadKeys() {
     const tbody = document.getElementById('keys-tbody');
