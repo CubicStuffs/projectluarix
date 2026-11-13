@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Luarix | Protect & Monetize your code</title>
+<title>Luarix | Dashboard</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { 
     --bg: #08080a; --bg-card: #0f111a; --bg-sidebar: #0b0b0f; --border: #1a1d2d; 
     --text: #ffffff; --text-muted: #8892b0; --gold: #f5c518; 
     --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); 
-    --success: #10b981; --danger: #ef4444; 
+    --success: #10b981; --danger: #ef4444; --discord: #5865F2;
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
   
-  /* ANIMATIONS */
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } 50% { box-shadow: 0 0 25px rgba(245, 197, 24, 0.6); } 100% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } }
@@ -22,8 +21,6 @@
 
   /* NAVBAR */
   nav { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(15, 17, 26, 0.9); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 12px; z-index: 100; animation: slideDown 0.5s ease-out; }
-  .nav-brand { display: flex; align-items: center; cursor: pointer; transition: transform 0.2s; }
-  .nav-brand:hover { transform: scale(1.05); }
   .nav-brand img { height: 40px; mix-blend-mode: screen; } 
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
@@ -46,83 +43,57 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DASHBOARD LAYOUT */
+  /* DASHBOARD LAYOUT (Fixed Gap) */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
-  .dash-layout { display: flex; height: 100%; }
+  .dash-layout { display: flex; height: 100%; width: 100%; }
   
-  /* SIDEBAR */
-  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; z-index: 10; }
-  .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
-  .sidebar.collapsed .menu-text { display: none; }
-  .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
-  .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; margin-bottom: 2rem; }
-  .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
-
-  .sidebar-logo { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; transition: 0.3s; }
-  
-  .toggle-btn {
-    position: absolute; right: -12px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border);
-    color: var(--gold); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;
-    cursor: pointer; z-index: 10; transition: 0.3s;
-  }
-  .toggle-btn:hover { background: var(--gold); color: #000; transform: scale(1.1); }
-
-  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden; transition: 0.2s; }
+  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: 0.3s; z-index: 10; }
+  .sidebar-logo { height: 50px; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; }
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
-  .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
 
-  /* MAIN CONTENT (Fixed Gap & Stretches) */
-  .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
-  .content-wrapper { width: 100%; max-width: 1600px; margin: 0 auto; } /* Fills the screen, but caps at 1600px for ultra-wides */
+  .main-content { flex: 1; padding: 2rem; display: flex; justify-content: center; overflow-y: auto; }
+  .content-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 2rem; } /* Fixes the big gap */
 
-  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+  /* DASHBOARD CARDS */
+  .dash-header { display: flex; justify-content: space-between; align-items: center; }
+  .user-info h1 { font-size: 1.5rem; }
+  .user-info p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+  .user-info .discord-tag { color: var(--discord); font-weight: bold; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: 0.3s; }
+  .stat-card:hover { border-color: #333; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+  .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-info h2 { font-size: 2rem; margin-top: 0.5rem; }
   
-  /* STRETCHING GRID */
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-  .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
-  .stat-info h2 { font-size: 1.5rem; }
-  
-  .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+  .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
   .api-key-box code { color: var(--gold); font-size: 1.2rem; font-weight: bold; font-family: monospace; }
 
-  #obfuscator-panel, #admin-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
-  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-  input[type="text"], input[type="email"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
-  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: #a5f3c4; font-family: monospace; min-height: 150px; resize: vertical; }
-  .output-box { display: none; margin-top: 1.5rem; background: #050505; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
-  .code-box { width: 100%; height: 80px; background: #000; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; resize: none; margin-bottom: 1rem; }
-
-  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: 100%; }
+  /* TABLES (Keys & Blacklists) */
+  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
   .script-table { width: 100%; border-collapse: collapse; text-align: left; }
   .script-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; border-bottom: 1px solid var(--border); }
   .script-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-  
-  .action-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 500; margin-right: 5px; font-size: 0.8rem; transition: 0.2s; }
+  .action-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.8rem; transition: 0.2s; }
   .action-btn:hover { background: rgba(245, 197, 24, 0.1); color: var(--gold); border-color: var(--gold); }
   .action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
   
-  .toggle-switch { cursor: pointer; padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: bold; font-size: 0.8rem; border: none; }
-  .toggle-on { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-  .toggle-off { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-
+  /* INPUTS */
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+  input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
+  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: #a5f3c4; font-family: monospace; min-height: 150px; resize: vertical; }
+  
   /* MODALS & TOASTS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; }
   .modal-bg.show { display: flex; }
   .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-  .secret-logo { position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; }
-
-  /* BEAUTIFUL TOAST NOTIFICATION */
-  .toast-notification {
-    position: fixed; bottom: 2rem; right: 2rem;
-    background: var(--bg-card); border: 1px solid var(--gold); border-left: 4px solid var(--gold);
-    color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999;
-    display: flex; align-items: center; gap: 10px;
-    animation: toastSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
+  .btn-discord { background: var(--discord); color: white; padding: 0.8rem; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 1rem; transition: 0.2s; }
+  .btn-discord:hover { background: #4752c4; }
+  
+  .toast-notification { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--gold); border-left: 4px solid var(--gold); color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s forwards; }
 </style>
 </head>
 <body>
@@ -132,7 +103,6 @@
   <div class="links">
     <a onclick="openLogin()">Dashboard</a>
     <a>Discord</a>
-    <a onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
   </div>
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
@@ -141,181 +111,152 @@
   <section class="hero">
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
   </section>
-  <section class="pricing-section" id="pricing">
-    <div class="pricing-grid">
-      <div class="price-card">
-        <h3>Free</h3><div class="price">$0<span>/mo</span></div>
-        <ul class="price-features"><li>20 Obfuscations / month</li><li>Key System</li></ul>
-        <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="openLogin()">Start Free</button>
-      </div>
-      <div class="price-card popular">
-        <h3>Basic</h3><div class="price">$5<span>/mo</span></div>
-        <ul class="price-features"><li>Unlimited Obfuscations</li><li>Priority Support</li></ul>
-        <button class="btn-gold" style="width: 100%;" onclick="openPayModal('Basic')">Buy Basic</button>
-      </div>
-    </div>
-  </section>
 </div>
 
 <div id="view-dashboard">
   <div class="dash-layout">
     
     <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-      <div class="toggle-btn" onclick="toggleSidebar()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+    <div class="sidebar">
+      <img src="logo.png" class="sidebar-logo" alt="Luarix">
+      
+      <div class="menu-item active" id="tab-dash" onclick="switchTab('dash')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+      </div>
+      
+      <div class="menu-item" id="tab-keys" onclick="switchTab('keys')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+        Manage Keys
       </div>
 
-      <img src="logo.png" class="sidebar-logo" alt="Luarix">
-      <div class="menu-item active" onclick="toggleObfuscator()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        <span class="menu-text">Dashboard</span>
+      <div class="menu-item" id="tab-blacklist" onclick="switchTab('blacklist')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+        Blacklists
       </div>
-      <div class="menu-item" onclick="toggleObfuscator()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span class="menu-text">Create Project</span>
-      </div>
-      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-        <span class="menu-text">Admin KeyGen</span>
-      </div>
+      
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        <span class="menu-text">Log Out</span>
+        Log Out
       </div>
     </div>
 
     <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="content-wrapper">
+        
+        <!-- HEADER -->
         <div class="dash-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p id="user-plan-text" style="color: var(--text-muted); font-size: 0.9rem;">Plan: Loading...</p>
+          <div class="user-info">
+            <h1 id="user-greeting">Dashboard</h1>
+            <p>Logged in as <span id="user-email-display"></span> <span id="user-discord-display"></span></p>
           </div>
-          <button class="btn-gold" onclick="toggleObfuscator()">+ Create Project</button>
+          <button class="btn-gold" id="action-btn" style="display:none;" onclick="switchTab('dash')">+ Create Project</button>
         </div>
 
-        <div class="api-key-box" id="api-key-box" style="display: none;">
-          <div>
-            <h4 style="color: var(--text-muted); font-size: 0.8rem;">Your API Key (Use this in Discord)</h4>
-            <code id="user-api-key">LXR-...</code>
+        <!-- TAB: DASHBOARD -->
+        <div id="content-dash">
+          <div class="api-key-box" style="margin-bottom: 2rem;">
+            <div>
+              <h4 style="color: var(--text-muted); font-size: 0.8rem;">Your API Key (Use this in Discord)</h4>
+              <code id="user-api-key">LXR-...</code>
+            </div>
+            <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="copyApiKey()">Copy Key</button>
           </div>
-          <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="copyApiKey()">Copy Key</button>
-        </div>
 
-        <div class="stats-grid">
-          <div class="stat-card" id="stat-card-limit">
-            <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">∞</h2></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-projects">0</h2></div>
+            </div>
+            <div class="stat-card" onclick="showToast('Upgrade coming soon!')" style="cursor: pointer; border-color: var(--gold);">
+              <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1.2rem;">Get Unlimited</h2></div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-scripts">0</h2></div>
-          </div>
-          <div class="stat-card" onclick="openUpgradeModal()" style="cursor: pointer; border-color: var(--gold);">
-            <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1rem;">Get Unlimited</h2></div>
-          </div>
-        </div>
 
-        <div id="admin-panel">
-          <h3>Admin Key Generator</h3>
-          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-              <button class="btn-gold" onclick="generateAdminKey('basic')">Generate Basic Key</button>
-              <button class="btn-gold" onclick="generateAdminKey('premium')">Generate Premium Key</button>
-          </div>
-          <div id="key-result" style="display:none; margin-top: 1rem; background:#000; padding:1rem; border-radius:8px;"></div>
-        </div>
-
-        <div id="obfuscator-panel">
-          <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
-          <input type="hidden" id="edit-id" value="">
-          <label>Project Name</label>
-          <input type="text" id="project-name" placeholder="e.g. Tazex Sniper v2" />
-          <label>Lua Source Code</label>
-          <textarea id="lua-source" placeholder="-- Paste your script here..."></textarea>
-          <button class="btn-gold" id="protect-btn" onclick="doObfuscate()" style="width: 100%; padding: 1rem; margin-top: 1rem;">Obfuscate & Save Project</button>
-          
-          <div class="output-box" id="output">
-            <h3 id="status-title" style="color: var(--success); margin-bottom: 1rem;">Protected Successfully</h3>
-            <label>Loader URL</label>
-            <textarea id="loader-code" class="code-box" readonly></textarea>
-            <button class="btn-gold" style="background: #222; color: #fff;" onclick="copyText()">Copy Loader</button>
+          <div class="table-box" style="margin-top: 2rem;">
+            <div class="table-header"><h3>My Projects</h3></div>
+            <table class="script-table">
+              <thead><tr><th>Project Name</th><th>Keyless</th><th>Actions</th></tr></thead>
+              <tbody id="projects-tbody"></tbody>
+            </table>
           </div>
         </div>
 
-        <div class="table-box">
-          <div class="table-header"><h3>My Projects</h3></div>
-          <table class="script-table">
-            <thead>
-              <tr><th>Project Name</th><th>Keyless</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="projects-tbody"></tbody>
-          </table>
+        <!-- TAB: MANAGE KEYS -->
+        <div id="content-keys" style="display: none;">
+          <div class="table-box">
+            <div class="table-header"><h3>Active Keys</h3></div>
+            <table class="script-table">
+              <thead><tr><th>Key</th><th>Project</th><th>HWID</th><th>Expires</th><th>Actions</th></tr></thead>
+              <tbody id="keys-tbody"></tbody>
+            </table>
+          </div>
         </div>
+
+        <!-- TAB: BLACKLISTS -->
+        <div id="content-blacklist" style="display: none;">
+          <div class="table-box">
+            <div class="table-header"><h3>Blacklisted Users</h3></div>
+            <table class="script-table">
+              <thead><tr><th>Discord ID</th><th>Project</th><th>Reason</th><th>Expires</th><th>Actions</th></tr></thead>
+              <tbody id="blacklist-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
 
+<!-- MODALS -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
-    <h2>Welcome to Luarix</h2>
-    <input type="email" id="login-email" placeholder="Email Address" required />
-    <input type="text" id="login-key" placeholder="Paid API Key (Optional)" />
-    <button class="btn-gold" style="width: 100%;" onclick="loginUser()">Login / Register</button>
-    <img src="logo.png" class="secret-logo" onclick="promptAdmin()" alt="Admin">
+    <h2 id="auth-title">Welcome Back</h2>
+    <p id="auth-desc" style="color: var(--text-muted); margin-bottom: 1.5rem;">Login to your account</p>
+    
+    <input type="email" id="auth-email" placeholder="Email Address" />
+    <input type="password" id="auth-password" placeholder="Password" />
+    
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="handleAuth()" id="auth-btn">Login</button>
+    
+    <div style="display: flex; align-items: center; gap: 10px; margin: 1rem 0; color: var(--text-muted); font-size: 0.8rem;">
+      <div style="flex:1; height:1px; background:var(--border);"></div> OR <div style="flex:1; height:1px; background:var(--border);"></div>
+    </div>
+
+    <button class="btn-discord" onclick="loginDiscord()">
+      <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
+      Login with Discord
+    </button>
+
+    <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+      <span id="toggle-text">Don't have an account?</span> 
+      <a href="#" onclick="toggleAuthMode()" style="color: var(--gold); text-decoration: none;" id="toggle-link">Sign Up</a>
+    </p>
   </div>
 </div>
 
 <script>
-let allProjects = [];
+let isLoginMode = true;
+let currentAuth = null;
 
 /* ==========================================
-   1. CUSTOM TOAST NOTIFICATION SYSTEM
+   1. UI & TOASTS
    ========================================== */
-function showToast(message) {
+function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification');
     if (oldToast) oldToast.remove();
-
     const toast = document.createElement('div');
     toast.className = 'toast-notification';
-    toast.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        ${message}
-    `;
+    toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>${msg}`;
     document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.animation = 'toastSlideUp 0.3s reverse forwards';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => { toast.style.animation = 'toastSlideUp 0.3s reverse forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-/* ==========================================
-   2. SIDEBAR TOGGLE
-   ========================================== */
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const icon = sidebar.querySelector('.toggle-btn svg');
-    
-    sidebar.classList.toggle('collapsed');
-    
-    if (sidebar.classList.contains('collapsed')) {
-        icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-    } else {
-        icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
-    }
-}
-
-/* ==========================================
-   3. UI & AUTH LOGIC
-   ========================================== */
 function openLogin() { document.getElementById('login-modal').classList.add('show'); }
 function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
 function showView(view) { 
@@ -324,244 +265,185 @@ function showView(view) {
     document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
 }
 
-function getAuth() {
-    const email = localStorage.getItem('luarix_active_user');
-    if (!email) return null;
-    return JSON.parse(localStorage.getItem('luarix_auth_' + email));
+function toggleAuthMode() {
+    isLoginMode = !isLoginMode;
+    document.getElementById('auth-title').textContent = isLoginMode ? "Welcome Back" : "Create an Account";
+    document.getElementById('auth-desc').textContent = isLoginMode ? "Login to your account" : "Sign up to start protecting scripts";
+    document.getElementById('auth-btn').textContent = isLoginMode ? "Login" : "Sign Up";
+    document.getElementById('toggle-text').textContent = isLoginMode ? "Don't have an account?" : "Already have an account?";
+    document.getElementById('toggle-link').textContent = isLoginMode ? "Sign Up" : "Login";
 }
 
-async function loginUser() {
-    const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const paidKey = document.getElementById('login-key').value.trim();
-    if (!email.includes('@')) return showToast("Please enter a valid email.");
+function switchTab(tab) {
+    document.getElementById('content-dash').style.display = tab === 'dash' ? 'block' : 'none';
+    document.getElementById('content-keys').style.display = tab === 'keys' ? 'block' : 'none';
+    document.getElementById('content-blacklist').style.display = tab === 'blacklist' ? 'block' : 'none';
+    
+    document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
 
-    const btn = document.querySelector('#login-modal button');
+    if (tab === 'keys') loadKeys();
+    if (tab === 'blacklist') loadBlacklists();
+}
+
+/* ==========================================
+   2. AUTHENTICATION
+   ========================================== */
+async function handleAuth() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+    if (!email || !password) return showToast("Please fill in all fields.");
+
+    const btn = document.getElementById('auth-btn');
     btn.textContent = "Connecting..."; btn.disabled = true;
 
     try {
-        const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const action = isLoginMode ? 'login' : 'signup';
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, email, password })
+        });
         const data = await res.json();
         
-        let finalKey = data.api_key;
-        let plan = 'free';
-        
-        if (paidKey) {
-            if (paidKey.startsWith('LXR-PREM-')) plan = 'premium';
-            else if (paidKey.startsWith('LXR-BASIC-')) plan = 'basic';
-            else if (paidKey === 'ADMIN') plan = 'admin';
-            finalKey = paidKey;
-        }
+        if (!res.ok) throw new Error(data.error || "Authentication failed");
 
-        let auth = { email: email, api_key: finalKey, plan: plan, usage: 0, resetDate: Date.now() + (30*24*60*60*1000) };
-        localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
-        localStorage.setItem('luarix_active_user', email);
-        
-        closeLogin(); showView('dashboard'); loadDashboard();
-    } catch (err) { showToast("Error: " + err.message); } 
-    finally { btn.textContent = "Login / Register"; btn.disabled = false; }
+        currentAuth = data.user;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        closeLogin(); loadDashboard();
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        btn.textContent = isLoginMode ? "Login" : "Sign Up"; btn.disabled = false;
+    }
+}
+
+function loginDiscord() {
+    // Redirects to Vercel API which handles Discord OAuth
+    window.location.href = '/api/discord-auth';
 }
 
 function loadDashboard() {
-    const auth = getAuth();
-    if (!auth) return logout();
-
-    document.getElementById('user-api-key').textContent = auth.api_key;
-    document.getElementById('api-key-box').style.display = 'flex';
-    
-    const planText = document.getElementById('user-plan-text');
-    const adminBtn = document.getElementById('admin-menu-btn');
-    const limitCard = document.getElementById('stat-card-limit');
-    const limitText = document.getElementById('stat-limit');
-
-    if (auth.plan === 'admin') {
-        adminBtn.style.display = 'flex'; limitCard.style.display = 'none';
-        planText.textContent = "ADMIN ACCESS";
-    } else if (auth.plan === 'free') {
-        adminBtn.style.display = 'none'; limitCard.style.display = 'block';
-        const left = 20 - (auth.usage || 0);
-        limitText.textContent = left;
-        limitText.style.color = left > 0 ? 'var(--text)' : 'var(--danger)';
-        planText.textContent = auth.email + " | Plan: Free";
-    } else {
-        adminBtn.style.display = 'none'; limitCard.style.display = 'block';
-        limitText.textContent = "∞"; limitText.style.color = "var(--success)";
-        planText.textContent = auth.email + " | Plan: " + auth.plan.toUpperCase();
+    if (!currentAuth) {
+        const saved = localStorage.getItem('luarix_auth');
+        if (saved) currentAuth = JSON.parse(saved);
+        else return showView('landing');
     }
-    fetchProjects();
+    
+    showView('dashboard');
+    document.getElementById('user-email-display').textContent = currentAuth.email;
+    document.getElementById('user-api-key').textContent = currentAuth.api_key;
+    
+    if (currentAuth.discord_tag) {
+        document.getElementById('user-discord-display').innerHTML = `• <span class="discord-tag">${currentAuth.discord_tag}</span>`;
+    }
+
+    // Load projects stat
+    fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('stat-projects').textContent = data.scripts ? data.scripts.length : 0;
+            renderProjects(data.scripts || []);
+        });
 }
 
-function fetchProjects() {
-    const auth = getAuth();
-    allProjects = JSON.parse(localStorage.getItem('luarix_projects_' + auth.email) || '[]');
-    document.getElementById('stat-scripts').textContent = allProjects.length;
-    
-    const tbody = document.getElementById('projects-tbody');
-    if (allProjects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding: 2rem;">No projects yet.</td></tr>`;
-        return;
-    }
+function logout() { localStorage.removeItem('luarix_auth'); currentAuth = null; showView('landing'); }
+function copyApiKey() { navigator.clipboard.writeText(currentAuth.api_key); showToast("API Key copied!"); }
 
-    tbody.innerHTML = allProjects.map(p => `
+/* ==========================================
+   3. TAB RENDERERS
+   ========================================== */
+function renderProjects(scripts) {
+    const tbody = document.getElementById('projects-tbody');
+    if (scripts.length === 0) return tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">No projects yet.</td></tr>';
+    
+    tbody.innerHTML = scripts.map(s => `
         <tr>
-            <td><strong>${p.name}</strong></td>
-            <td>
-                <button class="toggle-switch ${p.keyless ? 'toggle-on' : 'toggle-off'}" onclick="toggleKeyless('${p.id}', ${p.keyless})">
-                    ${p.keyless ? 'ON' : 'OFF'}
-                </button>
-            </td>
-            <td>
-                <button class="action-btn" onclick="editProject('${p.id}')">Edit</button>
-                <button class="action-btn" onclick="generateProjectKey('${p.id}')">Key</button>
-                <button class="action-btn" onclick="copyLoader('${p.id}')">Loader</button>
-                <button class="action-btn delete" onclick="deleteProject('${p.id}')">Delete</button>
-            </td>
+            <td><strong>${s.name}</strong></td>
+            <td><span style="color:var(--danger)">OFF</span></td>
+            <td><button class="action-btn">Manage</button></td>
         </tr>
     `).join('');
 }
 
-/* ==========================================
-   4. ACTION HANDLERS
-   ========================================== */
-function toggleObfuscator() { 
-    const p = document.getElementById('obfuscator-panel');
-    p.style.display = p.style.display === 'block' ? 'none' : 'block'; 
-    document.getElementById('admin-panel').style.display = 'none';
-}
+async function loadKeys() {
+    const tbody = document.getElementById('keys-tbody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
 
-async function doObfuscate() {
-    const auth = getAuth();
-    if (auth.plan === 'free' && auth.usage >= 20) return showToast("Limit reached. Upgrade or wait.");
+    const res = await fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key);
+    const data = await res.json();
     
-    const name = document.getElementById('project-name').value.trim() || "Untitled";
-    const source = document.getElementById('lua-source').value.trim();
-    if (!source) return showToast("Paste code first!");
-
-    const btn = document.getElementById('protect-btn');
-    btn.textContent = "Saving..."; btn.disabled = true;
-    document.getElementById('output').style.display = 'block';
-    document.getElementById('loader-code').value = "Connecting to database...";
-
-    try {
-        const key = Math.floor(Math.random() * 200) + 10;
-        const bytes = new TextEncoder().encode(source);
-        let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
-        const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
-
-        const res = await fetch('/api/create_script', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, code: encrypted, original_code: source, api_key: auth.api_key })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-
-        const customUrl = `https://${window.location.host}/api/loader?id=${data.id}`;
-        const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}"))()`;
-        
-        document.getElementById('loader-code').value = loader;
-        document.getElementById('status-title').textContent = "Saved successfully!";
-
-        if (auth.plan === 'free') {
-            auth.usage = (auth.usage || 0) + 1;
-            localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
-        }
-
-        allProjects.unshift({ id: data.id, name, keyless: false, loader });
-        localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
-        
-        loadDashboard();
-        document.getElementById('project-name').value = '';
-        document.getElementById('lua-source').value = '';
-    } catch (err) { showToast(err.message); } 
-    finally { btn.textContent = "Obfuscate & Save Project"; btn.disabled = false; }
-}
-
-async function toggleKeyless(id, currentStatus) {
-    const auth = getAuth();
-    try {
-        await fetch('/api/toggle_keyless', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ script_id: id, api_key: auth.api_key, keyless: !currentStatus })
-        });
-        
-        const p = allProjects.find(x => x.id === id);
-        if (p) p.keyless = !currentStatus;
-        localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
-        fetchProjects();
-        showToast("Keyless mode updated.");
-    } catch (err) { showToast("Failed to toggle"); }
-}
-
-async function generateProjectKey(id) {
-    const auth = getAuth();
-    try {
-        const res = await fetch('/api/generate_key', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ script_id: id, api_key: auth.api_key })
-        });
-        const data = await res.json();
-        if (data.success) {
-            prompt("Key generated! Copy it below:", data.key);
-        } else {
-            showToast(data.error);
-        }
-    } catch (err) { showToast("Error generating key"); }
-}
-
-function editProject(id) {
-    const p = allProjects.find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('project-name').value = p.name;
-    document.getElementById('lua-source').value = "Please re-paste your code here to edit.";
-    document.getElementById('obfuscator-panel').style.display = 'block';
-    document.getElementById('protect-btn').textContent = "Update & Save Project";
-}
-
-function deleteProject(id) {
-    if (!confirm("Delete?")) return;
-    const auth = getAuth();
-    allProjects = allProjects.filter(x => x.id !== id);
-    localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
-    fetchProjects();
-    showToast("Project deleted.");
-}
-
-function copyLoader(id) {
-    const p = allProjects.find(x => x.id === id);
-    navigator.clipboard.writeText(p.loader);
-    showToast("Loader copied to clipboard!");
-}
-
-function copyApiKey() { 
-    navigator.clipboard.writeText(document.getElementById('user-api-key').textContent); 
-    showToast("API Key copied!"); 
-}
-
-function copyText() { 
-    const l = document.getElementById('loader-code'); 
-    l.select(); 
-    navigator.clipboard.writeText(l.value); 
-    showToast("Loader copied!"); 
-}
-
-function logout() { localStorage.removeItem('luarix_active_user'); showView('landing'); }
-function promptAdmin() {
-    if (prompt("Password:") === "cubic%is@luarix^owner") {
-        const secureAdminKey = `LXR-ADMIN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-        localStorage.setItem('luarix_active_user', 'admin@luarix.com');
-        localStorage.setItem('luarix_auth_admin@luarix.com', JSON.stringify({ email: 'admin@luarix.com', api_key: secureAdminKey, plan: 'admin' }));
-        closeLogin(); showView('dashboard'); loadDashboard();
+    if (!data.keys || data.keys.length === 0) {
+        return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No keys found.</td></tr>';
     }
-}
-function toggleAdminPanel() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
-function generateAdminKey(type) {
-    const key = (type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREM-') + Math.random().toString(36).substring(2, 10).toUpperCase();
-    const res = document.getElementById('key-result');
-    res.style.display = 'block'; res.innerHTML = `<div style="color:var(--gold); font-size:1.2rem;">${key}</div>`;
-}
-function openPayModal() { showToast("Payment system coming soon."); }
-function openUpgradeModal() { showToast("Upgrade coming soon."); }
 
-if (localStorage.getItem('luarix_active_user')) { showView('dashboard'); loadDashboard(); }
+    tbody.innerHTML = data.keys.map(k => {
+        const script = data.scripts.find(s => s.id === k.script_id);
+        return `
+        <tr>
+            <td><code>${k.key}</code></td>
+            <td>${script ? script.name : 'Unknown'}</td>
+            <td>${k.hwid ? '✅ Locked' : '❌ None'}</td>
+            <td>${k.expires_at ? new Date(k.expires_at).toLocaleDateString() : 'Forever'}</td>
+            <td>
+                <button class="action-btn" onclick="resetKey('${k.key}')">Reset HWID</button>
+                <button class="action-btn delete" onclick="deleteKey('${k.key}')">Delete</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function loadBlacklists() {
+    const tbody = document.getElementById('blacklist-tbody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+
+    const res = await fetch('/api/manage?action=get_blacklists&api_key=' + currentAuth.api_key);
+    const data = await res.json();
+    
+    if (!data.blacklists || data.blacklists.length === 0) {
+        return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No blacklisted users.</td></tr>';
+    }
+
+    // We need scripts to show names
+    const resS = await fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key);
+    const dataS = await resS.json();
+
+    tbody.innerHTML = data.blacklists.map(b => {
+        const script = dataS.scripts.find(s => s.id === b.script_id);
+        return `
+        <tr>
+            <td><code>${b.discord_id}</code></td>
+            <td>${script ? script.name : 'Unknown'}</td>
+            <td>${b.reason}</td>
+            <td>${b.expires_at ? new Date(b.expires_at).toLocaleDateString() : 'Forever'}</td>
+            <td><button class="action-btn delete" onclick="removeBlacklist('${b.discord_id}', '${b.script_id}')">Remove</button></td>
+        </tr>`;
+    }).join('');
+}
+
+/* ==========================================
+   4. ACTIONS
+   ========================================== */
+async function resetKey(key) {
+    if (!confirm('Reset HWID for this key?')) return;
+    await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' });
+    showToast('HWID Reset!'); loadKeys();
+}
+
+async function deleteKey(key) {
+    if (!confirm('Delete this key permanently?')) return;
+    await fetch(`/api/manage?action=delete_key&key_id=${key}`, { method: 'POST' });
+    showToast('Key Deleted!'); loadKeys();
+}
+
+async function removeBlacklist(discord_id, script_id) {
+    if (!confirm('Remove blacklist?')) return;
+    await fetch(`/api/manage?action=remove_blacklist&discord_id=${discord_id}&script_id=${script_id}`, { method: 'POST' });
+    showToast('User unblacklisted!'); loadBlacklists();
+}
+
+// Init
+if (localStorage.getItem('luarix_auth')) loadDashboard();
+else showView('landing');
 </script>
 </body>
 </html>
