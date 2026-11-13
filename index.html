@@ -3,36 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Luarix — Protect & Monetize your code</title>
+<title>Luarix | Protect & Monetize your code</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #050505; --bg-card: rgba(15, 15, 20, 0.7); --border: rgba(255, 255, 255, 0.08);
-    --text: #ffffff; --text-muted: #888; --gold: #f5c518; 
+    --bg: #08080a; --bg-card: #0f111a; --bg-sidebar: #0b0b0f; --border: #1a1d2d;
+    --text: #ffffff; --text-muted: #8892b0; --gold: #f5c518; 
     --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); 
     --success: #10b981; --danger: #ef4444;
-    --glow: 0 0 20px rgba(245, 197, 24, 0.2);
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden;
-    background-image: radial-gradient(circle at 15% 50%, rgba(245, 197, 24, 0.08), transparent 25%),
-                      radial-gradient(circle at 85% 30%, rgba(239, 68, 68, 0.05), transparent 25%);
   }
 
   /* NAVBAR */
   nav {
     position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
     width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between;
-    padding: 0.8rem 1.5rem; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(20px);
+    padding: 0.8rem 1.5rem; background: rgba(15, 17, 26, 0.9); backdrop-filter: blur(15px);
     border: 1px solid var(--border); border-radius: 12px; z-index: 100;
   }
-  .nav-brand { font-size: 1.4rem; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; cursor: pointer;}
+  .nav-brand { display: flex; align-items: center; cursor: pointer; }
+  .nav-brand img { height: 45px; width: auto; mix-blend-mode: screen; } /* mix-blend-mode removes black background from logo */
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
-  nav a:hover { color: var(--text); }
-  .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
-  .btn-gold:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+  nav a:hover { color: var(--gold); }
+  .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2); }
 
   /* HERO */
   #view-landing { display: block; }
@@ -45,54 +43,68 @@
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
   .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
   .price-card.popular { border-color: var(--gold); box-shadow: 0 0 30px rgba(245, 197, 24, 0.05); }
-  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; letter-spacing: 0.5px; }
+  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; }
   .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
   .price span { font-size: 1rem; color: var(--text-muted); }
   .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DASHBOARD */
+  /* DASHBOARD (Luarmor Style) */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
-  .sidebar { width: 260px; background: rgba(10, 10, 12, 0.95); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
-  .sidebar h2 { color: var(--gold); margin-bottom: 2rem; font-size: 1.2rem; }
-  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500;}
+  
+  /* Sidebar */
+  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
+  .sidebar img { height: 40px; margin-bottom: 2rem; mix-blend-mode: screen; }
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); }
-  .main-content { flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 850px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   
-  .form-group { margin-bottom: 1.5rem; }
-  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
-  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #a5f3c4; font-family: monospace; min-height: 250px; resize: vertical; transition: 0.2s;}
-  textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px rgba(245, 197, 24, 0.1); }
+  /* Main Content */
+  .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
   
-  .btn-primary { background: var(--gold-grad); color: #000; padding: 1rem; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--glow); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  
-  /* OUTPUT BOX */
-  .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-  .output-box.show { display: block; }
-  .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  
-  textarea#loader-code { 
-    width: 100%; height: 100px; background: #0a0a0a; color: var(--gold); 
-    border: 1px solid var(--border); border-radius: 8px; padding: 10px; 
-    font-family: monospace; font-size: 0.85rem; resize: none; margin-bottom: 1rem; 
-  }
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+  .dash-header h1 { font-size: 1.5rem; }
+  .dash-header p { color: var(--text-muted); font-size: 0.9rem; }
 
-  .btn-group { display: flex; gap: 1rem; margin-top: 1rem;}
-  .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
-  .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
+  /* Stats Grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .stat-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; justify-content: center; align-items: center; }
+  .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;}
+  .stat-info h2 { font-size: 1.5rem; }
+
+  /* Graph Placeholder */
+  .graph-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; height: 200px; display: flex; flex-direction: column; }
+  .graph-title { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; }
+  .graph-placeholder { flex: 1; border-bottom: 1px dashed var(--border); position: relative; display: flex; align-items: flex-end; gap: 2px;}
+  /* Fake SVG line */
+  .graph-line { width: 100%; height: 80%; background: linear-gradient(180deg, rgba(245,197,24,0.2) 0%, rgba(245,197,24,0) 100%); border-top: 2px solid var(--gold); clip-path: polygon(0 80%, 10% 60%, 20% 70%, 30% 40%, 40% 50%, 50% 20%, 60% 30%, 70% 10%, 80% 40%, 90% 20%, 100% 30%, 100% 100%, 0 100%); }
+
+  /* Table */
+  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .table-header h3 { font-size: 1rem; }
+  .script-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .script-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .script-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .status-badge { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
   
+  /* Obfuscator Panel (hidden initially) */
+  #obfuscator-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;}
+  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #a5f3c4; font-family: monospace; min-height: 150px; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--gold); }
+  .output-box { display: none; margin-top: 1.5rem; background: #050505; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+  .code-box { width: 100%; height: 80px; background: #000; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; resize: none; margin-bottom: 1rem;}
+
   /* MODALS */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-  .modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; }
+  .modal h2 { margin-bottom: 0.5rem; }
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-  .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
+  .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
   .modal input:focus { outline: none; border-color: var(--gold); }
 </style>
 </head>
@@ -100,13 +112,18 @@
 
 <!-- NAVBAR -->
 <nav id="main-nav">
-  <a class="nav-brand" onclick="showView('landing')">Luarix</a>
+  <a class="nav-brand" onclick="showView('landing')">
+    <img src="logo.png" alt="Luarix">
+  </a>
   <div class="links">
-    <a onclick="document.getElementById('auth-modal').classList.add('show')">User Login</a>
-    <a onclick="document.getElementById('admin-modal').classList.add('show')" style="color: var(--gold);">Admin Access</a>
+    <a>Docs</a>
+    <a onclick="login('admin')">Dashboard</a>
+    <a>Discord</a>
+    <a>F.A.Q</a>
+    <a>Pricing</a>
   </div>
   <div id="nav-auth">
-    <button class="btn-gold" onclick="document.getElementById('auth-modal').classList.add('show')">Sign up</button>
+    <button class="btn-gold" onclick="document.getElementById('admin-modal').classList.add('show')">Sign in</button>
   </div>
 </nav>
 
@@ -116,27 +133,19 @@
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
     <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
   </section>
-
   <section class="pricing-section">
     <div class="pricing-grid">
       <div class="price-card">
         <h3>Basic</h3>
         <div class="price">$15<span>/mo</span></div>
-        <ul class="price-features">
-          <li>Unlimited obfuscation</li>
-          <li>Standard loaders</li>
-        </ul>
-        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+        <ul class="price-features"><li>Unlimited Obfuscation</li><li>Standard Loaders</li></ul>
+        <button class="btn-gold" style="width: 100%;" onclick="document.getElementById('admin-modal').classList.add('show')">Get Started</button>
       </div>
       <div class="price-card popular">
         <h3>Premium</h3>
         <div class="price">$25<span>/mo</span></div>
-        <ul class="price-features">
-          <li>Unlimited obfuscation</li>
-          <li>Fast HttpGet Loaders</li>
-          <li>Priority Support</li>
-        </ul>
-        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+        <ul class="price-features"><li>Unlimited Obfuscation</li><li>Fast HttpGet Loaders</li><li>Priority Support</li></ul>
+        <button class="btn-gold" style="width: 100%;" onclick="document.getElementById('admin-modal').classList.add('show')">Get Started</button>
       </div>
     </div>
   </section>
@@ -145,99 +154,153 @@
 <!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
+    <!-- Sidebar -->
     <div class="sidebar">
-      <h2>Luarix Panel</h2>
-      <div class="menu-item active">🛡️ Script Protector</div>
-      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">🚪 Logout</div>
+      <img src="logo.png" alt="Luarix">
+      
+      <!-- SVG Icons used instead of emojis -->
+      <div class="menu-item active" onclick="toggleObfuscator()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Dashboard
+      </div>
+      <div class="menu-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Script Hub
+      </div>
+      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Log Out
+      </div>
     </div>
+
+    <!-- Main Content -->
     <div class="main-content">
-      <div class="panel">
-        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Protect Script</h2>
-        <div class="form-group">
+      <div class="dash-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Welcome back, Admin.</p>
+        </div>
+        <button class="btn-gold" onclick="toggleObfuscator()">+ Create Script</button>
+      </div>
+
+      <!-- Stats Grid (Image 3 Style) -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--success);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          </div>
+          <div class="stat-info"><h4>Total Executions</h4><h2>1,024</h2></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: #3b82f6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="stat-info"><h4>Total Users</h4><h2>342</h2></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: #a855f7;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="stat-info"><h4>Monthly Obfuscations</h4><h2>89</h2></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--danger);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="stat-info"><h4>Threats Blocked</h4><h2>0</h2></div>
+        </div>
+      </div>
+
+      <!-- Graph Area -->
+      <div class="graph-box">
+        <div class="graph-title">Executions over the last 7 days</div>
+        <div class="graph-placeholder">
+          <div class="graph-line"></div>
+        </div>
+      </div>
+
+      <!-- Obfuscator Tool -->
+      <div id="obfuscator-panel">
+        <h3 style="margin-bottom: 1.5rem;">Create New Script</h3>
+        <div class="form-group" style="margin-bottom: 1rem;">
           <label>Lua Source Code</label>
           <textarea id="lua-source" placeholder="-- Paste your script here..."></textarea>
         </div>
-        <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
+        <button class="btn-gold" id="protect-btn" onclick="doObfuscate()" style="width: 100%; padding: 1rem;">Obfuscate & Generate Loader</button>
         
         <div class="output-box" id="output">
-          <h3 id="status-title">✓ Protected Successfully!</h3>
-          <label>Loader (Copy & Execute)</label>
-          <textarea id="loader-code" readonly></textarea>
-          
-          <div class="btn-group">
-            <button class="btn-secondary" onclick="copyText()">📋 Copy Loader</button>
-            <button class="btn-secondary" onclick="downloadLua()">⬇️ Download .lua</button>
+          <h3 id="status-title" style="color: var(--success); margin-bottom: 1rem;">Protected Successfully</h3>
+          <label>Loader URL</label>
+          <textarea id="loader-code" class="code-box" readonly></textarea>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn-gold" style="background: #222; color: #fff;" onclick="copyText()">Copy Loader</button>
+            <button class="btn-gold" style="background: #222; color: #fff;" onclick="downloadLua()">Download .lua</button>
           </div>
         </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-box">
+        <div class="table-header">
+          <h3>Script Hub</h3>
+        </div>
+        <table class="script-table">
+          <thead>
+            <tr><th>Name</th><th>Status</th><th>Version</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Tazex Sniper</td><td><span class="status-badge">Active</span></td><td>v1.0.4</td><td style="color:var(--gold); cursor:pointer;">Edit</td></tr>
+            <tr><td>Auto Farm</td><td><span class="status-badge">Active</span></td><td>v2.1.0</td><td style="color:var(--gold); cursor:pointer;">Edit</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div class="modal-bg" id="auth-modal">
-  <div class="modal">
-    <h2>User Login</h2>
-    <p>Enter any email to login.</p>
-    <input type="email" id="user-email" placeholder="Email" />
-    <button class="btn-gold" style="width: 100%;" onclick="login('user')">Login</button>
-  </div>
-</div>
-
+<!-- MODAL -->
 <div class="modal-bg" id="admin-modal">
   <div class="modal">
     <h2>Admin Access</h2>
-    <p>Enter password for free unlimited access.</p>
+    <p>Enter password for unlimited access.</p>
     <input type="password" id="admin-pass" placeholder="Password" />
-    <button class="btn-gold" style="width: 100%;" onclick="login('admin')">Unlock</button>
+    <button class="btn-gold" style="width: 100%;" onclick="login('admin')">Unlock Dashboard</button>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   1. SYNCHRONOUS OBFUSCATOR (UTF-8 Safe)
+   1. OBFUSCATOR LOGIC
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(source);
     const hexArr = new Array(bytes.length);
-    
     for (let i = 0; i < bytes.length; i++) {
         hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
-    const hexString = hexArr.join('');
-
     return `
 -- Luarix Protected
-local h = "${hexString}"
+local h = "${hexArr.join('')}"
 local k = ${key}
-local s = h:gsub("%x%x", function(c) 
-    return string.char(bit32.bxor(tonumber(c, 16), k)) 
-end)
+local s = h:gsub("%x%x", function(c) return string.char(bit32.bxor(tonumber(c, 16), k)) end)
 loadstring(s)()
 `.trim();
 }
 
-/* ============================================================
-   2. UPLOAD TO PASTES (Behind the scenes)
-   ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
         const response = await fetch("https://api.pastes.dev/post", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: obfuscatedCode
+            method: "POST", headers: { "Content-Type": "text/plain" }, body: obfuscatedCode
         });
         if (!response.ok) return null;
         const data = await response.json();
         return data.key; 
-    } catch (err) {
-        return null;
-    }
+    } catch (err) { return null; }
 }
 
 /* ============================================================
-   3. UI LOGIC
+   2. UI LOGIC
    ============================================================ */
 function showView(view) {
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
@@ -246,28 +309,17 @@ function showView(view) {
 }
 
 function login(type) {
-    if (type === 'user') {
-        if (!document.getElementById('user-email').value) return alert("Enter email");
-        document.getElementById('auth-modal').classList.remove('show');
-    } else {
-        const pass = document.getElementById('admin-pass').value;
-        if (pass !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect password");
-        document.getElementById('admin-modal').classList.remove('show');
-    }
-    localStorage.setItem('luarix_auth', 'true');
+    const pass = document.getElementById('admin-pass').value;
+    if (pass !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect password");
+    document.getElementById('admin-modal').classList.remove('show');
     showView('dashboard');
 }
 
-function logout() {
-    localStorage.removeItem('luarix_auth');
-    showView('landing');
-}
+function logout() { showView('landing'); }
 
-// Check session
-if (localStorage.getItem('luarix_auth')) {
-    showView('dashboard');
-} else {
-    showView('landing');
+function toggleObfuscator() {
+    const panel = document.getElementById('obfuscator-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 }
 
 let currentLoaderUrl = "";
@@ -283,8 +335,8 @@ async function doObfuscate() {
     const statusTitle = document.getElementById('status-title');
 
     btn.disabled = true;
-    btn.textContent = "⏳ Encrypting...";
-    output.classList.add('show');
+    btn.textContent = "Encrypting...";
+    output.style.display = 'block';
     statusTitle.textContent = "Encrypting...";
     loaderCode.value = "Please wait...";
 
@@ -294,29 +346,27 @@ async function doObfuscate() {
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
         
-        statusTitle.textContent = "Uploading to Luarix Servers...";
-        btn.textContent = "⏳ Uploading...";
+        statusTitle.textContent = "Uploading to Servers...";
+        btn.textContent = "Uploading...";
 
         const key = await uploadToHost(encrypted);
 
         if (key) {
-            // THIS GENERATES YOUR CUSTOM LUARIX URL!
             const customUrl = `https://${window.location.host}/api/raw?key=${key}`;
             currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
-            statusTitle.textContent = "✓ Protected (HttpGet Loader)";
+            statusTitle.textContent = "Protected Successfully (HttpGet)";
         } else {
             currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
-            statusTitle.textContent = "✓ Protected (Inline Loader)";
+            statusTitle.textContent = "Protected Successfully (Inline)";
         }
 
         loaderCode.value = currentLoaderUrl;
-        setTimeout(() => output.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 
     } catch (err) {
         alert("Error: " + err.message);
     } finally {
         btn.disabled = false;
-        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
+        btn.textContent = "Obfuscate & Generate Loader";
     }
 }
 
@@ -324,7 +374,7 @@ function copyText() {
     const loaderCode = document.getElementById('loader-code');
     loaderCode.select();
     navigator.clipboard.writeText(loaderCode.value);
-    alert("Loader copied!");
+    alert("Loader copied to clipboard!");
 }
 
 function downloadLua() {
