@@ -14,7 +14,6 @@ export default async function handler(req, res) {
         // Fetch Script
         const { data: script, error: scriptErr } = await supabase.from('scripts').select('*').eq('id', id).single();
         
-        // NEW: If there is a DB error, print it to the browser!
         if (scriptErr) {
             return res.status(500).send('-- Database Error: ' + scriptErr.message);
         }
@@ -23,7 +22,7 @@ export default async function handler(req, res) {
         }
 
         if (script.keyless) return res.status(200).send(script.lua_code);
-        if (!key) return sendAuthError(res, "You need a script_key to access this script.");
+        if (!key) return sendAuthError(res, "You need a script_key to access this script. No key found.");
 
         // Validate Key
         const { data: keyData, error: keyErr } = await supabase.from('script_keys').select('*').eq('key', key).single();
@@ -50,51 +49,11 @@ export default async function handler(req, res) {
     }
 }
 
+// NEW: Instant Kick Error (No UI)
 function sendAuthError(res, message) {
     const errorScript = `
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Desc = Instance.new("TextLabel")
-local Btn = Instance.new("TextButton")
-
-ScreenGui.Parent = game:GetService("CoreGui")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 400, 0, 200)
-Frame.Position = UDim2.new(0.5, -200, 0.5, -100)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Frame.BorderSizePixel = 0
-
-Title.Parent = Frame
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundTransparency = 1
-Title.Text = "Auth Error"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
-
-Desc.Parent = Frame
-Desc.Size = UDim2.new(0.9, 0, 0, 80)
-Desc.Position = UDim2.new(0.05, 0, 0.3, 0)
-Desc.BackgroundTransparency = 1
-Desc.Text = "${message}"
-Desc.TextColor3 = Color3.fromRGB(200, 200, 200)
-Desc.Font = Enum.Font.Gotham
-Desc.TextSize = 14
-Desc.TextWrapped = true
-
-Btn.Parent = Frame
-Btn.Size = UDim2.new(0.9, 0, 0, 40)
-Btn.Position = UDim2.new(0.05, 0, 0.75, 0)
-Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Btn.Text = "Leave"
-Btn.TextColor3 = Color3.fromRGB(0, 0, 0)
-Btn.Font = Enum.Font.GothamBold
-Btn.TextSize = 16
-
-Btn.MouseButton1Click:Connect(function()
-    game.Players.LocalPlayer:Kick("Auth Error: ${message}")
-end)
+warn("[Luarix] Auth Error: ${message}")
+game.Players.LocalPlayer:Kick("Auth Error: ${message}")
 `;
     res.status(200).send(errorScript);
 }
