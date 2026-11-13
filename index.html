@@ -20,7 +20,6 @@
   /* ANIMATIONS */
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes spin { 100% { transform: rotate(360deg); } }
   @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } 50% { box-shadow: 0 0 25px rgba(245, 197, 24, 0.6); } 100% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } }
 
   /* NAVBAR */
@@ -33,7 +32,7 @@
   }
   .nav-brand { display: flex; align-items: center; cursor: pointer; transition: transform 0.2s; }
   .nav-brand:hover { transform: scale(1.05); }
-  .nav-brand img { height: 45px; width: auto; mix-blend-mode: screen; } 
+  .nav-brand img { height: 40px; width: auto; object-fit: contain; mix-blend-mode: screen; } 
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; position: relative; }
   nav a::after { content: ''; position: absolute; width: 0%; height: 2px; bottom: -4px; left: 0; background: var(--gold); transition: 0.3s; }
@@ -67,7 +66,18 @@
   .dash-layout { display: flex; height: 100%; }
   
   .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; animation: fadeIn 0.5s ease-out; }
-  .sidebar img { height: 40px; margin-bottom: 2rem; mix-blend-mode: screen; }
+  
+  /* LOGO FIX */
+  .sidebar img { 
+    height: auto; 
+    max-height: 60px; 
+    width: 80%; 
+    object-fit: contain; 
+    margin: 0 auto 2rem auto; 
+    display: block;
+    mix-blend-mode: screen; 
+  }
+  
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
   
@@ -331,9 +341,8 @@ function getAuth() {
     let auth = JSON.parse(localStorage.getItem('luarix_auth_' + email));
     if (!auth) return null;
 
-    // Check expiry
     if (auth.expires && Date.now() > auth.expires) {
-        auth.plan = 'free'; // Downgrade expired
+        auth.plan = 'free'; 
         auth.expires = null;
         localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
     }
@@ -348,12 +357,10 @@ function loginUser() {
 
     let auth = JSON.parse(localStorage.getItem('luarix_auth_' + email));
 
-    // If account doesn't exist, create it
     if (!auth) {
         auth = { email: email, plan: 'free', usage: 0, resetDate: Date.now() + (30 * 24 * 60 * 60 * 1000) };
     }
 
-    // Apply API Key if provided
     if (key) {
         if (key.startsWith('LXR-PREM-')) {
             auth.plan = 'premium';
@@ -369,7 +376,6 @@ function loginUser() {
         }
     }
 
-    // Save and set active
     localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
     localStorage.setItem('luarix_active_user', email);
     
@@ -522,7 +528,6 @@ let currentObfuscatedCode = "";
 async function doObfuscate() {
     const auth = getAuth();
     
-    // Check limits
     if (auth.plan === 'free' && auth.usage >= 20) {
         return alert("You have reached your 20 free obfuscations. Please upgrade or wait for the reset.");
     }
@@ -561,14 +566,12 @@ async function doObfuscate() {
         loaderCode.value = loader;
         currentLoaderUrl = loader;
 
-        // Update Usage Limits
         if (auth.plan === 'free') {
             auth.usage += 1;
             localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
             updateDashboardUI();
         }
 
-        // Save or Update Project
         let projects = getProjects();
         if (editId) {
             const idx = projects.findIndex(p => p.id === editId);
@@ -591,7 +594,6 @@ async function doObfuscate() {
         saveProjects(projects);
         loadProjects();
         
-        // Reset form
         document.getElementById('edit-id').value = '';
         document.getElementById('project-name').value = '';
         document.getElementById('lua-source').value = '';
