@@ -166,14 +166,14 @@
 
 <script>
 /* ============================================================
-   1. ASYNC CHUNKED OBFUSCATOR (Never freezes the browser)
+   1. ASYNC CHUNKED OBFUSCATOR
    ============================================================ */
 function encryptLuaChunked(source, onProgress, onComplete) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(source);
     const hexArr = new Array(bytes.length);
     let i = 0;
-    const chunkSize = 50000; // Process 50k bytes at a time
+    const chunkSize = 10000;
 
     function processChunk() {
         const end = Math.min(i + chunkSize, bytes.length);
@@ -183,7 +183,7 @@ function encryptLuaChunked(source, onProgress, onComplete) {
 
         if (i < bytes.length) {
             onProgress(i / bytes.length);
-            setTimeout(processChunk, 0); // Yield to browser so UI updates
+            setTimeout(processChunk, 0);
         } else {
             onComplete(hexArr.join(''), key);
         }
@@ -192,7 +192,7 @@ function encryptLuaChunked(source, onProgress, onComplete) {
 }
 
 /* ============================================================
-   2. UPLOADER (Fallback Safe)
+   2. UPLOADER
    ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
@@ -205,7 +205,6 @@ async function uploadToHost(obfuscatedCode) {
         const data = await response.json();
         return `https://api.pastes.dev/${data.key}`;
     } catch (err) {
-        console.log("Upload failed, skipping HttpGet.");
         return null;
     }
 }
@@ -252,27 +251,25 @@ function doObfuscate() {
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
 
-    // Reset UI
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
     output.classList.remove('show');
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
+    progressBar.style.background = 'var(--gold-grad)';
     progressText.textContent = 'Encrypting... 0%';
     
     const startTime = Date.now();
 
-    // Start Async Encryption
     encryptLuaChunked(source, 
         (progress) => {
-            // Update Progress Bar
             const percent = Math.floor(progress * 100);
             progressBar.style.width = `${percent}%`;
             progressText.textContent = `Encrypting... ${percent}%`;
         }, 
         (hexString, key) => {
-            // On Complete
-            const encrypted = `
+            try {
+                const encrypted = `
 -- Luarix Protected (v7.0)
 local h = "${hexString}"
 local k = ${key}
@@ -283,33 +280,43 @@ local f, err = loadstring(s)
 if f then f() else warn(err) end
 `.trim();
 
-            currentObfuscatedCode = encrypted;
-            currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
+                currentObfuscatedCode = encrypted;
+                currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
 
-            // Show Output
-            document.getElementById('loader-code').textContent = currentLoaderUrl;
-            document.getElementById('status-title').textContent = "✓ Protected (Inline Loader Ready)";
-            output.classList.add('show');
-            
-            // Finish Progress Bar
-            const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-            progressBar.style.width = '100%';
-            progressBar.style.background = 'var(--success)';
-            progressText.textContent = `Completed in ${timeTaken} seconds!`;
-            
-            setTimeout(() => { progressContainer.style.display = 'none'; progressBar.style.background = 'var(--gold-grad)'; }, 3000);
+                document.getElementById('loader-code').textContent = currentLoaderUrl;
+                document.getElementById('status-title').textContent = "✓ Protected (Inline Loader Ready)";
+                
+                // HIDE PROGRESS, SHOW OUTPUT
+                const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+                progressBar.style.width = '100%';
+                progressBar.style.background = 'var(--success)';
+                progressText.textContent = `Completed in ${timeTaken} seconds!`;
+                
+                setTimeout(() => { 
+                    progressContainer.style.display = 'none'; 
+                }, 2000);
+                
+                output.classList.add('show');
+                
+                // AUTO-SCROLL TO SHOW THE RESULT!
+                output.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Try HttpGet Loader in background
-            btn.textContent = "⏳ Fetching URL...";
-            uploadToHost(encrypted).then(rawUrl => {
-                if (rawUrl) {
-                    currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
-                    document.getElementById('loader-code').textContent = currentLoaderUrl;
-                    document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
-                }
+                btn.textContent = "⏳ Fetching URL...";
+                uploadToHost(encrypted).then(rawUrl => {
+                    if (rawUrl) {
+                        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+                        document.getElementById('loader-code').textContent = currentLoaderUrl;
+                        document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
+                    }
+                    btn.disabled = false;
+                    btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
+                });
+
+            } catch (err) {
+                alert("Encryption Error: " + err.message);
                 btn.disabled = false;
                 btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-            });
+            }
         }
     );
 }
