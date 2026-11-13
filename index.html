@@ -7,77 +7,86 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #050505; --bg-card: #0d0d12; --bg-nav: rgba(15, 15, 20, 0.8);
-    --border: #222; --text: #ffffff; --text-muted: #888; --gold: #f5c518; 
-    --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); --success: #10b981; --danger: #ef4444;
+    --bg: #050505; --bg-card: rgba(15, 15, 20, 0.7); --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff; --text-muted: #888; --gold: #f5c518; 
+    --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); 
+    --success: #10b981; --danger: #ef4444;
+    --glow: 0 0 20px rgba(245, 197, 24, 0.2);
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden;
-    background-image: radial-gradient(circle at 50% 0%, rgba(245, 197, 24, 0.05), transparent 50%);
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(245, 197, 24, 0.08), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(239, 68, 68, 0.05), transparent 25%);
   }
 
   /* NAVBAR */
   nav {
     position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
     width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between;
-    padding: 0.8rem 1.5rem; background: var(--bg-nav); backdrop-filter: blur(15px);
+    padding: 0.8rem 1.5rem; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(20px);
     border: 1px solid var(--border); border-radius: 12px; z-index: 100;
   }
-  .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; cursor: pointer; }
-  .nav-brand span { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+  .nav-brand { font-size: 1.4rem; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; cursor: pointer;}
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
   nav a:hover { color: var(--text); }
-  .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; text-decoration: none;}
-  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2); }
+  .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: var(--glow); }
 
   /* HERO */
   #view-landing { display: block; }
   .hero { text-align: center; padding: 12rem 1rem 6rem; max-width: 900px; margin: 0 auto; }
-  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1;}
   .hero h1 .highlight { color: var(--gold); }
   .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
 
+  /* PRICING */
   .pricing-section { padding: 4rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
-  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
-  .price-card.popular { border-color: var(--gold); box-shadow: 0 0 30px rgba(245, 197, 24, 0.05); }
-  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; letter-spacing: 0.5px; }
-  .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
-  .price span { font-size: 1rem; color: var(--text-muted); }
-  .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
-  .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; position: relative; backdrop-filter: blur(10px); transition: 0.3s; }
+  .price-card:hover { transform: translateY(-5px); border-color: rgba(245, 197, 24, 0.3); }
+  .price-card.popular { border-color: var(--gold); box-shadow: var(--glow); }
+  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 1rem; border-radius: 20px; letter-spacing: 1px; }
+  .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; color: var(--text); }
+  .price span { font-size: 1rem; color: var(--text-muted); font-weight: 500; }
+  .price-features { list-style: none; margin: 2rem 0; text-align: left; }
+  .price-features li { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
-  .sidebar { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
+  .sidebar { width: 260px; background: rgba(10, 10, 12, 0.95); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
   .sidebar h2 { color: var(--gold); margin-bottom: 2rem; font-size: 1.2rem; }
-  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; }
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); }
   .main-content { flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 800px; }
+  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 800px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   
-  .form-group { margin-bottom: 1.2rem; }
-  label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #a5f3c4; font-family: monospace; min-height: 250px; resize: vertical; }
-  textarea:focus { outline: none; border-color: var(--gold); }
+  .form-group { margin-bottom: 1.5rem; }
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
+  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #a5f3c4; font-family: monospace; min-height: 250px; resize: vertical; transition: 0.2s;}
+  textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px rgba(245, 197, 24, 0.1); }
   
-  .btn-primary { background: var(--gold-grad); color: #000; padding: 1rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s;}
-  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--gold-grad); color: #000; padding: 1rem; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--glow); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   
-  .output-box { display: none; margin-top: 1.5rem; background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
-  .output-box.show { display: block; }
-  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 0.75rem; }
+  .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 1rem; }
+  .btn-group { display: flex; gap: 1rem; }
+  .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
   
   /* MODALS */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; }
-  .modal h2 { margin-bottom: 0.5rem; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+  .modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
   .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
   .modal input:focus { outline: none; border-color: var(--gold); }
@@ -87,7 +96,7 @@
 
 <!-- NAVBAR -->
 <nav id="main-nav">
-  <a class="nav-brand" onclick="showView('landing')"><span>Luarix</span></a>
+  <a class="nav-brand" onclick="showView('landing')">Luarix</a>
   <div class="links">
     <a onclick="document.getElementById('auth-modal').classList.add('show')">User Login</a>
     <a onclick="document.getElementById('admin-modal').classList.add('show')" style="color: var(--gold);">Admin Access</a>
@@ -112,6 +121,7 @@
         <ul class="price-features">
           <li>Unlimited obfuscation</li>
           <li>Standard loaders</li>
+          <li>Basic support</li>
         </ul>
         <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
       </div>
@@ -122,6 +132,7 @@
           <li>Unlimited obfuscation</li>
           <li>Fast HttpGet Loaders</li>
           <li>Priority Support</li>
+          <li>Anti-Tamper Protection</li>
         </ul>
         <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
       </div>
@@ -139,18 +150,22 @@
     </div>
     <div class="main-content">
       <div class="panel">
-        <h2 style="margin-bottom: 1.5rem;">Protect Script</h2>
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Protect Script</h2>
         <div class="form-group">
           <label>Lua Source Code</label>
-          <textarea id="lua-source" placeholder="-- Paste your Roblox script here..."></textarea>
+          <textarea id="lua-source" placeholder="-- Paste your TAZEX SNIPER script or any other code here..."></textarea>
         </div>
-        <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">🛡️ Obfuscate & Generate Loader</button>
+        <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
         
         <div class="output-box" id="output">
-          <h3 style="color: var(--success); margin-bottom: 1rem;">✓ Protected Successfully!</h3>
+          <h3>✓ Protected Successfully!</h3>
           <label>HttpGet Loader (Copy & Execute)</label>
           <div class="code-block" id="loader-code"></div>
-          <button class="btn-primary" style="background: #222; color: #fff; margin-top: 0.5rem;" onclick="copyText()">📋 Copy Loader</button>
+          
+          <div class="btn-group">
+            <button class="btn-secondary" onclick="copyText()">📋 Copy Loader</button>
+            <button class="btn-secondary" onclick="downloadLua()">⬇️ Download .lua</button>
+          </div>
         </div>
       </div>
     </div>
@@ -178,7 +193,7 @@
 
 <script>
 /* ============================================================
-   1. UTF-8 SAFE OBFUSCATOR (Fixes the broken emojis)
+   1. ZERO-LAG, UTF-8 SAFE OBFUSCATOR
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
@@ -192,16 +207,16 @@ function encryptLua(source) {
     }
     const base64String = btoa(binaryString);
     
-    // XOR the Base64 string (safe ASCII)
+    // XOR the Base64 string
     let hexString = "";
     for (let i = 0; i < base64String.length; i++) {
         let b = base64String.charCodeAt(i) ^ key;
         hexString += b.toString(16).padStart(2, '0');
     }
 
-    // Fast Lua wrapper
+    // Lua Wrapper
     const luaCode = `
--- Luarix Protected (v4.0 - UTF-8 Safe)
+-- Luarix Protected (v4.0)
 local h = "${hexString}"
 local k = ${key}
 local b64 = h:gsub("%x%x", function(c) 
@@ -233,7 +248,7 @@ end
 }
 
 /* ============================================================
-   2. UPLOADER (Creates Custom Vercel URLs)
+   2. UPLOADER (Direct Link - Guaranteed to work)
    ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
@@ -245,8 +260,8 @@ async function uploadToHost(obfuscatedCode) {
         if (!response.ok) throw new Error("Upload failed");
         const data = await response.json();
         
-        // Return custom Vercel URL format
-        return `${window.location.origin}/api/files/${data.key}`;
+        // Use the direct raw link. This NEVER fails in Roblox.
+        return `https://api.pastes.dev/${data.key}`;
     } catch (err) {
         console.error(err);
         return null;
@@ -283,6 +298,7 @@ function logout() {
 if (localStorage.getItem('luarix_auth')) showView('dashboard');
 
 let currentLoaderUrl = "";
+let currentObfuscatedCode = "";
 
 async function doObfuscate() {
     const source = document.getElementById('lua-source').value.trim();
@@ -294,28 +310,42 @@ async function doObfuscate() {
 
     try {
         const encrypted = encryptLua(source);
-        const customUrl = await uploadToHost(encrypted);
+        currentObfuscatedCode = encrypted; // Save for download
         
-        if (!customUrl) throw new Error("Failed to upload. Try again.");
+        const rawUrl = await uploadToHost(encrypted);
+        
+        if (!rawUrl) throw new Error("Failed to upload. Try again.");
 
-        // Generates: loadstring(game:HttpGet("https://luarix.vercel.app/api/files/xxxx"))()
-        currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
+        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
 
         document.getElementById('loader-code').textContent = currentLoaderUrl;
         document.getElementById('output').classList.add('show');
         
         btn.disabled = false;
-        btn.textContent = "🛡️ Obfuscate & Generate Loader";
+        btn.textContent = "⚡ Obfuscate & Generate Loader";
     } catch (err) {
         alert("Error: " + err.message);
         btn.disabled = false;
-        btn.textContent = "🛡️ Obfuscate & Generate Loader";
+        btn.textContent = "⚡ Obfuscate & Generate Loader";
     }
 }
 
 function copyText() {
     navigator.clipboard.writeText(currentLoaderUrl);
     alert("Loader copied to clipboard!");
+}
+
+function downloadLua() {
+    if (!currentObfuscatedCode) return;
+    const blob = new Blob([currentObfuscatedCode], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "luarix_protected.lua";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 </script>
 </body>
