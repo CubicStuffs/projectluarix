@@ -422,10 +422,31 @@ function copyLoader(id) {
 
 function logout() { localStorage.removeItem('luarix_active_user'); showView('landing'); }
 function promptAdmin() {
-    if (prompt("Password:") === "cubic%is@luarix^owner") {
-        localStorage.setItem('luarix_active_user', 'admin@luarix.com');
-        localStorage.setItem('luarix_auth_admin@luarix.com', JSON.stringify({ email: 'admin@luarix.com', api_key: 'ADMIN', plan: 'admin' }));
-        closeLogin(); showView('dashboard'); loadDashboard();
+    const pass = prompt("Enter Admin Password:");
+    if (pass === "cubic%is@luarix^owner") {
+        const adminEmail = 'admin@luarix.com';
+        
+        // Generate a secure, random Admin API key
+        const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const secureAdminKey = `LXR-ADMIN-${randomHex}`;
+        
+        let auth = { 
+            email: adminEmail, 
+            api_key: secureAdminKey, 
+            plan: 'admin', 
+            usage: 0, 
+            expires: null 
+        };
+        
+        localStorage.setItem('luarix_auth_' + adminEmail, JSON.stringify(auth));
+        localStorage.setItem('luarix_active_user', adminEmail);
+        
+        closeLogin();
+        showView('dashboard');
+        loadDashboard();
+        alert("Admin Access Granted. Your secure key is: " + secureAdminKey);
+    } else if (pass !== null) {
+        alert("Incorrect password.");
     }
 }
 function toggleAdminPanel() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
