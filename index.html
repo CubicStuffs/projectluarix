@@ -154,29 +154,32 @@
 
 <script>
 /* ============================================================
-   1. HYPER-FAST OBFUSCATOR (UTF-8 Safe Hex Method)
+   1. HYPER-FAST OBFUSCATOR (Bulletproof for large scripts)
    ============================================================ */
 function encryptLua(source) {
-    // 1. Safely convert all emojis and text to raw UTF-8 bytes
-    const utf8Bytes = unescape(encodeURIComponent(source));
+    // 1. Safely encode to bytes
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(source);
     const key = Math.floor(Math.random() * 200) + 10;
     
-    // 2. XOR bytes and convert to Hex
-    let hexString = "";
-    for (let i = 0; i < utf8Bytes.length; i++) {
-        let b = utf8Bytes.charCodeAt(i) ^ key;
-        hexString += b.toString(16).padStart(2, '0');
+    // 2. XOR bytes and convert to Hex efficiently
+    const hexArr = new Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) {
+        hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
+    const hexString = hexArr.join('');
 
-    // 3. Fast Lua Decoder using gsub
+    // 3. Lua Decoder (Uses table.concat to prevent Roblox lag/crashing)
     const luaCode = `
--- Luarix Protected (v5.0)
+-- Luarix Protected (v6.0)
 local h = "${hexString}"
 local k = ${key}
-local s = h:gsub("%x%x", function(c) 
-    return string.char(bit32.bxor(tonumber(c, 16), k)) 
-end)
-local f, err = loadstring(s)
+local t = {}
+for i = 1, #h, 2 do
+    local b = tonumber(h:sub(i, i+1), 16)
+    table.insert(t, string.char(bit32.bxor(b, k)))
+end
+local f, err = loadstring(table.concat(t))
 if f then 
     f() 
 else 
@@ -200,7 +203,7 @@ async function uploadToHost(obfuscatedCode) {
         const data = await response.json();
         return `https://api.pastes.dev/${data.key}`;
     } catch (err) {
-        console.log("Upload failed.");
+        console.log("Upload failed, returning null.");
         return null;
     }
 }
@@ -245,22 +248,22 @@ async function doObfuscate() {
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
 
+    // Give browser 50ms to update UI text before heavy processing
+    await new Promise(r => setTimeout(r, 50));
+
     try {
-        // 1. Obfuscate immediately (runs in milliseconds)
+        // 1. Obfuscate
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
 
-        // Generate Inline Loader (Works instantly, 100% success rate)
-        const inlineLoader = `loadstring([==[\n${encrypted}\n]==])()`;
-        currentLoaderUrl = inlineLoader;
-
-        // SHOW UI IMMEDIATELY
-        document.getElementById('loader-code').textContent = inlineLoader;
+        // 2. Instantly show the Inline Loader (Guaranteed to work)
+        currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
+        document.getElementById('loader-code').textContent = currentLoaderUrl;
         document.getElementById('status-title').textContent = "✓ Protected (Inline Loader Ready)";
         document.getElementById('output').classList.add('show');
 
-        // 2. Upload to get HttpGet loader
-        btn.textContent = "⏳ Generating URL...";
+        // 3. Try to get HttpGet in the background
+        btn.textContent = "⏳ Uploading URL...";
         const rawUrl = await uploadToHost(encrypted);
 
         if (rawUrl) {
