@@ -8,10 +8,22 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // 1. FETCH KEYS
+        if (action === 'get_stats') {
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
+            if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
+
+            const scriptIds = scripts.map(s => s.id);
+            const { data: keys } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
+
+            const totalExecutions = keys.reduce((acc, curr) => acc + (curr.executions || 0), 0);
+            const totalKeys = keys.length;
+
+            return res.status(200).json({ totalExecutions, totalKeys, totalProjects: scripts.length });
+        }
+
         if (action === 'get_keys') {
             const { data: scripts } = await supabase.from('scripts').select('id, name').eq('api_key', api_key);
-            if (!scripts) return res.status(200).json({ keys: [] });
+            if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
 
             const scriptIds = scripts.map(s => s.id);
             const { data: keys } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
@@ -19,7 +31,6 @@ export default async function handler(req, res) {
             return res.status(200).json({ keys: keys || [], scripts });
         }
 
-        // 2. FETCH BLACKLISTS
         if (action === 'get_blacklists') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ blacklists: [] });
@@ -30,19 +41,16 @@ export default async function handler(req, res) {
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
-        // 3. DELETE KEY
         if (req.method === 'POST' && action === 'delete_key') {
             await supabase.from('script_keys').delete().eq('key', key_id);
             return res.status(200).json({ success: true });
         }
 
-        // 4. RESET HWID
         if (req.method === 'POST' && action === 'reset_hwid') {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
 
-        // 5. REMOVE BLACKLIST
         if (req.method === 'POST' && action === 'remove_blacklist') {
             await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id);
             return res.status(200).json({ success: true });
