@@ -178,27 +178,51 @@
 
 <script>
 /* ============================================================
-   1. ZERO-LAG OBFUSCATOR (Fast gsub Decoding)
+   1. UTF-8 SAFE OBFUSCATOR (Fixes the broken emojis)
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
-    let hexString = "";
     
-    // Encrypt to Hex
-    for (let i = 0; i < source.length; i++) {
-        let b = source.charCodeAt(i) ^ key;
+    // Safely encode string to Base64 (handles all emojis/special chars)
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(source);
+    let binaryString = "";
+    for (let i = 0; i < bytes.length; i++) {
+        binaryString += String.fromCharCode(bytes[i]);
+    }
+    const base64String = btoa(binaryString);
+    
+    // XOR the Base64 string (safe ASCII)
+    let hexString = "";
+    for (let i = 0; i < base64String.length; i++) {
+        let b = base64String.charCodeAt(i) ^ key;
         hexString += b.toString(16).padStart(2, '0');
     }
 
-    // Fast gsub decryption in Lua (Prevents lag and string corruption)
+    // Fast Lua wrapper
     const luaCode = `
--- Luarix Protected (v3.0 - Fast)
+-- Luarix Protected (v4.0 - UTF-8 Safe)
 local h = "${hexString}"
 local k = ${key}
-local s = h:gsub("%x%x", function(c) 
+local b64 = h:gsub("%x%x", function(c) 
     return string.char(bit32.bxor(tonumber(c, 16), k)) 
 end)
-local f, err = loadstring(s)
+
+local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+local s = b64:gsub('[^'..b..'=]', '')
+local res = s:gsub('.', function(x)
+    if (x == '=') then return '' end
+    local r,f='',(b:find(x)-1)
+    for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+    return r
+end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+    if (#x ~= 8) then return '' end
+    local c=0
+    for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+    return string.char(c)
+end)
+
+local f, err = loadstring(res)
 if f then 
     f() 
 else 
@@ -209,7 +233,7 @@ end
 }
 
 /* ============================================================
-   2. AUTO-UPLOADER (Generates Real HttpGet Loaders)
+   2. UPLOADER (Creates Custom Vercel URLs)
    ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
@@ -220,7 +244,9 @@ async function uploadToHost(obfuscatedCode) {
         });
         if (!response.ok) throw new Error("Upload failed");
         const data = await response.json();
-        return `https://api.pastes.dev/${data.key}`;
+        
+        // Return custom Vercel URL format
+        return `${window.location.origin}/api/files/${data.key}`;
     } catch (err) {
         console.error(err);
         return null;
@@ -254,7 +280,6 @@ function logout() {
     showView('landing');
 }
 
-// Check session
 if (localStorage.getItem('luarix_auth')) showView('dashboard');
 
 let currentLoaderUrl = "";
@@ -269,11 +294,12 @@ async function doObfuscate() {
 
     try {
         const encrypted = encryptLua(source);
-        const rawUrl = await uploadToHost(encrypted);
+        const customUrl = await uploadToHost(encrypted);
         
-        if (!rawUrl) throw new Error("Failed to upload. Try again.");
+        if (!customUrl) throw new Error("Failed to upload. Try again.");
 
-        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+        // Generates: loadstring(game:HttpGet("https://luarix.vercel.app/api/files/xxxx"))()
+        currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
 
         document.getElementById('loader-code').textContent = currentLoaderUrl;
         document.getElementById('output').classList.add('show');
