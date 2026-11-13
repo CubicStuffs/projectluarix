@@ -78,6 +78,14 @@ export default async function handler(req, res) {
 
         // NEW: Generate Key from Web
         if (req.method === 'POST' && action === 'generate_key') {
+                    // NEW: Update Script Code
+        if (req.method === 'POST' && action === 'update_script_code') {
+            await supabase.from('scripts').update({ 
+                lua_code: req.query.code,
+                original_code: req.query.original_code
+            }).eq('id', script_id).eq('api_key', api_key);
+            return res.status(200).json({ success: true });
+        }
             const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
             const newKey = `LXR-KEY-${randomHex}`;
             const { error } = await supabase.from('script_keys').insert({ key: newKey, script_id: script_id });
