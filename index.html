@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Luarix | Protect & Monetize your code</title>
 <style>
+  /* Same CSS as before */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --bg: #08080a; --bg-card: #0f111a; --bg-sidebar: #0b0b0f; --border: #1a1d2d;
@@ -12,24 +13,12 @@
     --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); 
     --success: #10b981; --danger: #ef4444;
   }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden;
-  }
-
-  /* ANIMATIONS */
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } 50% { box-shadow: 0 0 25px rgba(245, 197, 24, 0.6); } 100% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } }
 
-  /* NAVBAR */
-  nav {
-    position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
-    width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between;
-    padding: 0.8rem 1.5rem; background: rgba(15, 17, 26, 0.9); backdrop-filter: blur(15px);
-    border: 1px solid var(--border); border-radius: 12px; z-index: 100;
-    animation: slideDown 0.5s ease-out;
-  }
+  nav { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(15, 17, 26, 0.9); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 12px; z-index: 100; animation: slideDown 0.5s ease-out; }
   .nav-brand { display: flex; align-items: center; cursor: pointer; transition: transform 0.2s; }
   .nav-brand:hover { transform: scale(1.05); }
   .nav-brand img { height: 40px; width: auto; object-fit: contain; mix-blend-mode: screen; } 
@@ -41,7 +30,6 @@
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 197, 24, 0.4); }
 
-  /* HERO & PRICING */
   #view-landing { display: block; animation: fadeIn 0.8s ease-out; }
   .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1;}
@@ -61,52 +49,22 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DASHBOARD LAYOUT */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
-  
-  /* SIDEBAR (Collapsible) */
-  .sidebar { 
-    width: 260px; 
-    background: var(--bg-sidebar); 
-    border-right: 1px solid var(--border); 
-    padding: 1.5rem 1rem; 
-    display: flex; 
-    flex-direction: column; 
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-  }
+  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
   .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
   .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; margin-bottom: 2rem; }
   .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
-
-  .sidebar-logo { 
-    height: auto; max-height: 60px; width: 80%; object-fit: contain; 
-    margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; 
-    transition: 0.3s;
-  }
-
-  .toggle-btn {
-    position: absolute; right: -12px; top: 2rem;
-    background: var(--bg-card); border: 1px solid var(--border);
-    color: var(--gold); border-radius: 50%; width: 24px; height: 24px;
-    display: flex; justify-content: center; align-items: center;
-    cursor: pointer; z-index: 10; transition: 0.3s;
-  }
+  .sidebar-logo { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; transition: 0.3s; }
+  .toggle-btn { position: absolute; right: -12px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--gold); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: 0.3s; }
   .toggle-btn:hover { background: var(--gold); color: #000; transform: scale(1.1); }
-  
-  .menu-item { 
-    padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); 
-    cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; 
-    display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden;
-  }
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden; }
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
   .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
   .menu-icon { flex-shrink: 0; }
 
-  /* MAIN CONTENT */
   .main-content { flex: 1; padding: 2rem; overflow-y: auto; animation: fadeIn 0.6s ease-out; }
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
   .dash-header h1 { font-size: 1.5rem; }
@@ -117,7 +75,11 @@
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.3rem;}
   .stat-info h2 { font-size: 1.5rem; }
 
-  /* Obfuscator Panel */
+  /* NEW: API KEY BOX */
+  .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; animation: pulseGlow 3s infinite; }
+  .api-key-box h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+  .api-key-box code { color: var(--gold); font-size: 1.2rem; font-weight: bold; font-family: monospace; }
+
   #obfuscator-panel, #admin-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; animation: fadeIn 0.4s ease-out; }
   label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;}
   input[type="text"], input[type="email"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; transition: 0.2s;}
@@ -127,7 +89,6 @@
   .output-box { display: none; margin-top: 1.5rem; background: #050505; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; animation: fadeIn 0.5s ease-out; }
   .code-box { width: 100%; height: 80px; background: #000; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; resize: none; margin-bottom: 1rem;}
 
-  /* Table */
   .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; animation: fadeIn 0.7s ease-out; }
   .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .script-table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -139,14 +100,12 @@
   .action-btn:hover { color: var(--gold); transform: scale(1.1); }
   .action-btn.delete:hover { color: var(--danger); }
 
-  /* MODALS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
   .modal-bg.show { display: flex; }
   .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; animation: slideDown 0.3s ease-out; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
   .modal h2 { margin-bottom: 0.5rem; }
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
   .ltc-box { background: #000; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; word-break: break-all; color: var(--gold); font-size: 0.85rem; margin-bottom: 1rem;}
-  
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; line-height: 1; }
   .close-btn:hover { color: var(--danger); transform: scale(1.1); }
   .secret-logo { position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s; mix-blend-mode: screen; }
@@ -157,9 +116,7 @@
 
 <!-- NAVBAR -->
 <nav id="main-nav">
-  <a class="nav-brand" onclick="showView('landing')">
-    <img src="logo.png" alt="Luarix">
-  </a>
+  <a class="nav-brand" onclick="showView('landing')"><img src="logo.png" alt="Luarix"></a>
   <div class="links">
     <a>Docs</a>
     <a onclick="openLogin()">Dashboard</a>
@@ -167,9 +124,7 @@
     <a>F.A.Q</a>
     <a onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
   </div>
-  <div id="nav-auth">
-    <button class="btn-gold" onclick="openLogin()">Sign in</button>
-  </div>
+  <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
 
 <!-- LANDING PAGE -->
@@ -218,40 +173,29 @@
 <!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
-    
-    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
-      <!-- Toggle Button -->
       <div class="toggle-btn" onclick="toggleSidebar()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </div>
-
       <img src="logo.png" class="sidebar-logo" alt="Luarix">
-      
       <div class="menu-item active" onclick="toggleObfuscator()">
         <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span class="menu-text">Dashboard</span>
       </div>
-      
       <div class="menu-item" onclick="toggleObfuscator()">
         <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span class="menu-text">Create Project</span>
       </div>
-      
       <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">
         <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
         <span class="menu-text">Admin KeyGen</span>
       </div>
-      
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
         <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span class="menu-text">Log Out</span>
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="dash-header">
         <div>
@@ -259,6 +203,15 @@
           <p id="user-plan-text" style="color: var(--text-muted); font-size: 0.9rem;">Plan: Loading...</p>
         </div>
         <button class="btn-gold" onclick="toggleObfuscator()">+ Create Project</button>
+      </div>
+
+      <!-- NEW: API KEY DISPLAY -->
+      <div class="api-key-box" id="api-key-box" style="display: none;">
+        <div>
+          <h4>Your API Key (Use this in Discord)</h4>
+          <code id="user-api-key">LXR-...</code>
+        </div>
+        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="copyApiKey()">Copy Key</button>
       </div>
 
       <div class="stats-grid">
@@ -273,10 +226,8 @@
         </div>
       </div>
 
-      <!-- ADMIN KEY GENERATOR -->
       <div id="admin-panel">
         <h3 style="margin-bottom: 1rem; color: var(--gold);">Admin Key Generator</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Generate API keys to distribute in your Discord server.</p>
         <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
             <button class="btn-gold" style="flex: 1;" onclick="generateKey('basic')">Generate Basic Key</button>
             <button class="btn-gold" style="flex: 1; background: #222; color: #fff;" onclick="generateKey('premium')">Generate Premium Key</button>
@@ -284,7 +235,6 @@
         <div id="key-result" style="display:none; background:#000; padding:1.5rem; border-radius:8px; border:1px solid var(--border); text-align:center;"></div>
       </div>
 
-      <!-- OBFUSCATOR TOOL -->
       <div id="obfuscator-panel">
         <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
         <input type="hidden" id="edit-id" value="">
@@ -309,15 +259,10 @@
         </div>
       </div>
 
-      <!-- PROJECTS TABLE -->
       <div class="table-box">
-        <div class="table-header">
-          <h3>My Projects</h3>
-        </div>
+        <div class="table-header"><h3>My Projects</h3></div>
         <table class="script-table">
-          <thead>
-            <tr><th>Project Name</th><th>Date Created</th><th>Status</th><th>Actions</th></tr>
-          </thead>
+          <thead><tr><th>Project Name</th><th>Date Created</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="projects-tbody"></tbody>
         </table>
       </div>
@@ -325,71 +270,52 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL -->
+<!-- MODALS (Same as before) -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
     <h2>Welcome to Luarix</h2>
     <p>Enter your email to manage your private projects.</p>
-    
     <input type="email" id="login-email" placeholder="Email Address" required />
-    <input type="text" id="login-key" placeholder="API Key (Leave blank for Free Plan)" />
-    
+    <input type="text" id="login-key" placeholder="Paid API Key (Leave blank for Free Plan)" />
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="loginUser()">Login / Register</button>
-    
     <img src="logo.png" class="secret-logo" onclick="promptAdmin()" alt="Admin">
   </div>
 </div>
 
-<!-- PAY MODAL -->
 <div class="modal-bg" id="pay-modal">
   <div class="modal">
     <span class="close-btn" onclick="document.getElementById('pay-modal').classList.remove('show')">&times;</span>
     <h2 id="pay-title">Upgrade to Basic</h2>
-    <p>Send exact LTC amount to the address below. Once sent, open a ticket in our Discord with the TXID to get your API key.</p>
-    <div class="ltc-box" id="ltc-address">ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3</div>
+    <p>Send exact LTC amount to the address below. Open a Discord ticket with the TXID to get your paid key.</p>
+    <div class="ltc-box">ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3</div>
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="copyLTC()">Copy LTC Address</button>
   </div>
 </div>
 
-<!-- UPGRADE MODAL -->
 <div class="modal-bg" id="upgrade-modal">
   <div class="modal">
     <span class="close-btn" onclick="document.getElementById('upgrade-modal').classList.remove('show')">&times;</span>
     <h2>Upgrade Plan</h2>
-    <p>Unlock unlimited obfuscations and private projects.</p>
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="openPayModal('Basic')">Buy Basic ($5/mo)</button>
     <button class="btn-gold" style="width: 100%;" onclick="openPayModal('Premium')">Buy Premium ($10/yr)</button>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   1. SIDEBAR TOGGLE LOGIC
-   ============================================================ */
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const icon = sidebar.querySelector('.toggle-btn svg');
-    
     sidebar.classList.toggle('collapsed');
-    
-    if (sidebar.classList.contains('collapsed')) {
-        icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-    } else {
-        icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
-    }
+    if (sidebar.classList.contains('collapsed')) icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+    else icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
 }
 
-/* ============================================================
-   2. OBFUSCATOR LOGIC
-   ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(source);
     const hexArr = new Array(bytes.length);
-    for (let i = 0; i < bytes.length; i++) {
-        hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
-    }
+    for (let i = 0; i < bytes.length; i++) hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     return `
 -- Luarix Protected
 warn("[Luarix] Securing Connection... [1]")
@@ -400,88 +326,89 @@ warn("[Luarix] Fetching Payload... [3]")
 task.wait(0.5)
 warn("[Luarix] Decrypting Data... [4]")
 task.wait(0.5)
-
 local h = "${hexArr.join('')}"
 local k = ${key}
 local s = h:gsub("%x%x", function(c) return string.char(bit32.bxor(tonumber(c, 16), k)) end)
-
 warn("[Luarix] Launching Script... [5]")
 task.wait(0.2)
 loadstring(s)()
 `.trim();
 }
 
-/* ============================================================
-   3. AUTHENTICATION & ADMIN SYSTEM
-   ============================================================ */
 function getAuth() {
     const email = localStorage.getItem('luarix_active_user');
     if (!email) return null;
-    
     let auth = JSON.parse(localStorage.getItem('luarix_auth_' + email));
     if (!auth) return null;
-
-    if (auth.expires && Date.now() > auth.expires) {
-        auth.plan = 'free'; 
-        auth.expires = null;
-        localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
-    }
     return auth;
 }
 
 function openLogin() { document.getElementById('login-modal').classList.add('show'); }
 function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
 
-function loginUser() {
+async function loginUser() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const key = document.getElementById('login-key').value.trim();
+    const paidKey = document.getElementById('login-key').value.trim();
     
     if (!email || !email.includes('@')) return alert("Please enter a valid email address.");
 
-    let auth = JSON.parse(localStorage.getItem('luarix_auth_' + email));
+    const btn = document.querySelector('#login-modal button');
+    btn.textContent = "Connecting...";
+    btn.disabled = true;
 
-    if (!auth) {
-        auth = { email: email, plan: 'free', usage: 0, resetDate: Date.now() + (30 * 24 * 60 * 60 * 1000) };
-    }
+    try {
+        // 1. Send email to API to get/create the Free API Key
+        const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+        const data = await response.json();
+        if (!data.api_key) throw new Error("Failed to get API Key");
 
-    if (key) {
-        if (key.startsWith('LXR-PREM-')) {
-            auth.plan = 'premium';
-            auth.expires = Date.now() + (365 * 24 * 60 * 60 * 1000);
-        } else if (key.startsWith('LXR-BASIC-')) {
-            auth.plan = 'basic';
-            auth.expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
-        } else if (key === 'ADMIN') {
-            auth.plan = 'admin';
-            auth.expires = null;
-        } else {
-            return alert("Invalid API Key format.");
+        let finalKey = data.api_key;
+        let plan = 'free';
+
+        // 2. If they have a paid key, override it
+        if (paidKey) {
+            if (paidKey.startsWith('LXR-PREM-')) plan = 'premium';
+            else if (paidKey.startsWith('LXR-BASIC-')) plan = 'basic';
+            else if (paidKey === 'ADMIN') plan = 'admin';
+            finalKey = paidKey;
         }
-    }
 
-    localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
-    localStorage.setItem('luarix_active_user', email);
-    
-    closeLogin();
-    document.getElementById('login-email').value = '';
-    document.getElementById('login-key').value = '';
-    showView('dashboard');
+        let auth = { 
+            email: email, 
+            api_key: finalKey, 
+            plan: plan,
+            usage: 0,
+            resetDate: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+        };
+
+        localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
+        localStorage.setItem('luarix_active_user', email);
+        
+        closeLogin();
+        showView('dashboard');
+
+    } catch (err) {
+        alert("Error: " + err.message);
+    } finally {
+        btn.textContent = "Login / Register";
+        btn.disabled = false;
+    }
 }
 
 function promptAdmin() {
     const pass = prompt("Enter Admin Password:");
     if (pass === "cubic%is@luarix^owner") {
         const adminEmail = 'admin@luarix.com';
-        let auth = { email: adminEmail, plan: 'admin', usage: 0, expires: null };
+        let auth = { email: adminEmail, api_key: "ADMIN", plan: 'admin', usage: 0, expires: null };
         localStorage.setItem('luarix_auth_' + adminEmail, JSON.stringify(auth));
         localStorage.setItem('luarix_active_user', adminEmail);
-        
         closeLogin();
         showView('dashboard');
-        alert("Admin Access Granted.");
-    } else if (pass !== null) {
-        alert("Incorrect password.");
-    }
+    } else if (pass !== null) alert("Incorrect password.");
 }
 
 function logout() {
@@ -489,14 +416,10 @@ function logout() {
     showView('landing');
 }
 
-/* ============================================================
-   4. DASHBOARD & PROJECT MANAGEMENT
-   ============================================================ */
 function showView(view) {
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none';
     document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
-    
     if (view === 'dashboard') {
         updateDashboardUI();
         loadProjects();
@@ -507,6 +430,9 @@ function updateDashboardUI() {
     const auth = getAuth();
     if (!auth) return logout();
 
+    document.getElementById('user-api-key').textContent = auth.api_key;
+    document.getElementById('api-key-box').style.display = 'flex';
+
     const limitText = document.getElementById('stat-limit');
     const planText = document.getElementById('user-plan-text');
     const adminBtn = document.getElementById('admin-menu-btn');
@@ -515,27 +441,20 @@ function updateDashboardUI() {
     if (auth.plan === 'admin') {
         adminBtn.style.display = 'flex';
         limitCard.style.display = 'none';
-        planText.textContent = "ADMIN ACCESS | Full Control";
+        planText.textContent = "ADMIN ACCESS";
     } else {
         adminBtn.style.display = 'none';
         limitCard.style.display = 'flex';
-        
-        if (auth.plan === 'free') {
-            if (Date.now() > auth.resetDate) {
-                auth.usage = 0;
-                auth.resetDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
-                localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
-            }
-            const left = 20 - auth.usage;
-            limitText.textContent = left;
-            limitText.style.color = left > 0 ? 'var(--text)' : 'var(--danger)';
-            planText.textContent = auth.email + " | Plan: Free (Resets " + new Date(auth.resetDate).toLocaleDateString() + ")";
-        } else {
-            limitText.textContent = "Unlimited";
-            limitText.style.color = "var(--success)";
-            planText.textContent = auth.email + " | Plan: " + auth.plan.toUpperCase();
-        }
+        limitText.textContent = "∞";
+        limitText.style.color = "var(--success)";
+        planText.textContent = auth.email + " | Plan: " + auth.plan.toUpperCase();
     }
+}
+
+function copyApiKey() {
+    const key = document.getElementById('user-api-key').textContent;
+    navigator.clipboard.writeText(key);
+    alert("API Key Copied! You can now use /link in Discord.");
 }
 
 function toggleAdminPanel() {
@@ -547,7 +466,6 @@ function generateKey(type) {
     const chars = 'ABCDEF0123456789';
     let rand = '';
     for (let i = 0; i < 8; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
-    
     const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREM-';
     const key = prefix + rand;
     
@@ -555,8 +473,8 @@ function generateKey(type) {
     resBox.style.display = 'block';
     resBox.innerHTML = `
         <h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4>
-        <div style="font-family: monospace; font-size: 1.5rem; color: var(--gold); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div>
-        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="navigator.clipboard.writeText('${key}'); alert('Key Copied to Clipboard!')">Copy Key</button>
+        <div style="font-family: monospace; font-size: 1.5rem; color: var(--gold); margin-bottom: 1rem;">${key}</div>
+        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="navigator.clipboard.writeText('${key}'); alert('Copied!')">Copy Key</button>
     `;
 }
 
@@ -566,24 +484,18 @@ function openPayModal(plan) {
     document.getElementById('upgrade-modal').classList.remove('show');
 }
 function openUpgradeModal() { document.getElementById('upgrade-modal').classList.add('show'); }
-function copyLTC() { navigator.clipboard.writeText('ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3'); alert("LTC Address Copied!"); }
+function copyLTC() { navigator.clipboard.writeText('ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3'); alert("Copied!"); }
 
 function toggleObfuscator() {
     const panel = document.getElementById('obfuscator-panel');
     if (panel.style.display === 'block') {
         panel.style.display = 'none';
-        document.getElementById('edit-id').value = '';
-        document.getElementById('project-name').value = '';
-        document.getElementById('lua-source').value = '';
-        document.getElementById('panel-title').textContent = "Create New Project";
-        document.getElementById('protect-btn').textContent = "Obfuscate & Save Project";
     } else {
         panel.style.display = 'block';
         document.getElementById('admin-panel').style.display = 'none';
     }
 }
 
-// PROJECTS (Local Storage for immediate UI update)
 function getProjects() {
     const auth = getAuth();
     if (!auth) return [];
@@ -601,7 +513,7 @@ function loadProjects() {
     document.getElementById('stat-scripts').textContent = projects.length;
 
     if (projects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2rem;">No projects yet. Create one above!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2rem;">No projects yet.</td></tr>`;
         return;
     }
 
@@ -611,7 +523,6 @@ function loadProjects() {
             <td>${p.date}</td>
             <td><span class="status-badge">Active</span></td>
             <td>
-                <button class="action-btn" onclick="editProject('${p.id}')">Edit</button>
                 <button class="action-btn" onclick="copySavedLoader('${p.id}')">Copy Loader</button>
                 <button class="action-btn delete" onclick="deleteProject('${p.id}')">Delete</button>
             </td>
@@ -619,23 +530,8 @@ function loadProjects() {
     `).join('');
 }
 
-function editProject(id) {
-    const project = getProjects().find(p => p.id === id);
-    if (!project) return;
-    
-    document.getElementById('edit-id').value = id;
-    document.getElementById('project-name').value = project.name;
-    document.getElementById('lua-source').value = project.originalSource || "";
-    document.getElementById('panel-title').textContent = "Update Project: " + project.name;
-    document.getElementById('protect-btn').textContent = "Update & Save Project";
-    
-    const panel = document.getElementById('obfuscator-panel');
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth' });
-}
-
 function deleteProject(id) {
-    if (!confirm('Delete this project permanently?')) return;
+    if (!confirm('Delete this project?')) return;
     let projects = getProjects().filter(p => p.id !== id);
     saveProjects(projects);
     loadProjects();
@@ -649,22 +545,12 @@ function copySavedLoader(id) {
     }
 }
 
-let currentLoaderUrl = "";
-let currentObfuscatedCode = "";
-
-/* ============================================================
-   5. DATABASE INTEGRATION (NEW)
-   ============================================================ */
 async function doObfuscate() {
     const auth = getAuth();
-    
-    if (auth.plan === 'free' && auth.usage >= 20) {
-        return alert("You have reached your 20 free obfuscations. Please upgrade or wait for the reset.");
-    }
+    if (!auth) return;
 
     const name = document.getElementById('project-name').value.trim() || "Untitled Project";
     const source = document.getElementById('lua-source').value.trim();
-    
     if (!source) return alert("Paste a script first!");
 
     const btn = document.getElementById('protect-btn');
@@ -679,53 +565,33 @@ async function doObfuscate() {
     await new Promise(r => setTimeout(r, 50));
 
     try {
-        // 1. Obfuscate locally
         const encrypted = encryptLua(source);
-        currentObfuscatedCode = encrypted;
 
-        // 2. Send to Vercel API (Which saves to Supabase)
+        // SEND USING THEIR REAL API KEY
         const response = await fetch('/api/create_script', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 name: name, 
                 code: encrypted, 
-                api_key: auth.email // Using email as the API key for this demo
+                api_key: auth.api_key // <--- REAL API KEY
             })
         });
 
         const data = await response.json();
-        
-        if (!data.success) throw new Error(data.error || "Failed to save script to database");
+        if (!data.success) throw new Error(data.error || "Failed to save script");
 
-        // 3. Generate the new Key System Loader
         const customUrl = `https://${window.location.host}/api/loader?id=${data.id}`;
         const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}&key="..script_key.."&hwid="..(gethwid and gethwid() or game:GetService("RbxAnalyticsService"):GetClientId())))()`;
 
         loaderCode.value = loader;
-        currentLoaderUrl = loader;
         document.getElementById('status-title').textContent = "✓ Saved to Database & Protected!";
 
-        // 4. Update Limits (if free)
-        if (auth.plan === 'free') {
-            auth.usage += 1;
-            localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
-            updateDashboardUI();
-        }
-
-        // 5. Save locally just so the table updates instantly on the site
         let projects = getProjects();
-        projects.unshift({
-            id: data.id, // Use the ID from the database
-            name: name,
-            date: new Date().toLocaleDateString(),
-            loader: loader,
-            originalSource: source
-        });
+        projects.unshift({ id: data.id, name: name, date: new Date().toLocaleDateString(), loader: loader });
         saveProjects(projects);
         loadProjects();
         
-        // Reset form
         document.getElementById('project-name').value = '';
         document.getElementById('lua-source').value = '';
         btn.textContent = "Obfuscate & Save Project";
@@ -744,15 +610,6 @@ function copyText() {
     loaderCode.select();
     navigator.clipboard.writeText(loaderCode.value);
     alert("Loader copied!");
-}
-
-function downloadLua() {
-    if (!currentObfuscatedCode) return;
-    const blob = new Blob([currentObfuscatedCode], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "luarix_protected.lua";
-    a.click();
 }
 </script>
 </body>
