@@ -1,67 +1,55 @@
 import { createClient } from '@supabase/supabase-js';
 
-// PASTE YOUR SUPABASE URL AND PUBLISHABLE KEY HERE
-const supabaseUrl = 'https://djvpvxxpuvwbopzwtmgi.supabase.co';
-const supabaseKey = 'sb_publishable_rz3itIinBmVWzhDlwgQV6g_EqrJ4MfI'; // Starts with sb_publishable_...
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export default async function handler(req, res) {
-    // Get the ID, Key, and HWID from the Roblox loader URL
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
     const { id, key, hwid } = req.query;
 
     if (!id) return res.status(400).send('-- Error: Missing script ID.');
 
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
     try {
-        // 1. Fetch Script from Supabase
+        // Fetch Script
         const { data: script, error: scriptErr } = await supabase.from('scripts').select('*').eq('id', id).single();
-        if (scriptErr || !script) return res.status(404).send('-- Error: Script not found.');
-
-        // 2. Keyless Bypass (If script is free)
-        if (script.keyless) {
-            return sendLua(res, script.lua_code);
+        
+        // NEW: If there is a DB error, print it to the browser!
+        if (scriptErr) {
+            return res.status(500).send('-- Database Error: ' + scriptErr.message);
+        }
+        if (!script) {
+            return res.status(404).send('-- Error: Script not found.');
         }
 
-        // 3. Check if Key is provided
-        if (!key) {
-            return sendAuthError(res, "You need a script_key to access this script. No key found.");
-        }
+        if (script.keyless) return res.status(200).send(script.lua_code);
+        if (!key) return sendAuthError(res, "You need a script_key to access this script.");
 
-        // 4. Validate Key
+        // Validate Key
         const { data: keyData, error: keyErr } = await supabase.from('script_keys').select('*').eq('key', key).single();
+        
         if (keyErr || !keyData || keyData.script_id !== id) {
             return sendAuthError(res, "Invalid script_key.");
         }
 
-        // Check Expiry
         if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) {
             return sendAuthError(res, "This script_key has expired.");
         }
 
-        // 5. HWID Locking
+        // HWID Locking
         if (!keyData.hwid) {
-            // First time use: Lock HWID to this player's device
             await supabase.from('script_keys').update({ hwid: hwid }).eq('key', key);
         } else if (keyData.hwid !== hwid) {
-            // Someone else trying to use it
             return sendAuthError(res, "HWID Mismatch. This key is locked to another device.");
         }
 
-        // 6. Success - Send the script
-        return sendLua(res, script.lua_code);
+        return res.status(200).send(script.lua_code);
 
     } catch (err) {
-        return res.status(500).send('-- Server Error');
+        return res.status(500).send('-- Server Exception: ' + err.message);
     }
 }
 
-// Helper to send plain Lua code
-function sendLua(res, code) {
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.status(200).send(code);
-}
-
-// Helper to send the Error GUI that kicks the player
 function sendAuthError(res, message) {
     const errorScript = `
 local ScreenGui = Instance.new("ScreenGui")
@@ -108,5 +96,5 @@ Btn.MouseButton1Click:Connect(function()
     game.Players.LocalPlayer:Kick("Auth Error: ${message}")
 end)
 `;
-    sendLua(res, errorScript);
+    res.status(200).send(errorScript);
 }
