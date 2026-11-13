@@ -5,13 +5,11 @@ export default async function handler(req, res) {
         return res.status(400).send('-- Error: Missing script key.');
     }
 
-    // 1. Check the User-Agent header to see if the request is from a Roblox executor
     const userAgent = req.headers['user-agent'] || '';
     const isRoblox = userAgent.includes('Roblox') || userAgent.includes('WinInet');
 
-    // 2. If it's NOT a Roblox executor (i.e., it's a web browser), return a landing page
+    // If opening in a browser, show the custom landing page
     if (!isRoblox) {
-        // Define the HTML for the Luarmor-style page
         const html = `
         <!DOCTYPE html>
         <html lang="en">
@@ -21,7 +19,7 @@ export default async function handler(req, res) {
             <title>Luarix | Secure Loader</title>
             <style>
                 body {
-                    background-color: #0d0d12;
+                    background-color: #08080a;
                     color: #ffffff;
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     display: flex;
@@ -29,34 +27,43 @@ export default async function handler(req, res) {
                     align-items: center;
                     height: 100vh;
                     margin: 0;
-                    flex-direction: column;
                 }
                 .container {
-                    background: #15151e;
+                    background: #0f111a;
                     padding: 2rem 3rem;
-                    border-radius: 16px;
-                    border: 1px solid #222;
+                    border-radius: 12px;
+                    border: 1px solid #1a1d2d;
                     text-align: center;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    max-width: 600px;
+                    width: 100%;
                 }
-                h2 {
+                .title {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
                     color: #f5c518;
+                    font-size: 1.2rem;
+                    font-weight: 700;
                     margin-bottom: 1rem;
                 }
                 p {
-                    color: #888;
+                    color: #8892b0;
                     margin-bottom: 2rem;
+                    font-size: 0.9rem;
                 }
                 .code-box {
-                    background: #000;
+                    background: #050505;
                     padding: 1rem;
                     border-radius: 8px;
-                    border: 1px solid #333;
-                    font-family: 'Courier New', monospace;
+                    border: 1px solid #1a1d2d;
+                    font-family: monospace;
                     color: #a5f3c4;
                     word-break: break-all;
                     text-align: left;
                     position: relative;
+                    font-size: 0.85rem;
                 }
                 .copy-btn {
                     position: absolute;
@@ -65,10 +72,11 @@ export default async function handler(req, res) {
                     background: #f5c518;
                     color: #000;
                     border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 6px;
+                    padding: 0.4rem 0.8rem;
+                    border-radius: 4px;
                     font-weight: bold;
                     cursor: pointer;
+                    font-size: 0.75rem;
                 }
                 .footer {
                     margin-top: 2rem;
@@ -83,7 +91,10 @@ export default async function handler(req, res) {
         </head>
         <body>
             <div class="container">
-                <h2>📄 Loadstring</h2>
+                <div class="title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Loadstring
+                </div>
                 <p>Copy the code below to execute the script.</p>
                 <div class="code-box">
                     <button class="copy-btn" onclick="navigator.clipboard.writeText('script_key = \\'KEY\\'; loadstring(game:HttpGet(\\'${req.headers.host ? 'https://' + req.headers.host : 'https://luarix.vercel.app'}/api/raw?key=${key}\\'))()')">Copy</button>
@@ -100,19 +111,16 @@ export default async function handler(req, res) {
         return res.status(200).send(html);
     }
 
-    // 3. If it IS a Roblox executor, proceed to fetch and return the raw Lua code
+    // If Roblox executor, return code
     try {
         const response = await fetch(`https://api.pastes.dev/${key}`);
         if (!response.ok) {
             return res.status(404).send('-- Error: Script not found on host.');
         }
-
         const scriptText = await response.text();
-
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.status(200).send(scriptText);
-        
     } catch (error) {
         res.status(500).send('-- Error fetching script.');
     }
