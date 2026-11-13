@@ -1,39 +1,54 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
-    const { email } = req.body;
-
-    if (!email || !email.includes('@')) {
-        return res.status(400).json({ error: 'Invalid email' });
+    if (!req.query.code) {
+        const params = new URLSearchParams({
+            client_id: process.env.DISCORD_CLIENT_ID,
+            redirect_uri: process.env.DISCORD_REDIRECT_URI,
+            response_type: 'code',
+            scope: 'identify guilds.join email'
+        });
+        return res.redirect(`https://discord.com/api/oauth2/authorize?${params}`);
     }
 
+    const { code } = req.query;
     try {
-        // Check if user exists
-        const { data: user, error } = await supabase.from('users').select('*').eq('email', email).single();
+        // 1. Get Token
+        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: process.env.DISCORD_CLIENT_ID,
+                client_secret: process.env.DISCORD_CLIENT_SECRET,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: process.env.DISCORD_REDIRECT_URI
+            })
+        });
+        const tokenData = await tokenRes.json();
 
-        if (user) {
-            // User exists, return their existing key
-            return res.status(200).json({ api_key: user.api_key });
-        }
+        // 2. Get User Info
+        const userRes = await fetch('https://discord.com/api/users/@me', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
+        });
+        const userData = await userRes.json();
 
-        // If user doesn't exist, create a new one with a Free key
-        const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
-        const newKey = `LXR-FREE-${randomHex}`;
-
-        const { error: insertError } = await supabase.from('users').insert({
-            email: email,
-            api_key: newKey
+        // 3. Force Join Server (Auto-Join)
+        await fetch(`https://discord.com/api/guilds/${process.env.DISCORD_GUILD_ID}/members/${userData.id}`, {
+            method: 'PUT',
+            headers: { 
+                Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ access_token: tokenData.access_token })
         });
 
-        if (insertError) throw insertError;
+        // 4. Redirect back to frontend with Discord Data (Do NOT create user yet)
+        return res.redirect(`/?discord_auth=${encodeURIComponent(JSON.stringify({
+            email: userData.email || `${userData.id}@discord.com`,
+            discord_tag: userData.username,
+            discord_id: userData.id
+        }))}`);
 
-        return res.status(200).json({ api_key: newKey });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: error.message });
+    } catch (err) {
+        return res.status(500).send('Discord Auth Failed');
     }
 }
