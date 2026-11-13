@@ -25,7 +25,7 @@
     border: 1px solid var(--border); border-radius: 12px; z-index: 100;
   }
   .nav-brand { display: flex; align-items: center; cursor: pointer; }
-  .nav-brand img { height: 45px; width: auto; mix-blend-mode: screen; } /* Removes black background */
+  .nav-brand img { height: 45px; width: auto; mix-blend-mode: screen; } 
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
   nav a:hover { color: var(--gold); }
@@ -273,7 +273,7 @@
 
 <script>
 /* ============================================================
-   1. OBFUSCATOR LOGIC (Real XOR Hex Encoder)
+   1. OBFUSCATOR LOGIC (With Boot Sequence)
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
@@ -282,11 +282,25 @@ function encryptLua(source) {
     for (let i = 0; i < bytes.length; i++) {
         hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
+    
+    // This is the Luarmor-style boot sequence injected into the loader
     return `
 -- Luarix Protected
+warn("[Luarix] Securing Connection... [1]")
+task.wait(0.5)
+warn("[Luarix] Validating HWID... [2]")
+task.wait(0.5)
+warn("[Luarix] Fetching Payload... [3]")
+task.wait(0.5)
+warn("[Luarix] Decrypting Data... [4]")
+task.wait(0.5)
+
 local h = "${hexArr.join('')}"
 local k = ${key}
 local s = h:gsub("%x%x", function(c) return string.char(bit32.bxor(tonumber(c, 16), k)) end)
+
+warn("[Luarix] Launching Script... [5]")
+task.wait(0.2)
 loadstring(s)()
 `.trim();
 }
