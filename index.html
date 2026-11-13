@@ -28,32 +28,33 @@
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 197, 24, 0.4); }
 
-  /* LANDING PAGE */
+  /* LANDING PAGE & PRICING */
   #view-landing { display: block; animation: fadeIn 0.8s ease-out; }
   .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; }
   .hero h1 .highlight { color: var(--gold); }
+  
   .pricing-section { padding: 2rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
   .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
   .price-card.popular { border-color: var(--gold); animation: pulseGlow 2s infinite; }
+  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; }
   .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
   .price span { font-size: 1rem; color: var(--text-muted); }
   .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DASHBOARD LAYOUT (Fixed Gap) */
+  /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
-  
-  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: 0.3s; z-index: 10; }
+  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; z-index: 10; }
   .sidebar-logo { height: 50px; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; }
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
 
   .main-content { flex: 1; padding: 2rem; display: flex; justify-content: center; overflow-y: auto; }
-  .content-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 2rem; } /* Fixes the big gap */
+  .content-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 2rem; }
 
   /* DASHBOARD CARDS */
   .dash-header { display: flex; justify-content: space-between; align-items: center; }
@@ -62,15 +63,14 @@
   .user-info .discord-tag { color: var(--discord); font-weight: bold; }
 
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: 0.3s; }
-  .stat-card:hover { border-color: #333; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
   .stat-info h2 { font-size: 2rem; margin-top: 0.5rem; }
   
   .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
   .api-key-box code { color: var(--gold); font-size: 1.2rem; font-weight: bold; font-family: monospace; }
 
-  /* TABLES (Keys & Blacklists) */
+  /* TABLES */
   .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
   .script-table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -80,18 +80,14 @@
   .action-btn:hover { background: rgba(245, 197, 24, 0.1); color: var(--gold); border-color: var(--gold); }
   .action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
   
-  /* INPUTS */
-  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-  input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
-  textarea { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: #a5f3c4; font-family: monospace; min-height: 150px; resize: vertical; }
-  
-  /* MODALS & TOASTS */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; }
+  /* MODALS */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
   .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
   .btn-discord { background: var(--discord); color: white; padding: 0.8rem; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 1rem; transition: 0.2s; }
   .btn-discord:hover { background: #4752c4; }
+  input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
   
   .toast-notification { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--gold); border-left: 4px solid var(--gold); color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s forwards; }
 </style>
@@ -103,20 +99,47 @@
   <div class="links">
     <a onclick="openLogin()">Dashboard</a>
     <a>Discord</a>
+    <a onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
   </div>
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
 
+<!-- LANDING PAGE & PRICING -->
 <div id="view-landing">
   <section class="hero">
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
   </section>
+  
+  <section class="pricing-section" id="pricing">
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Free</h3>
+        <div class="price">$0<span>/mo</span></div>
+        <ul class="price-features">
+          <li>20 Obfuscations / month</li>
+          <li>Standard Loaders</li>
+          <li>Discord Bot Integration</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="openLogin()">Start Free</button>
+      </div>
+      <div class="price-card popular">
+        <h3>Basic</h3>
+        <div class="price">$5<span>/mo</span></div>
+        <ul class="price-features">
+          <li>Unlimited Obfuscations</li>
+          <li>Fast HttpGet Loaders</li>
+          <li>Priority Support</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="openLogin()">Get Basic</button>
+      </div>
+    </div>
+  </section>
 </div>
 
+<!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
     
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <img src="logo.png" class="sidebar-logo" alt="Luarix">
       
@@ -124,12 +147,10 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         Dashboard
       </div>
-      
       <div class="menu-item" id="tab-keys" onclick="switchTab('keys')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
         Manage Keys
       </div>
-
       <div class="menu-item" id="tab-blacklist" onclick="switchTab('blacklist')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
         Blacklists
@@ -141,17 +162,13 @@
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="content-wrapper">
-        
-        <!-- HEADER -->
         <div class="dash-header">
           <div class="user-info">
             <h1 id="user-greeting">Dashboard</h1>
             <p>Logged in as <span id="user-email-display"></span> <span id="user-discord-display"></span></p>
           </div>
-          <button class="btn-gold" id="action-btn" style="display:none;" onclick="switchTab('dash')">+ Create Project</button>
         </div>
 
         <!-- TAB: DASHBOARD -->
@@ -166,7 +183,7 @@
 
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">∞</h2></div>
+              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
             </div>
             <div class="stat-card">
               <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-projects">0</h2></div>
@@ -206,13 +223,12 @@
             </table>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- MODAL: EMAIL LOGIN -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
@@ -229,7 +245,6 @@
     </div>
 
     <button class="btn-discord" onclick="loginDiscord()">
-      <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
       Login with Discord
     </button>
 
@@ -240,9 +255,23 @@
   </div>
 </div>
 
+<!-- MODAL: DISCORD KEY LINK (NEW) -->
+<div class="modal-bg" id="discord-link-modal">
+  <div class="modal">
+    <h2>Welcome, <span id="dc-welcome-name" style="color: var(--discord);"></span>!</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Do you have a paid API key, or would you like to use the Free Plan?</p>
+    
+    <input type="text" id="dc-paid-key" placeholder="Paste Paid API Key (Optional)" />
+    
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="linkDiscordAccount(true)">Link Paid Key</button>
+    <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="linkDiscordAccount(false)">Continue with Free Plan</button>
+  </div>
+</div>
+
 <script>
 let isLoginMode = true;
 let currentAuth = null;
+let tempDiscordData = null;
 
 /* ==========================================
    1. UI & TOASTS
@@ -287,7 +316,7 @@ function switchTab(tab) {
 }
 
 /* ==========================================
-   2. AUTHENTICATION
+   2. AUTHENTICATION (Email/Pass)
    ========================================== */
 async function handleAuth() {
     const email = document.getElementById('auth-email').value.trim();
@@ -318,10 +347,54 @@ async function handleAuth() {
 }
 
 function loginDiscord() {
-    // Redirects to Vercel API which handles Discord OAuth
     window.location.href = '/api/discord-auth';
 }
 
+/* ==========================================
+   3. DISCORD OAUTH CALLBACK
+   ========================================== */
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('discord_auth')) {
+    tempDiscordData = JSON.parse(urlParams.get('discord_auth'));
+    window.history.replaceState({}, document.title, "/"); // Clean URL
+    
+    // Show the new modal
+    document.getElementById('dc-welcome-name').textContent = tempDiscordData.discord_tag;
+    document.getElementById('discord-link-modal').classList.add('show');
+}
+
+async function linkDiscordAccount(isPaid) {
+    const paidKey = document.getElementById('dc-paid-key').value.trim();
+    document.getElementById('discord-link-modal').classList.remove('show');
+
+    try {
+        const action = isPaid ? 'link_paid' : 'free';
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: action, 
+                email: tempDiscordData.email, 
+                password: "discord_oauth_bypass", // Dummy password
+                paid_key: paidKey,
+                discord_tag: tempDiscordData.discord_tag,
+                discord_id: tempDiscordData.discord_id
+            })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || "Failed to link account");
+
+        currentAuth = data.user;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        loadDashboard();
+    } catch (err) {
+        showToast(err.message);
+    }
+}
+
+/* ==========================================
+   4. DASHBOARD RENDERING
+   ========================================== */
 function loadDashboard() {
     if (!currentAuth) {
         const saved = localStorage.getItem('luarix_auth');
@@ -337,7 +410,12 @@ function loadDashboard() {
         document.getElementById('user-discord-display').innerHTML = `• <span class="discord-tag">${currentAuth.discord_tag}</span>`;
     }
 
-    // Load projects stat
+    if (currentAuth.plan === 'free') {
+        document.getElementById('stat-limit').textContent = 20 - (currentAuth.usage || 0);
+    } else {
+        document.getElementById('stat-limit').textContent = "∞";
+    }
+
     fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key)
         .then(r => r.json())
         .then(data => {
@@ -349,9 +427,6 @@ function loadDashboard() {
 function logout() { localStorage.removeItem('luarix_auth'); currentAuth = null; showView('landing'); }
 function copyApiKey() { navigator.clipboard.writeText(currentAuth.api_key); showToast("API Key copied!"); }
 
-/* ==========================================
-   3. TAB RENDERERS
-   ========================================== */
 function renderProjects(scripts) {
     const tbody = document.getElementById('projects-tbody');
     if (scripts.length === 0) return tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">No projects yet.</td></tr>';
@@ -365,6 +440,9 @@ function renderProjects(scripts) {
     `).join('');
 }
 
+/* ==========================================
+   5. TABS: KEYS & BLACKLISTS
+   ========================================== */
 async function loadKeys() {
     const tbody = document.getElementById('keys-tbody');
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
@@ -403,7 +481,6 @@ async function loadBlacklists() {
         return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No blacklisted users.</td></tr>';
     }
 
-    // We need scripts to show names
     const resS = await fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key);
     const dataS = await resS.json();
 
@@ -420,9 +497,6 @@ async function loadBlacklists() {
     }).join('');
 }
 
-/* ==========================================
-   4. ACTIONS
-   ========================================== */
 async function resetKey(key) {
     if (!confirm('Reset HWID for this key?')) return;
     await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' });
