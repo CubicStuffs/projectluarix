@@ -61,15 +61,54 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DASHBOARD */
+  /* DASHBOARD LAYOUT */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
   
-  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; animation: fadeIn 0.5s ease-out; }
-  .sidebar img { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; }
-  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px;}
-  .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
+  /* SIDEBAR (Collapsible) */
+  .sidebar { 
+    width: 260px; 
+    background: var(--bg-sidebar); 
+    border-right: 1px solid var(--border); 
+    padding: 1.5rem 1rem; 
+    display: flex; 
+    flex-direction: column; 
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
   
+  /* Collapsed State */
+  .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
+  .sidebar.collapsed .menu-text { display: none; }
+  .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
+  .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; margin-bottom: 2rem; }
+  .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
+
+  .sidebar-logo { 
+    height: auto; max-height: 60px; width: 80%; object-fit: contain; 
+    margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; 
+    transition: 0.3s;
+  }
+
+  .toggle-btn {
+    position: absolute; right: -12px; top: 2rem;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--gold); border-radius: 50%; width: 24px; height: 24px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 10; transition: 0.3s;
+  }
+  .toggle-btn:hover { background: var(--gold); color: #000; transform: scale(1.1); }
+  
+  .menu-item { 
+    padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); 
+    cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; 
+    display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden;
+  }
+  .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
+  .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
+  .menu-icon { flex-shrink: 0; }
+
+  /* MAIN CONTENT */
   .main-content { flex: 1; padding: 2rem; overflow-y: auto; animation: fadeIn 0.6s ease-out; }
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
   .dash-header h1 { font-size: 1.5rem; }
@@ -110,7 +149,6 @@
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
   .ltc-box { background: #000; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; word-break: break-all; color: var(--gold); font-size: 0.85rem; margin-bottom: 1rem;}
   
-  /* NEW: Close Button & Secret Logo */
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; line-height: 1; }
   .close-btn:hover { color: var(--danger); transform: scale(1.1); }
   .secret-logo { position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s; mix-blend-mode: screen; }
@@ -182,16 +220,40 @@
 <!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
-    <div class="sidebar">
-      <img src="logo.png" alt="Luarix">
-      <div class="menu-item active" onclick="toggleObfuscator()">Dashboard</div>
-      <div class="menu-item" onclick="toggleObfuscator()">Create Project</div>
-      <!-- Admin Only Menu Item -->
-      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">Admin KeyGen</div>
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <!-- Toggle Button -->
+      <div class="toggle-btn" onclick="toggleSidebar()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </div>
+
+      <img src="logo.png" class="sidebar-logo" alt="Luarix">
       
-      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">Log Out</div>
+      <div class="menu-item active" onclick="toggleObfuscator()">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span class="menu-text">Dashboard</span>
+      </div>
+      
+      <div class="menu-item" onclick="toggleObfuscator()">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="menu-text">Create Project</span>
+      </div>
+      
+      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+        <span class="menu-text">Admin KeyGen</span>
+      </div>
+      
+      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span class="menu-text">Log Out</span>
+      </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="dash-header">
         <div>
@@ -202,7 +264,7 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-limit">
           <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
         </div>
         <div class="stat-card">
@@ -213,7 +275,7 @@
         </div>
       </div>
 
-      <!-- ADMIN KEY GENERATOR (Hidden by default) -->
+      <!-- ADMIN KEY GENERATOR -->
       <div id="admin-panel">
         <h3 style="margin-bottom: 1rem; color: var(--gold);">Admin Key Generator</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Generate API keys to distribute in your Discord server.</p>
@@ -221,12 +283,10 @@
             <button class="btn-gold" style="flex: 1;" onclick="generateKey('basic')">Generate Basic Key</button>
             <button class="btn-gold" style="flex: 1; background: #222; color: #fff;" onclick="generateKey('premium')">Generate Premium Key</button>
         </div>
-        <div id="key-result" style="display:none; background:#000; padding:1.5rem; border-radius:8px; border:1px solid var(--border); text-align:center;">
-            <!-- Key will appear here -->
-        </div>
+        <div id="key-result" style="display:none; background:#000; padding:1.5rem; border-radius:8px; border:1px solid var(--border); text-align:center;"></div>
       </div>
 
-      <!-- Obfuscator Panel -->
+      <!-- OBFUSCATOR TOOL -->
       <div id="obfuscator-panel">
         <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
         <input type="hidden" id="edit-id" value="">
@@ -251,7 +311,7 @@
         </div>
       </div>
 
-      <!-- Projects Table -->
+      <!-- PROJECTS TABLE -->
       <div class="table-box">
         <div class="table-header">
           <h3>My Projects</h3>
@@ -279,7 +339,6 @@
     
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="loginUser()">Login / Register</button>
     
-    <!-- Secret Admin Logo -->
     <img src="logo.png" class="secret-logo" onclick="promptAdmin()" alt="Admin">
   </div>
 </div>
@@ -308,7 +367,26 @@
 
 <script>
 /* ============================================================
-   1. OBFUSCATOR LOGIC
+   1. SIDEBAR TOGGLE LOGIC
+   ============================================================ */
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const icon = sidebar.querySelector('.toggle-btn svg');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    // Check if it's collapsed to change the arrow direction
+    if (sidebar.classList.contains('collapsed')) {
+        // Change to right arrow >
+        icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+    } else {
+        // Change to left arrow <
+        icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
+    }
+}
+
+/* ============================================================
+   2. OBFUSCATOR LOGIC
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
@@ -350,7 +428,7 @@ async function uploadToHost(obfuscatedCode) {
 }
 
 /* ============================================================
-   2. AUTHENTICATION & ADMIN SYSTEM
+   3. AUTHENTICATION & ADMIN SYSTEM
    ============================================================ */
 function getAuth() {
     const email = localStorage.getItem('luarix_active_user');
@@ -409,7 +487,6 @@ function loginUser() {
 function promptAdmin() {
     const pass = prompt("Enter Admin Password:");
     if (pass === "cubic%is@luarix^owner") {
-        // Create an admin session
         const adminEmail = 'admin@luarix.com';
         let auth = { email: adminEmail, plan: 'admin', usage: 0, expires: null };
         localStorage.setItem('luarix_auth_' + adminEmail, JSON.stringify(auth));
@@ -429,7 +506,7 @@ function logout() {
 }
 
 /* ============================================================
-   3. DASHBOARD & PROJECT MANAGEMENT
+   4. DASHBOARD & PROJECT MANAGEMENT
    ============================================================ */
 function showView(view) {
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
@@ -449,17 +526,15 @@ function updateDashboardUI() {
     const limitText = document.getElementById('stat-limit');
     const planText = document.getElementById('user-plan-text');
     const adminBtn = document.getElementById('admin-menu-btn');
+    const limitCard = document.getElementById('stat-card-limit');
 
-    // Check if admin
     if (auth.plan === 'admin') {
         adminBtn.style.display = 'flex';
-        limitText.textContent = "∞";
-        limitText.style.color = "var(--gold)";
+        limitCard.style.display = 'none';
         planText.textContent = "ADMIN ACCESS | Full Control";
-        document.getElementById('stat-limit').parentElement.parentElement.style.display = 'none'; // Hide limits for admin
     } else {
         adminBtn.style.display = 'none';
-        document.getElementById('stat-limit').parentElement.parentElement.style.display = 'flex';
+        limitCard.style.display = 'flex';
         
         if (auth.plan === 'free') {
             if (Date.now() > auth.resetDate) {
@@ -479,7 +554,6 @@ function updateDashboardUI() {
     }
 }
 
-// Admin Logic
 function toggleAdminPanel() {
     const panel = document.getElementById('admin-panel');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -521,7 +595,7 @@ function toggleObfuscator() {
         document.getElementById('protect-btn').textContent = "Obfuscate & Save Project";
     } else {
         panel.style.display = 'block';
-        document.getElementById('admin-panel').style.display = 'none'; // Close admin panel if open
+        document.getElementById('admin-panel').style.display = 'none';
     }
 }
 
