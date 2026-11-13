@@ -66,10 +66,26 @@
   .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
   #progress-bar { height: 100%; width: 0%; background: var(--gold-grad); transition: width 0.1s; }
   
+  /* OUTPUT BOX */
   .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; animation: fadeIn 0.5s; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;}
+  
+  /* Textarea for Loader (Prevents freezing on huge scripts) */
+  textarea#loader-code { 
+    width: 100%; 
+    height: 120px; 
+    background: #0a0a0a; 
+    color: var(--gold); 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    padding: 10px; 
+    font-family: monospace; 
+    font-size: 0.85rem;
+    resize: none; 
+    margin-bottom: 1rem; 
+  }
+
   .btn-group { display: flex; gap: 1rem; margin-top: 1rem;}
   .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
   .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
@@ -123,7 +139,6 @@
         </div>
         <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
         
-        <!-- PROGRESS BAR CONTAINER -->
         <div id="progress-container">
           <div id="progress-text">Encrypting... 0%</div>
           <div class="progress-bg"><div id="progress-bar"></div></div>
@@ -133,7 +148,8 @@
           <h3 id="status-title">✓ Protected Successfully!</h3>
           
           <label>Loader (Copy & Execute)</label>
-          <div class="code-block" id="loader-code"></div>
+          <!-- CHANGED TO TEXTAREA TO PREVENT BROWSER CRASH -->
+          <textarea id="loader-code" readonly></textarea>
           
           <div class="btn-group">
             <button class="btn-secondary" onclick="copyText()">📋 Copy Loader</button>
@@ -250,6 +266,7 @@ function doObfuscate() {
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
+    const loaderCode = document.getElementById('loader-code');
 
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
@@ -258,6 +275,7 @@ function doObfuscate() {
     progressBar.style.width = '0%';
     progressBar.style.background = 'var(--gold-grad)';
     progressText.textContent = 'Encrypting... 0%';
+    loaderCode.value = "";
     
     const startTime = Date.now();
 
@@ -268,9 +286,11 @@ function doObfuscate() {
             progressText.textContent = `Encrypting... ${percent}%`;
         }, 
         (hexString, key) => {
-            try {
-                const encrypted = `
--- Luarix Protected (v7.0)
+            // Use a small delay to let the browser render the final 100% progress
+            setTimeout(() => {
+                try {
+                    const encrypted = `
+-- Luarix Protected (v8.0)
 local h = "${hexString}"
 local k = ${key}
 local s = h:gsub("%x%x", function(c) 
@@ -280,49 +300,55 @@ local f, err = loadstring(s)
 if f then f() else warn(err) end
 `.trim();
 
-                currentObfuscatedCode = encrypted;
-                currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
+                    currentObfuscatedCode = encrypted;
+                    currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
 
-                document.getElementById('loader-code').textContent = currentLoaderUrl;
-                document.getElementById('status-title').textContent = "✓ Protected (Inline Loader Ready)";
-                
-                // HIDE PROGRESS, SHOW OUTPUT
-                const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-                progressBar.style.width = '100%';
-                progressBar.style.background = 'var(--success)';
-                progressText.textContent = `Completed in ${timeTaken} seconds!`;
-                
-                setTimeout(() => { 
-                    progressContainer.style.display = 'none'; 
-                }, 2000);
-                
-                output.classList.add('show');
-                
-                // AUTO-SCROLL TO SHOW THE RESULT!
-                output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Safely inject into the textarea instead of a div
+                    loaderCode.value = currentLoaderUrl;
 
-                btn.textContent = "⏳ Fetching URL...";
-                uploadToHost(encrypted).then(rawUrl => {
-                    if (rawUrl) {
-                        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
-                        document.getElementById('loader-code').textContent = currentLoaderUrl;
-                        document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
-                    }
+                    const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+                    progressBar.style.width = '100%';
+                    progressBar.style.background = 'var(--success)';
+                    progressText.textContent = `Completed in ${timeTaken} seconds!`;
+                    
+                    // SHOW OUTPUT BOX
+                    output.classList.add('show');
+                    
+                    // Hide progress bar after 2 seconds
+                    setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
+                    
+                    // Force scroll down to show the output
+                    setTimeout(() => { output.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+
+                    // Fetch HttpGet
+                    btn.textContent = "⏳ Fetching URL...";
+                    uploadToHost(encrypted).then(rawUrl => {
+                        if (rawUrl) {
+                            currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+                            loaderCode.value = currentLoaderUrl;
+                            document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
+                        }
+                        btn.disabled = false;
+                        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
+                    }).catch(() => {
+                        btn.disabled = false;
+                        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
+                    });
+
+                } catch (err) {
+                    alert("Encryption Error: " + err.message);
                     btn.disabled = false;
                     btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-                });
-
-            } catch (err) {
-                alert("Encryption Error: " + err.message);
-                btn.disabled = false;
-                btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-            }
+                }
+            }, 50);
         }
     );
 }
 
 function copyText() {
-    navigator.clipboard.writeText(currentLoaderUrl);
+    const loaderCode = document.getElementById('loader-code');
+    loaderCode.select();
+    document.execCommand("copy");
     alert("Loader copied to clipboard!");
 }
 
