@@ -45,10 +45,37 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
+  /* DOCS PAGE (Luarmor Style) */
+  #view-docs { display: none; padding-top: 6rem; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
+  .docs-layout { display: flex; gap: 2rem; padding: 0 2rem 4rem 2rem; }
+  
+  .docs-sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 6rem; height: calc(100vh - 8rem); overflow-y: auto; border-right: 1px solid var(--border); padding-right: 1rem; }
+  .docs-sidebar h3 { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; margin-top: 1.5rem; }
+  .docs-sidebar h3:first-child { margin-top: 0; }
+  .docs-link { display: block; color: var(--text-muted); text-decoration: none; padding: 0.5rem 0; font-size: 0.9rem; transition: 0.2s; }
+  .docs-link:hover { color: var(--gold); }
+  
+  .docs-content { flex: 1; max-width: 900px; }
+  .docs-content h1 { font-size: 2.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .docs-content h2 { font-size: 1.8rem; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  .docs-content h3 { font-size: 1.3rem; margin-top: 2rem; margin-bottom: 1rem; }
+  .docs-content p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+  .docs-content ul { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; padding-left: 1.5rem; }
+  .docs-content li { margin-bottom: 0.5rem; }
+  .docs-content strong { color: var(--text); }
+  
+  .warning-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--danger); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+  .warning-box h4 { color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .warning-box p { color: #fca5a5; margin-bottom: 0; font-size: 0.9rem; }
+
+  .info-box { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid #3b82f6; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+  .info-box p { color: #93c5fd; margin-bottom: 0; font-size: 0.9rem; }
+
+  .code-block { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; color: var(--gold); margin-bottom: 1.5rem; overflow-x: auto; position: relative; }
+  
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
-  
   .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s, min-width 0.3s; z-index: 10; position: relative; }
   .sidebar.collapsed { width: 80px; min-width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text { display: none; }
@@ -121,9 +148,11 @@
 <nav id="main-nav">
   <a class="nav-brand" onclick="showView('landing')"><img src="logo.png" alt="Luarix"></a>
   <div class="links">
+    <a onclick="showView('docs')">Docs</a>
     <a onclick="openLogin()">Dashboard</a>
-    <a>Discord</a>
-    <a onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
+    <a href="https://discord.gg/KSdDSrmaCT" target="_blank">Discord</a>
+    <a onclick="showView('docs')">F.A.Q</a>
+    <a onclick="showView('landing'); document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
   </div>
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
@@ -170,6 +199,87 @@
   </section>
 </div>
 
+<!-- DOCUMENTATION PAGE -->
+<div id="view-docs">
+  <div class="docs-layout">
+    <div class="docs-sidebar">
+      <h3>Getting Started</h3>
+      <a href="#intro" class="docs-link">Introduction</a>
+      <a href="#discord-setup" class="docs-link">Discord Bot Setup</a>
+      <a href="#script-loader" class="docs-link">How to Use Loaders</a>
+      
+      <h3>Discord Commands</h3>
+      <a href="#cmd-setpanel" class="docs-link">/setpanel</a>
+      <a href="#cmd-createkey" class="docs-link">/createkey</a>
+      <a href="#cmd-whitelist" class="docs-link">/whitelist & /blacklist</a>
+      <a href="#cmd-masswhitelist" class="docs-link">/masswhitelist</a>
+      
+      <h3>F.A.Q</h3>
+      <a href="#faq" class="docs-link">Common Questions</a>
+    </div>
+
+    <div class="docs-content">
+      <h1 id="intro">👑 Luarix Documentation</h1>
+      
+      <div class="warning-box">
+        <h4>⚠️ IMPORTANT! ⚠️</h4>
+        <p>Luarix is a premium script protection system. Your API key is tied to your account. Do not share your API key with anyone, or they will be able to manage your scripts and keys.</p>
+      </div>
+
+      <h2>Top things to remember:</h2>
+      <div class="info-box">
+        <p><strong>Content-Type</strong> header must be set to <code>application/json</code> in all of your API requests (handled automatically by our system).</p>
+      </div>
+
+      <h2 id="discord-setup">Discord Bot Setup</h2>
+      <p>To manage your keys and panels, you must invite our official Discord bot to your server and link your account.</p>
+      <ol style="color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; padding-left: 1.5rem;">
+        <li>Go to the Dashboard and click <strong>Add to Discord</strong>.</li>
+        <li>Authorize the bot and invite it to your server.</li>
+        <li>Make sure the bot has the <strong>Manage Roles</strong> permission and its role is dragged above the Buyer Role in your server settings.</li>
+        <li>In your server, run <code>/link api_key: YOUR_API_KEY</code>.</li>
+        <li>Done! You can now use <code>/setpanel</code> and other commands.</li>
+      </ol>
+
+      <h2 id="script-loader">How to Use Loaders</h2>
+      <p>Once you create a script on the dashboard, you will receive a loader URL. It looks like this:</p>
+      <div class="code-block">script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("https://luarix-eight.vercel.app/api/loader?id=YOUR_SCRIPT_ID"))()</div>
+      <p>If the script is <strong>Keyless</strong>, users do not need a key. If it requires a key, users must redeem a key via your Discord panel and paste it into the <code>script_key</code> variable.</p>
+
+      <h2 id="cmd-setpanel">/setpanel</h2>
+      <p>Creates a beautiful control panel in the channel where you run the command.</p>
+      <ul>
+        <li><strong>project:</strong> Select your script from the dropdown.</li>
+        <li><strong>manager_role:</strong> The role that is allowed to generate keys.</li>
+        <li><strong>buyer_role:</strong> The role given to users when they redeem a key.</li>
+      </ul>
+
+      <h2 id="cmd-createkey">/createkey</h2>
+      <p>Generates a new script key. You can set the duration in days, or type <code>forever</code> for a permanent key.</p>
+
+      <h2 id="cmd-whitelist">/whitelist & /blacklist</h2>
+      <p>Use these to manually manage user access.</p>
+      <ul>
+        <li><strong>/whitelist:</strong> Gives a user instant access without needing a key.</li>
+        <li><strong>/blacklist:</strong> Bans a user from a specific project with a custom reason and duration.</li>
+      </ul>
+
+      <h2 id="cmd-masswhitelist">/masswhitelist</h2>
+      <p>Instantly whitelists everyone who has a specific role (e.g., @Buyer) for a specific project.</p>
+
+      <h2 id="faq">Frequently Asked Questions (F.A.Q)</h2>
+      <h3>How do I get an API Key?</h3>
+      <p>Log into the Dashboard. A free API key is automatically generated for you. If you want unlimited obfuscations, you can purchase a Basic or Premium plan.</p>
+
+      <h3>My script says "HWID Mismatch". What do I do?</h3>
+      <p>This means your key is locked to a different device. Go to the Discord panel and click the <strong>Reset HWID</strong> button, then run the script again.</p>
+
+      <h3>How do I make my script free (Keyless)?</h3>
+      <p>When creating or editing a project on the dashboard, toggle the <strong>Keyless Script</strong> switch to ON.</p>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
@@ -191,13 +301,10 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
         <span class="menu-text">Blacklists</span>
       </div>
-      
-      <!-- NEW TAB: ADD TO DISCORD -->
       <div class="menu-item" id="tab-discord" onclick="switchTab('discord')">
         <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
         <span class="menu-text">Add to Discord</span>
       </div>
-
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span class="menu-text">Log Out</span>
@@ -214,7 +321,6 @@
           <button class="btn-gold" onclick="document.getElementById('create-modal').classList.add('show')">+ Create Script</button>
         </div>
 
-        <!-- TAB: DASHBOARD -->
         <div id="content-dash">
           <div class="api-key-box" style="margin-bottom: 2rem;">
             <div>
@@ -225,18 +331,10 @@
           </div>
 
           <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-info"><h4>Total Executions</h4><h2 id="stat-executions">0</h2></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-info"><h4>Total Keys</h4><h2 id="stat-keys">0</h2></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-projects">0</h2></div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
-            </div>
+            <div class="stat-card"><div class="stat-info"><h4>Total Executions</h4><h2 id="stat-executions">0</h2></div></div>
+            <div class="stat-card"><div class="stat-info"><h4>Total Keys</h4><h2 id="stat-keys">0</h2></div></div>
+            <div class="stat-card"><div class="stat-info"><h4>Total Projects</h4><h2 id="stat-projects">0</h2></div></div>
+            <div class="stat-card"><div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div></div>
           </div>
 
           <div class="table-box" style="margin-top: 2rem;">
@@ -248,7 +346,6 @@
           </div>
         </div>
 
-        <!-- TAB: MANAGE KEYS -->
         <div id="content-keys" style="display: none;">
           <div class="table-box">
             <div class="table-header"><h3>Active Keys</h3></div>
@@ -259,7 +356,6 @@
           </div>
         </div>
 
-        <!-- TAB: BLACKLISTS -->
         <div id="content-blacklist" style="display: none;">
           <div class="table-box">
             <div class="table-header"><h3>Blacklisted Users</h3></div>
@@ -270,19 +366,15 @@
           </div>
         </div>
 
-        <!-- TAB: ADD TO DISCORD -->
         <div id="content-discord" style="display: none;">
           <div class="table-box discord-invite-box">
-            <!-- SVG Discord Logo -->
-            <svg class="discord-logo" viewBox="0 0 71 55" fill="currentColor">
-              <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/>
-            </svg>
+            <svg class="discord-logo" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
             <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">Add Luarix to your Server</h2>
             <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
               Invite our official Discord Bot to your server to start generating keys, managing whitelists, and creating control panels for your buyers automatically.
             </p>
             <!-- REPLACE YOUR_CLIENT_ID_HERE WITH YOUR ACTUAL DISCORD CLIENT ID -->
-            <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
+            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID_HERE&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
               <svg width="24" height="24" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
               Invite Bot
             </a>
@@ -294,64 +386,44 @@
   </div>
 </div>
 
-<!-- MODAL: CREATE SCRIPT -->
+<!-- MODALS -->
 <div class="modal-bg" id="create-modal">
   <div class="modal">
     <span class="close-btn" onclick="document.getElementById('create-modal').classList.remove('show')">&times;</span>
     <h2>Create New Project</h2>
     <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Upload your Lua code to protect it.</p>
-    
     <input type="text" id="new-script-name" placeholder="Project Name (e.g. Tazex Sniper)" />
     <textarea id="new-script-code" placeholder="-- Paste your Lua code here..."></textarea>
-    
     <div class="switch-container">
       <div style="text-align: left;">
         <h4 style="font-size: 0.9rem;">Keyless Script</h4>
         <p style="font-size: 0.75rem; color: var(--text-muted);">If enabled, users don't need a key to run this.</p>
       </div>
-      <label class="switch">
-        <input type="checkbox" id="new-script-keyless">
-        <span class="slider"></span>
-      </label>
+      <label class="switch"><input type="checkbox" id="new-script-keyless"><span class="slider"></span></label>
     </div>
-
     <button class="btn-gold" id="create-btn" style="width: 100%;" onclick="createScript()">Obfuscate & Save</button>
   </div>
 </div>
 
-<!-- MODAL: EMAIL LOGIN -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
     <h2 id="auth-title">Welcome Back</h2>
     <p id="auth-desc" style="color: var(--text-muted); margin-bottom: 1.5rem;">Login to your account</p>
-    
     <input type="email" id="auth-email" placeholder="Email Address" />
     <input type="password" id="auth-password" placeholder="Password" />
-    
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="handleAuth()" id="auth-btn">Login</button>
-    
-    <div style="display: flex; align-items: center; gap: 10px; margin: 1rem 0; color: var(--text-muted); font-size: 0.8rem;">
-      <div style="flex:1; height:1px; background:var(--border);"></div> OR <div style="flex:1; height:1px; background:var(--border);"></div>
-    </div>
-
+    <div style="display: flex; align-items: center; gap: 10px; margin: 1rem 0; color: var(--text-muted); font-size: 0.8rem;"><div style="flex:1; height:1px; background:var(--border);"></div> OR <div style="flex:1; height:1px; background:var(--border);"></div></div>
     <button class="btn-gold" style="width: 100%; background: var(--discord); color: white;" onclick="loginDiscord()">Login with Discord</button>
-
-    <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
-      <span id="toggle-text">Don't have an account?</span> 
-      <a href="#" onclick="toggleAuthMode()" style="color: var(--gold); text-decoration: none;" id="toggle-link">Sign Up</a>
-    </p>
+    <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);"><span id="toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: var(--gold); text-decoration: none;" id="toggle-link">Sign Up</a></p>
   </div>
 </div>
 
-<!-- MODAL: DISCORD KEY LINK -->
 <div class="modal-bg" id="discord-link-modal">
   <div class="modal">
     <h2>Welcome, <span id="dc-welcome-name" style="color: var(--discord);"></span>!</h2>
     <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Do you have a paid API key, or would you like to use the Free Plan?</p>
-    
     <input type="text" id="dc-paid-key" placeholder="Paste Paid API Key (Optional)" />
-    
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="linkDiscordAccount(true)">Link Paid Key</button>
     <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="linkDiscordAccount(false)">Continue with Free Plan</button>
   </div>
@@ -362,9 +434,6 @@ let isLoginMode = true;
 let currentAuth = null;
 let tempDiscordData = null;
 
-/* ==========================================
-   1. UI & TOASTS
-   ========================================== */
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification');
     if (oldToast) oldToast.remove();
@@ -380,7 +449,10 @@ function closeLogin() { document.getElementById('login-modal').classList.remove(
 function showView(view) { 
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none'; 
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none'; 
-    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
+    document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
+    document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
+    
+    if (view === 'docs') window.scrollTo(0, 0);
 }
 
 function toggleSidebar() {
@@ -413,9 +485,6 @@ function switchTab(tab) {
     if (tab === 'blacklist') loadBlacklists();
 }
 
-/* ==========================================
-   2. AUTHENTICATION
-   ========================================== */
 async function handleAuth() {
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value.trim();
@@ -431,7 +500,6 @@ async function handleAuth() {
             body: JSON.stringify({ action, email, password })
         });
         const data = await res.json();
-        
         if (!res.ok) throw new Error(data.error || "Authentication failed");
 
         currentAuth = data.user;
@@ -473,9 +541,6 @@ async function linkDiscordAccount(isPaid) {
     } catch (err) { showToast(err.message); }
 }
 
-/* ==========================================
-   3. DASHBOARD RENDERING
-   ========================================== */
 function loadDashboard() {
     if (!currentAuth) {
         const saved = localStorage.getItem('luarix_auth');
@@ -535,9 +600,6 @@ function renderProjects(scripts) {
     `).join('');
 }
 
-/* ==========================================
-   4. CREATE SCRIPT
-   ========================================== */
 async function createScript() {
     const name = document.getElementById('new-script-name').value.trim();
     const code = document.getElementById('new-script-code').value.trim();
@@ -559,7 +621,6 @@ async function createScript() {
             body: JSON.stringify({ name, code: encrypted, original_code: code, api_key: currentAuth.api_key, keyless })
         });
         const data = await res.json();
-        
         if (!data.success) throw new Error(data.error);
 
         showToast("Project Created Successfully!");
@@ -567,7 +628,6 @@ async function createScript() {
         document.getElementById('new-script-name').value = '';
         document.getElementById('new-script-code').value = '';
         document.getElementById('new-script-keyless').checked = false;
-
         loadDashboard();
     } catch (err) {
         showToast(err.message);
@@ -576,9 +636,6 @@ async function createScript() {
     }
 }
 
-/* ==========================================
-   5. TABS: KEYS & BLACKLISTS
-   ========================================== */
 async function loadKeys() {
     const tbody = document.getElementById('keys-tbody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
