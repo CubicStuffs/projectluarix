@@ -556,11 +556,25 @@ async function handleAuth() {
 function loginDiscord() { window.location.href = '/api/discord-auth'; }
 
 const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('discord_auth')) {
-    tempDiscordData = JSON.parse(urlParams.get('discord_auth'));
+
+if (urlParams.has('discord_error')) {
     window.history.replaceState({}, document.title, "/");
-    document.getElementById('dc-welcome-name').textContent = tempDiscordData.discord_tag;
-    document.getElementById('discord-link-modal').classList.add('show');
+    showToast("Discord authentication failed. Please try again.");
+}
+
+if (urlParams.has('discord_auth')) {
+    try {
+        const authString = urlParams.get('discord_auth');
+        tempDiscordData = JSON.parse(authString);
+        window.history.replaceState({}, document.title, "/");
+        
+        document.getElementById('dc-welcome-name').textContent = tempDiscordData.discord_tag;
+        document.getElementById('discord-link-modal').classList.add('show');
+    } catch (err) {
+        console.error("Failed to parse Discord Auth:", err);
+        window.history.replaceState({}, document.title, "/");
+        showToast("Authentication error. Please try again.");
+    }
 }
 
 async function linkDiscordAccount(isPaid) {
