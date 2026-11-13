@@ -50,12 +50,8 @@
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
   
-  /* SIDEBAR (Collapsible) */
-  .sidebar { 
-    width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); 
-    padding: 1.5rem 1rem; display: flex; flex-direction: column; 
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
-  }
+  /* SIDEBAR */
+  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; z-index: 10; }
   .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
@@ -75,12 +71,14 @@
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
   .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
 
-  /* MAIN CONTENT & WRAPPER (Fixes the gap) */
-  .main-content { flex: 1; padding: 2rem; overflow-y: auto; display: flex; justify-content: center; }
-  .content-wrapper { width: 100%; max-width: 1200px; } /* Centers content on ultra-wide screens */
+  /* MAIN CONTENT (Fixed Gap & Stretches) */
+  .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
+  .content-wrapper { width: 100%; max-width: 1600px; margin: 0 auto; } /* Fills the screen, but caps at 1600px for ultra-wides */
 
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+  
+  /* STRETCHING GRID */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
   .stat-info h2 { font-size: 1.5rem; }
@@ -164,7 +162,6 @@
     
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
-      <!-- Toggle Button (Restored) -->
       <div class="toggle-btn" onclick="toggleSidebar()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
@@ -279,7 +276,6 @@ let allProjects = [];
    1. CUSTOM TOAST NOTIFICATION SYSTEM
    ========================================== */
 function showToast(message) {
-    // Remove existing toast if any
     const oldToast = document.querySelector('.toast-notification');
     if (oldToast) oldToast.remove();
 
@@ -295,7 +291,6 @@ function showToast(message) {
     `;
     document.body.appendChild(toast);
 
-    // Slide down and remove after 3 seconds
     setTimeout(() => {
         toast.style.animation = 'toastSlideUp 0.3s reverse forwards';
         setTimeout(() => toast.remove(), 300);
@@ -402,7 +397,7 @@ function fetchProjects() {
     
     const tbody = document.getElementById('projects-tbody');
     if (allProjects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No projects yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding: 2rem;">No projects yet.</td></tr>`;
         return;
     }
 
