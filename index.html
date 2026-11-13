@@ -32,15 +32,15 @@
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
   .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2); }
 
-  /* HERO */
+  /* HERO & PRICING */
   #view-landing { display: block; }
-  .hero { text-align: center; padding: 12rem 1rem 6rem; max-width: 900px; margin: 0 auto; }
+  .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1;}
   .hero h1 .highlight { color: var(--gold); }
   .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
   
-  .pricing-section { padding: 4rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .pricing-section { padding: 2rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
   .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
   .price-card.popular { border-color: var(--gold); box-shadow: 0 0 30px rgba(245, 197, 24, 0.05); }
   .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; }
@@ -54,44 +54,20 @@
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
   
-  /* Sidebar */
   .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
   .sidebar img { height: 40px; margin-bottom: 2rem; mix-blend-mode: screen; }
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); }
   
-  /* Main Content */
   .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
-  
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
   .dash-header h1 { font-size: 1.5rem; }
-  .dash-header p { color: var(--text-muted); font-size: 0.9rem; }
-
-  /* Stats Grid */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+  
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
-  .stat-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; justify-content: center; align-items: center; }
-  .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;}
+  .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.3rem;}
   .stat-info h2 { font-size: 1.5rem; }
 
-  /* Graph Placeholder */
-  .graph-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; height: 200px; display: flex; flex-direction: column; }
-  .graph-title { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; }
-  .graph-placeholder { flex: 1; border-bottom: 1px dashed var(--border); position: relative; display: flex; align-items: flex-end; gap: 2px;}
-  .graph-line { width: 100%; height: 80%; background: linear-gradient(180deg, rgba(245,197,24,0.2) 0%, rgba(245,197,24,0) 100%); border-top: 2px solid var(--gold); clip-path: polygon(0 80%, 10% 60%, 20% 70%, 30% 40%, 40% 50%, 50% 20%, 60% 30%, 70% 10%, 80% 40%, 90% 20%, 100% 30%, 100% 100%, 0 100%); }
-
-  /* Table */
-  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .table-header h3 { font-size: 1rem; }
-  .script-table { width: 100%; border-collapse: collapse; text-align: left; }
-  .script-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid var(--border); }
-  .script-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-  .status-badge { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-  .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: bold; margin-right: 10px; transition: 0.2s; }
-  .action-btn:hover { color: var(--gold); }
-  .action-btn.delete:hover { color: var(--danger); }
-  
   /* Obfuscator Panel */
   #obfuscator-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
   label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;}
@@ -102,14 +78,26 @@
   .output-box { display: none; margin-top: 1.5rem; background: #050505; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
   .code-box { width: 100%; height: 80px; background: #000; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; resize: none; margin-bottom: 1rem;}
 
+  /* Table */
+  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .script-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .script-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .script-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .status-badge { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+  .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: bold; margin-right: 10px; transition: 0.2s; }
+  .action-btn:hover { color: var(--gold); }
+  .action-btn.delete:hover { color: var(--danger); }
+
   /* MODALS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; }
   .modal h2 { margin-bottom: 0.5rem; }
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
   .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
   .modal input:focus { outline: none; border-color: var(--gold); }
+  .ltc-box { background: #000; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; word-break: break-all; color: var(--gold); font-size: 0.85rem; margin-bottom: 1rem;}
 </style>
 </head>
 <body>
@@ -121,13 +109,13 @@
   </a>
   <div class="links">
     <a>Docs</a>
-    <a onclick="document.getElementById('admin-modal').classList.add('show')">Dashboard</a>
+    <a onclick="openLogin()">Dashboard</a>
     <a>Discord</a>
     <a>F.A.Q</a>
-    <a>Pricing</a>
+    <a onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</a>
   </div>
   <div id="nav-auth">
-    <button class="btn-gold" onclick="document.getElementById('admin-modal').classList.add('show')">Sign in</button>
+    <button class="btn-gold" onclick="openLogin()">Sign in</button>
   </div>
 </nav>
 
@@ -137,19 +125,38 @@
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
     <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
   </section>
-  <section class="pricing-section">
+
+  <section class="pricing-section" id="pricing">
     <div class="pricing-grid">
       <div class="price-card">
-        <h3>Basic</h3>
-        <div class="price">$15<span>/mo</span></div>
-        <ul class="price-features"><li>Unlimited Obfuscation</li><li>Standard Loaders</li></ul>
-        <button class="btn-gold" style="width: 100%;" onclick="document.getElementById('admin-modal').classList.add('show')">Get Started</button>
+        <h3>Free</h3>
+        <div class="price">$0<span>/mo</span></div>
+        <ul class="price-features">
+          <li>20 Obfuscations / month</li>
+          <li>Standard HttpGet Loaders</li>
+          <li>Access to Dashboard</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="openLogin()">Start Free</button>
       </div>
       <div class="price-card popular">
+        <h3>Basic</h3>
+        <div class="price">$5<span>/mo</span></div>
+        <ul class="price-features">
+          <li>Unlimited Obfuscations</li>
+          <li>Fast HttpGet Loaders</li>
+          <li>1 Month API Key</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="openPayModal('Basic')">Buy Basic</button>
+      </div>
+      <div class="price-card">
         <h3>Premium</h3>
-        <div class="price">$25<span>/mo</span></div>
-        <ul class="price-features"><li>Unlimited Obfuscation</li><li>Fast HttpGet Loaders</li><li>Priority Support</li></ul>
-        <button class="btn-gold" style="width: 100%;" onclick="document.getElementById('admin-modal').classList.add('show')">Get Started</button>
+        <div class="price">$10<span>/yr</span></div>
+        <ul class="price-features">
+          <li>Unlimited Obfuscations</li>
+          <li>Fast HttpGet Loaders</li>
+          <li>1 Year API Key</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="openPayModal('Premium')">Buy Premium</button>
       </div>
     </div>
   </section>
@@ -158,70 +165,44 @@
 <!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
-    <!-- Sidebar -->
     <div class="sidebar">
       <img src="logo.png" alt="Luarix">
       <div class="menu-item active" onclick="toggleObfuscator()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         Dashboard
       </div>
       <div class="menu-item" onclick="toggleObfuscator()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-        Script Hub
+        Create Project
       </div>
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         Log Out
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
       <div class="dash-header">
         <div>
           <h1>Dashboard</h1>
-          <p>Manage your protected scripts and loaders.</p>
+          <p id="user-plan-text" style="color: var(--text-muted); font-size: 0.9rem;">Plan: Loading...</p>
         </div>
         <button class="btn-gold" onclick="toggleObfuscator()">+ Create Project</button>
       </div>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon" style="color: var(--success);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-          </div>
-          <div class="stat-info"><h4>Total Executions</h4><h2 id="stat-executions">0</h2></div>
+          <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="color: #3b82f6;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          </div>
-          <div class="stat-info"><h4>Total Users</h4><h2>1</h2></div>
+          <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-scripts">0</h2></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="color: #a855f7;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          </div>
-          <div class="stat-info"><h4>Active Scripts</h4><h2 id="stat-scripts">0</h2></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="color: var(--danger);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          </div>
-          <div class="stat-info"><h4>Threats Blocked</h4><h2>0</h2></div>
+        <div class="stat-card" onclick="openUpgradeModal()" style="cursor: pointer; border-color: var(--gold);">
+          <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1rem;">Get Unlimited</h2></div>
         </div>
       </div>
 
-      <div class="graph-box">
-        <div class="graph-title">Executions over the last 7 days</div>
-        <div class="graph-placeholder">
-          <div class="graph-line"></div>
-        </div>
-      </div>
-
-      <!-- Obfuscator Tool -->
+      <!-- Obfuscator Panel -->
       <div id="obfuscator-panel">
-        <h3 style="margin-bottom: 1.5rem;">Create New Project</h3>
+        <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
+        <input type="hidden" id="edit-id" value="">
         <div class="form-group" style="margin-bottom: 1rem;">
           <label>Project Name</label>
           <input type="text" id="project-name" placeholder="e.g. Tazex Sniper v2" />
@@ -243,7 +224,7 @@
         </div>
       </div>
 
-      <!-- Real Projects Table -->
+      <!-- Projects Table -->
       <div class="table-box">
         <div class="table-header">
           <h3>My Projects</h3>
@@ -252,22 +233,40 @@
           <thead>
             <tr><th>Project Name</th><th>Date Created</th><th>Status</th><th>Actions</th></tr>
           </thead>
-          <tbody id="projects-tbody">
-            <!-- Filled by JavaScript -->
-          </tbody>
+          <tbody id="projects-tbody"></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-bg" id="admin-modal">
+<!-- MODALS -->
+<div class="modal-bg" id="login-modal">
   <div class="modal">
-    <h2>Admin Access</h2>
-    <p>Enter password for unlimited access.</p>
-    <input type="password" id="admin-pass" placeholder="Password" />
-    <button class="btn-gold" style="width: 100%;" onclick="login('admin')">Unlock Dashboard</button>
+    <h2>Welcome to Luarix</h2>
+    <p>Log in to access the dashboard.</p>
+    <input type="text" id="login-input" placeholder="Enter API Key (or leave blank for Free)" style="margin-bottom: 1rem;" />
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="loginUser()">Login</button>
+    <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="loginFree()">Continue as Free User</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="pay-modal">
+  <div class="modal">
+    <h2 id="pay-title">Upgrade to Basic</h2>
+    <p>Send exact LTC amount to the address below. Once sent, open a ticket in our Discord with the TXID to get your API key.</p>
+    <div class="ltc-box" id="ltc-address">ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3</div>
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="copyLTC()">Copy LTC Address</button>
+    <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="document.getElementById('pay-modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="upgrade-modal">
+  <div class="modal">
+    <h2>Upgrade Plan</h2>
+    <p>Unlock unlimited obfuscations.</p>
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="openPayModal('Basic')">Buy Basic ($5/mo)</button>
+    <button class="btn-gold" style="width: 100%;" onclick="openPayModal('Premium')">Buy Premium ($10/yr)</button>
   </div>
 </div>
 
@@ -282,8 +281,6 @@ function encryptLua(source) {
     for (let i = 0; i < bytes.length; i++) {
         hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
-    
-    // This is the Luarmor-style boot sequence injected into the loader
     return `
 -- Luarix Protected
 warn("[Luarix] Securing Connection... [1]")
@@ -317,26 +314,139 @@ async function uploadToHost(obfuscatedCode) {
 }
 
 /* ============================================================
-   2. PROJECT MANAGEMENT (Real LocalStorage)
+   2. AUTH & LIMIT SYSTEM
    ============================================================ */
-function getProjects() {
-    return JSON.parse(localStorage.getItem('luarix_projects') || '[]');
+function getAuth() {
+    let auth = JSON.parse(localStorage.getItem('luarix_auth'));
+    if (!auth) return null;
+    // Check expiry
+    if (auth.expires && Date.now() > auth.expires) {
+        localStorage.removeItem('luarix_auth');
+        alert("Your API Key has expired. Please renew.");
+        return null;
+    }
+    return auth;
 }
 
-function saveProject(project) {
-    const projects = getProjects();
-    projects.unshift(project);
-    localStorage.setItem('luarix_projects', JSON.stringify(projects));
-    loadProjects();
+function loginFree() {
+    let auth = JSON.parse(localStorage.getItem('luarix_auth'));
+    if (auth && auth.plan === 'free') {
+        // Existing free user
+    } else {
+        // New free user
+        localStorage.setItem('luarix_auth', JSON.stringify({
+            plan: 'free',
+            usage: 0,
+            resetDate: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+        }));
+    }
+    document.getElementById('login-modal').classList.remove('show');
+    showView('dashboard');
 }
 
-function deleteProject(id) {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    let projects = getProjects();
-    projects = projects.filter(p => p.id !== id);
-    localStorage.setItem('luarix_projects', JSON.stringify(projects));
-    loadProjects();
+function loginUser() {
+    const key = document.getElementById('login-input').value.trim();
+    if (!key) return alert("Please enter an API key or click 'Continue as Free User'.");
+    
+    // Simulated Key Validation
+    // In a real app, this would check a database.
+    // LXR-BASIC-XXXX (Expires in 30 days)
+    // LXR-PREM-XXXX (Expires in 365 days)
+    
+    let auth = { plan: 'basic', usage: 0, expires: Date.now() + (30 * 24 * 60 * 60 * 1000) };
+    
+    if (key.startsWith('LXR-PREM-')) {
+        auth.plan = 'premium';
+        auth.expires = Date.now() + (365 * 24 * 60 * 60 * 1000);
+    } else if (key.startsWith('LXR-BASIC-')) {
+        auth.plan = 'basic';
+        auth.expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    } else if (key === 'ADMIN') {
+        auth.plan = 'admin';
+        auth.expires = null;
+    } else {
+        return alert("Invalid API Key format.");
+    }
+
+    localStorage.setItem('luarix_auth', JSON.stringify(auth));
+    document.getElementById('login-modal').classList.remove('show');
+    showView('dashboard');
 }
+
+function logout() {
+    localStorage.removeItem('luarix_auth');
+    showView('landing');
+}
+
+function openLogin() { document.getElementById('login-modal').classList.add('show'); }
+
+/* ============================================================
+   3. DASHBOARD & PROJECT MANAGEMENT
+   ============================================================ */
+function showView(view) {
+    document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
+    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none';
+    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
+    
+    if (view === 'dashboard') {
+        updateDashboardUI();
+        loadProjects();
+    }
+}
+
+function updateDashboardUI() {
+    const auth = getAuth();
+    if (!auth) return logout();
+
+    const limitText = document.getElementById('stat-limit');
+    const planText = document.getElementById('user-plan-text');
+
+    if (auth.plan === 'free') {
+        // Check reset
+        if (Date.now() > auth.resetDate) {
+            auth.usage = 0;
+            auth.resetDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('luarix_auth', JSON.stringify(auth));
+        }
+        const left = 20 - auth.usage;
+        limitText.textContent = left;
+        limitText.style.color = left > 0 ? 'var(--text)' : 'var(--danger)';
+        planText.textContent = "Plan: Free (Resets " + new Date(auth.resetDate).toLocaleDateString() + ")";
+    } else {
+        limitText.textContent = "Unlimited";
+        limitText.style.color = "var(--success)";
+        planText.textContent = "Plan: " + auth.plan.toUpperCase() + " (Expires " + new Date(auth.expires).toLocaleDateString() + ")";
+    }
+}
+
+function openPayModal(plan) {
+    document.getElementById('pay-title').textContent = "Upgrade to " + plan;
+    document.getElementById('pay-modal').classList.add('show');
+    document.getElementById('upgrade-modal').classList.remove('show');
+}
+
+function openUpgradeModal() { document.getElementById('upgrade-modal').classList.add('show'); }
+function copyLTC() {
+    navigator.clipboard.writeText('ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3');
+    alert("LTC Address Copied!");
+}
+
+function toggleObfuscator() {
+    const panel = document.getElementById('obfuscator-panel');
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        // Reset for new project
+        document.getElementById('edit-id').value = '';
+        document.getElementById('project-name').value = '';
+        document.getElementById('lua-source').value = '';
+        document.getElementById('panel-title').textContent = "Create New Project";
+        document.getElementById('protect-btn').textContent = "Obfuscate & Save Project";
+    } else {
+        panel.style.display = 'block';
+    }
+}
+
+function getProjects() { return JSON.parse(localStorage.getItem('luarix_projects') || '[]'); }
 
 function loadProjects() {
     const projects = getProjects();
@@ -344,7 +454,7 @@ function loadProjects() {
     document.getElementById('stat-scripts').textContent = projects.length;
 
     if (projects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2rem;">No projects yet. Create one above!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2rem;">No projects yet.</td></tr>`;
         return;
     }
 
@@ -354,74 +464,68 @@ function loadProjects() {
             <td>${p.date}</td>
             <td><span class="status-badge">Active</span></td>
             <td>
+                <button class="action-btn" onclick="editProject('${p.id}')">Edit</button>
                 <button class="action-btn" onclick="copySavedLoader('${p.id}')">Copy Loader</button>
-                <button class="action-btn" onclick="downloadSavedLua('${p.id}')">Download</button>
                 <button class="action-btn delete" onclick="deleteProject('${p.id}')">Delete</button>
             </td>
         </tr>
     `).join('');
 }
 
+function editProject(id) {
+    const project = getProjects().find(p => p.id === id);
+    if (!project) return;
+    
+    document.getElementById('edit-id').value = id;
+    document.getElementById('project-name').value = project.name;
+    document.getElementById('lua-source').value = project.originalSource || ""; // Fallback if old format
+    document.getElementById('panel-title').textContent = "Update Project: " + project.name;
+    document.getElementById('protect-btn').textContent = "Update & Save Project";
+    
+    const panel = document.getElementById('obfuscator-panel');
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteProject(id) {
+    if (!confirm('Delete this project?')) return;
+    let projects = getProjects().filter(p => p.id !== id);
+    localStorage.setItem('luarix_projects', JSON.stringify(projects));
+    loadProjects();
+}
+
 function copySavedLoader(id) {
     const project = getProjects().find(p => p.id === id);
     if (project) {
         navigator.clipboard.writeText(project.loader);
-        alert("Loader copied for " + project.name);
+        alert("Loader copied!");
     }
-}
-
-function downloadSavedLua(id) {
-    const project = getProjects().find(p => p.id === id);
-    if (project) {
-        const blob = new Blob([project.code], { type: "text/plain" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = project.name.replace(/\s+/g, '_') + "_protected.lua";
-        a.click();
-    }
-}
-
-/* ============================================================
-   3. UI LOGIC
-   ============================================================ */
-function showView(view) {
-    document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
-    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none';
-    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
-}
-
-function login() {
-    const pass = document.getElementById('admin-pass').value;
-    if (pass !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect password");
-    document.getElementById('admin-modal').classList.remove('show');
-    showView('dashboard');
-    loadProjects();
-}
-
-function logout() { showView('landing'); }
-
-function toggleObfuscator() {
-    const panel = document.getElementById('obfuscator-panel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 }
 
 let currentLoaderUrl = "";
 let currentObfuscatedCode = "";
 
 async function doObfuscate() {
+    const auth = getAuth();
+    
+    // Check limits for free users
+    if (auth.plan === 'free' && auth.usage >= 20) {
+        return alert("You have reached your 20 free obfuscations for this month. Please upgrade or wait for the reset.");
+    }
+
+    const editId = document.getElementById('edit-id').value;
     const name = document.getElementById('project-name').value.trim() || "Untitled Project";
     const source = document.getElementById('lua-source').value.trim();
+    
     if (!source) return alert("Paste a script first!");
 
     const btn = document.getElementById('protect-btn');
     const output = document.getElementById('output');
     const loaderCode = document.getElementById('loader-code');
-    const statusTitle = document.getElementById('status-title');
 
     btn.disabled = true;
-    btn.textContent = "Encrypting & Saving...";
+    btn.textContent = "Processing...";
     output.style.display = 'block';
-    statusTitle.textContent = "Processing...";
     loaderCode.value = "Please wait...";
 
     await new Promise(r => setTimeout(r, 50));
@@ -430,55 +534,64 @@ async function doObfuscate() {
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
         
-        statusTitle.textContent = "Uploading Loader...";
         const key = await uploadToHost(encrypted);
+        let loader = "";
 
         if (key) {
             const customUrl = `https://${window.location.host}/api/raw?key=${key}`;
-            currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
-            statusTitle.textContent = "Project Saved & Protected!";
+            loader = `loadstring(game:HttpGet("${customUrl}"))()`;
         } else {
-            currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
-            statusTitle.textContent = "Project Saved (Inline Loader)";
+            loader = `loadstring([==[\n${encrypted}\n]==])()`;
         }
 
-        loaderCode.value = currentLoaderUrl;
+        loaderCode.value = loader;
+        currentLoaderUrl = loader;
 
-        // Save to real LocalStorage
-        saveProject({
-            id: key || Date.now().toString(),
-            name: name,
-            date: new Date().toLocaleDateString(),
-            loader: currentLoaderUrl,
-            code: encrypted
-        });
+        // Update Usage Limits
+        if (auth.plan === 'free') {
+            auth.usage += 1;
+            localStorage.setItem('luarix_auth', JSON.stringify(auth));
+            updateDashboardUI();
+        }
 
-        // Clear input
-        document.getElementById('project-name').value = "";
-        document.getElementById('lua-source').value = "";
+        // Save or Update Project
+        let projects = getProjects();
+        if (editId) {
+            // Update existing
+            const idx = projects.findIndex(p => p.id === editId);
+            if (idx !== -1) {
+                projects[idx].name = name;
+                projects[idx].loader = loader;
+                projects[idx].originalSource = source;
+                projects[idx].date = new Date().toLocaleDateString() + " (Edited)";
+            }
+        } else {
+            // Create new
+            projects.unshift({
+                id: key || Date.now().toString(),
+                name: name,
+                date: new Date().toLocaleDateString(),
+                loader: loader,
+                originalSource: source
+            });
+        }
+        
+        localStorage.setItem('luarix_projects', JSON.stringify(projects));
+        loadProjects();
+        
+        // Reset form
+        document.getElementById('edit-id').value = '';
+        document.getElementById('project-name').value = '';
+        document.getElementById('lua-source').value = '';
+        document.getElementById('panel-title').textContent = "Create New Project";
+        btn.textContent = "Obfuscate & Save Project";
 
     } catch (err) {
         alert("Error: " + err.message);
+        btn.textContent = "Obfuscate & Save Project";
     } finally {
         btn.disabled = false;
-        btn.textContent = "Obfuscate & Save Project";
     }
-}
-
-function copyText() {
-    const loaderCode = document.getElementById('loader-code');
-    loaderCode.select();
-    navigator.clipboard.writeText(loaderCode.value);
-    alert("Loader copied!");
-}
-
-function downloadLua() {
-    if (!currentObfuscatedCode) return;
-    const blob = new Blob([currentObfuscatedCode], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "luarix_protected.lua";
-    a.click();
 }
 </script>
 </body>
