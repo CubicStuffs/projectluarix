@@ -10,14 +10,12 @@ export default async function handler(req, res) {
     if (!email) return res.status(400).json({ error: 'Email required' });
 
     try {
-        // 1. Standard Login
         if (action === 'login') {
             const { data: user } = await supabase.from('users').select('*').eq('email', email).eq('password', password).maybeSingle();
             if (!user) return res.status(401).json({ error: 'Invalid email or password' });
             return res.status(200).json({ user });
         }
 
-        // 2. Standard Signup
         if (action === 'signup') {
             const { data: existing } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
             if (existing) return res.status(400).json({ error: 'Account already exists' });
@@ -33,12 +31,10 @@ export default async function handler(req, res) {
             return res.status(200).json({ user });
         }
 
-        // 3. Discord Free Mode
         if (action === 'free') {
             let { data: user } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
             
             if (!user) {
-                // Create new free account
                 const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
                 const newKey = `LXR-FREE-${randomHex}`;
                 const { data: newUser, error } = await supabase.from('users').insert({
@@ -47,7 +43,6 @@ export default async function handler(req, res) {
                 if (error) throw error;
                 user = newUser;
             } else {
-                // Update existing with discord info
                 await supabase.from('users').update({ discord_id }).eq('email', email);
             }
 
@@ -55,24 +50,26 @@ export default async function handler(req, res) {
             return res.status(200).json({ user });
         }
 
-        // 4. Discord Link Paid Key
         if (action === 'link_paid') {
             if (!paid_key) return res.status(400).json({ error: 'API Key required' });
 
-            // Verify key exists
             const { data: keyData } = await supabase.from('users').select('*').eq('api_key', paid_key).maybeSingle();
             if (!keyData) return res.status(400).json({ error: 'Invalid API Key' });
 
-            // Link discord to this paid account
-            await supabase.from('users').update({ discord_id, email }).eq('api_key', paid_key);
+            let plan = 'free';
+            if (paid_key.startsWith('LXR-PREM-')) plan = 'premium';
+            else if (paid_key.startsWith('LXR-BASIC-')) plan = 'basic';
+            else if (paid_key === 'ADMIN') plan = 'admin';
+
+            await supabase.from('users').update({ discord_id, email, plan }).eq('api_key', paid_key);
             
             keyData.discord_tag = discord_tag;
+            keyData.plan = plan; // Ensure the frontend gets the plan
             return res.status(200).json({ user: keyData });
         }
 
         return res.status(400).json({ error: 'Invalid action' });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ error: err.message });
     }
 }
