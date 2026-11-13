@@ -45,16 +45,14 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
-  /* DOCS PAGE (Luarmor Style) */
+  /* DOCS PAGE */
   #view-docs { display: none; padding-top: 6rem; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
   .docs-layout { display: flex; gap: 2rem; padding: 0 2rem 4rem 2rem; }
-  
   .docs-sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 6rem; height: calc(100vh - 8rem); overflow-y: auto; border-right: 1px solid var(--border); padding-right: 1rem; }
   .docs-sidebar h3 { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; margin-top: 1.5rem; }
   .docs-sidebar h3:first-child { margin-top: 0; }
   .docs-link { display: block; color: var(--text-muted); text-decoration: none; padding: 0.5rem 0; font-size: 0.9rem; transition: 0.2s; }
   .docs-link:hover { color: var(--gold); }
-  
   .docs-content { flex: 1; max-width: 900px; }
   .docs-content h1 { font-size: 2.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
   .docs-content h2 { font-size: 1.8rem; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
@@ -63,16 +61,13 @@
   .docs-content ul { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; padding-left: 1.5rem; }
   .docs-content li { margin-bottom: 0.5rem; }
   .docs-content strong { color: var(--text); }
-  
   .warning-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--danger); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
   .warning-box h4 { color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
   .warning-box p { color: #fca5a5; margin-bottom: 0; font-size: 0.9rem; }
-
   .info-box { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid #3b82f6; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
   .info-box p { color: #93c5fd; margin-bottom: 0; font-size: 0.9rem; }
-
   .code-block { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; color: var(--gold); margin-bottom: 1.5rem; overflow-x: auto; position: relative; }
-  
+
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
@@ -83,27 +78,22 @@
   .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; }
   .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
   .sidebar-logo { height: auto; max-height: 50px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; transition: 0.3s; }
-  
   .toggle-btn { position: absolute; right: -12px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--gold); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: 0.3s; }
   .toggle-btn:hover { background: var(--gold); color: #000; transform: scale(1.1); }
-
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; white-space: nowrap; overflow: hidden; }
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
   .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
 
   .main-content { flex: 1; padding: 2rem; display: flex; justify-content: center; overflow-y: auto; }
   .content-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 2rem; }
-
   .dash-header { display: flex; justify-content: space-between; align-items: center; }
   .user-info h1 { font-size: 1.5rem; }
   .user-info p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
   .user-info .discord-tag { color: var(--discord); font-weight: bold; }
-
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
   .stat-info h2 { font-size: 2rem; margin-top: 0.5rem; }
-  
   .api-key-box { background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
   .api-key-box code { color: var(--gold); font-size: 1.2rem; font-weight: bold; font-family: monospace; }
 
@@ -117,13 +107,17 @@
   .action-btn:hover { background: rgba(245, 197, 24, 0.1); color: var(--gold); border-color: var(--gold); }
   .action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
   
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 500;}
+  input[type="text"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; font-family: inherit; font-size: 0.95rem;}
+  textarea { font-family: monospace; min-height: 150px; resize: vertical; }
+  
   /* CREATE SCRIPT MODAL */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
   .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 600px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-  input[type="text"], input[type="email"], input[type="password"], textarea { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
-  textarea { font-family: monospace; min-height: 150px; resize: vertical; }
   
   /* TOGGLE SWITCH */
   .switch-container { display: flex; align-items: center; justify-content: space-between; background: #000; border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
@@ -141,6 +135,11 @@
   .discord-logo { width: 100px; height: 100px; color: var(--discord); margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(88, 101, 242, 0.4)); }
   .btn-discord-large { background: var(--discord); color: white; padding: 1rem 2.5rem; border-radius: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; border: none; cursor: pointer; margin-top: 1rem; }
   .btn-discord-large:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3); }
+
+  /* MONETIZATION TAB */
+  .monetize-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; max-width: 600px; }
+  .monetize-container h3 { margin-bottom: 0.5rem; }
+  .monetize-container p { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -301,6 +300,13 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
         <span class="menu-text">Blacklists</span>
       </div>
+      
+      <!-- NEW TAB: MONETIZATION -->
+      <div class="menu-item" id="tab-monetize" onclick="switchTab('monetize')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span class="menu-text">Monetization</span>
+      </div>
+
       <div class="menu-item" id="tab-discord" onclick="switchTab('discord')">
         <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
         <span class="menu-text">Add to Discord</span>
@@ -366,6 +372,35 @@
           </div>
         </div>
 
+        <!-- TAB: MONETIZATION -->
+        <div id="content-monetize" style="display: none;">
+          <div class="monetize-container">
+            <h3>Monetize Your Scripts</h3>
+            <p>Turn on monetization for Keyless scripts. When users run the script, a GUI will open asking them to complete a link to get a 1-time key.</p>
+            
+            <div class="form-group">
+              <label>Select Project</label>
+              <select id="mon-script-select"></select>
+            </div>
+            
+            <div class="form-group">
+              <label>Provider</label>
+              <select id="mon-provider">
+                <option value="Work.ink">Work.ink</option>
+                <option value="Lootlabs">Lootlabs</option>
+                <option value="Linkvertise">Linkvertise</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Provider Link</label>
+              <input type="text" id="mon-link" placeholder="e.g. https://work.ink/abc/xyz" />
+            </div>
+            
+            <button class="btn-gold" onclick="saveMonetization()">Save Monetization</button>
+          </div>
+        </div>
+
         <div id="content-discord" style="display: none;">
           <div class="table-box discord-invite-box">
             <svg class="discord-logo" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
@@ -373,8 +408,7 @@
             <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
               Invite our official Discord Bot to your server to start generating keys, managing whitelists, and creating control panels for your buyers automatically.
             </p>
-            <!-- REPLACE YOUR_CLIENT_ID_HERE WITH YOUR ACTUAL DISCORD CLIENT ID -->
-            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID_HERE&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
+            <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
               <svg width="24" height="24" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
               Invite Bot
             </a>
@@ -434,6 +468,9 @@ let isLoginMode = true;
 let currentAuth = null;
 let tempDiscordData = null;
 
+/* ==========================================
+   1. UI & TOASTS
+   ========================================== */
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification');
     if (oldToast) oldToast.remove();
@@ -451,7 +488,6 @@ function showView(view) {
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none'; 
     document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
     document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
-    
     if (view === 'docs') window.scrollTo(0, 0);
 }
 
@@ -477,14 +513,19 @@ function switchTab(tab) {
     document.getElementById('content-keys').style.display = tab === 'keys' ? 'block' : 'none';
     document.getElementById('content-blacklist').style.display = tab === 'blacklist' ? 'block' : 'none';
     document.getElementById('content-discord').style.display = tab === 'discord' ? 'flex' : 'none';
+    document.getElementById('content-monetize').style.display = tab === 'monetize' ? 'block' : 'none'; // ADDED
     
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
 
     if (tab === 'keys') loadKeys();
     if (tab === 'blacklist') loadBlacklists();
+    if (tab === 'monetize') loadMonetizationSelect(); // ADDED
 }
 
+/* ==========================================
+   2. AUTHENTICATION
+   ========================================== */
 async function handleAuth() {
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value.trim();
@@ -541,6 +582,9 @@ async function linkDiscordAccount(isPaid) {
     } catch (err) { showToast(err.message); }
 }
 
+/* ==========================================
+   3. DASHBOARD RENDERING
+   ========================================== */
 function loadDashboard() {
     if (!currentAuth) {
         const saved = localStorage.getItem('luarix_auth');
@@ -600,6 +644,9 @@ function renderProjects(scripts) {
     `).join('');
 }
 
+/* ==========================================
+   4. CREATE SCRIPT
+   ========================================== */
 async function createScript() {
     const name = document.getElementById('new-script-name').value.trim();
     const code = document.getElementById('new-script-code').value.trim();
@@ -636,6 +683,9 @@ async function createScript() {
     }
 }
 
+/* ==========================================
+   5. TABS: KEYS & BLACKLISTS & MONETIZATION
+   ========================================== */
 async function loadKeys() {
     const tbody = document.getElementById('keys-tbody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
@@ -689,6 +739,33 @@ async function loadBlacklists() {
             <td><button class="action-btn delete" onclick="removeBlacklist('${b.discord_id}', '${b.script_id}')">Remove</button></td>
         </tr>`;
     }).join('');
+}
+
+async function loadMonetizationSelect() {
+    const res = await fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key);
+    const data = await res.json();
+    const select = document.getElementById('mon-script-select');
+    if (data.scripts && data.scripts.length > 0) {
+        select.innerHTML = data.scripts.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    } else {
+        select.innerHTML = '<option value="">No projects found</option>';
+    }
+}
+
+async function saveMonetization() {
+    const scriptId = document.getElementById('mon-script-select').value;
+    const provider = document.getElementById('mon-provider').value;
+    const link = document.getElementById('mon-link').value.trim();
+    
+    if (!scriptId) return showToast("Please create a project first.");
+    if (!link) return showToast("Please enter a link.");
+    
+    const res = await fetch(`/api/manage?action=save_monetization&api_key=${currentAuth.api_key}&script_id=${scriptId}&provider=${provider}&link=${encodeURIComponent(link)}`, { method: 'POST' });
+    if (res.ok) {
+        showToast("Monetization Saved!");
+    } else {
+        showToast("Failed to save monetization.");
+    }
 }
 
 async function resetKey(key) {
