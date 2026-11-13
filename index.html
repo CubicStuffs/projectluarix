@@ -49,14 +49,12 @@
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
   
-  /* SIDEBAR & MINIMIZER */
-  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s; z-index: 10; position: relative; }
+  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s, min-width 0.3s; z-index: 10; position: relative; }
   .sidebar.collapsed { width: 80px; min-width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
   .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; }
   .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
-
   .sidebar-logo { height: auto; max-height: 50px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; transition: 0.3s; }
   
   .toggle-btn { position: absolute; right: -12px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--gold); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: 0.3s; }
@@ -69,13 +67,12 @@
   .main-content { flex: 1; padding: 2rem; display: flex; justify-content: center; overflow-y: auto; }
   .content-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 2rem; }
 
-  /* DASHBOARD CARDS */
   .dash-header { display: flex; justify-content: space-between; align-items: center; }
   .user-info h1 { font-size: 1.5rem; }
   .user-info p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
   .user-info .discord-tag { color: var(--discord); font-weight: bold; }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
   .stat-info h4 { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
   .stat-info h2 { font-size: 2rem; margin-top: 0.5rem; }
@@ -93,15 +90,23 @@
   .action-btn:hover { background: rgba(245, 197, 24, 0.1); color: var(--gold); border-color: var(--gold); }
   .action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
   
-  /* MODALS */
+  /* CREATE SCRIPT MODAL */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 600px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-  .btn-discord { background: var(--discord); color: white; padding: 0.8rem; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 1rem; transition: 0.2s; }
-  .btn-discord:hover { background: #4752c4; }
-  input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
+  input[type="text"], input[type="email"], input[type="password"], textarea { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; }
+  textarea { font-family: monospace; min-height: 150px; resize: vertical; }
   
+  /* TOGGLE SWITCH */
+  .switch-container { display: flex; align-items: center; justify-content: space-between; background: #000; border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
+  .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--gold); }
+  input:checked + .slider:before { transform: translateX(26px); background-color: #000; }
+
   .toast-notification { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--gold); border-left: 4px solid var(--gold); color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s forwards; }
 </style>
 </head>
@@ -141,9 +146,19 @@
         <ul class="price-features">
           <li>Unlimited Obfuscations</li>
           <li>Fast HttpGet Loaders</li>
-          <li>Priority Support</li>
+          <li>1 Month Access</li>
         </ul>
         <button class="btn-gold" style="width: 100%;" onclick="openLogin()">Get Basic</button>
+      </div>
+      <div class="price-card">
+        <h3>Premium</h3>
+        <div class="price">$10<span>/yr</span></div>
+        <ul class="price-features">
+          <li>Unlimited Obfuscations</li>
+          <li>Fast HttpGet Loaders</li>
+          <li>1 Year Access</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="openLogin()">Get Premium</button>
       </div>
     </div>
   </section>
@@ -153,18 +168,11 @@
 <div id="view-dashboard">
   <div class="dash-layout">
     
-    <!-- SIDEBAR (With Minimizer) -->
     <div class="sidebar" id="sidebar">
-      
-      <!-- MINIMIZER BUTTON -->
       <div class="toggle-btn" onclick="toggleSidebar()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </div>
-
       <img src="logo.png" class="sidebar-logo" alt="Luarix">
-      
       <div class="menu-item active" id="tab-dash" onclick="switchTab('dash')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span class="menu-text">Dashboard</span>
@@ -177,14 +185,12 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
         <span class="menu-text">Blacklists</span>
       </div>
-      
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span class="menu-text">Log Out</span>
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="content-wrapper">
         <div class="dash-header">
@@ -192,6 +198,7 @@
             <h1 id="user-greeting">Dashboard</h1>
             <p>Logged in as <span id="user-email-display"></span> <span id="user-discord-display"></span></p>
           </div>
+          <button class="btn-gold" onclick="document.getElementById('create-modal').classList.add('show')">+ Create Script</button>
         </div>
 
         <!-- TAB: DASHBOARD -->
@@ -206,13 +213,16 @@
 
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
+              <div class="stat-info"><h4>Total Executions</h4><h2 id="stat-executions">0</h2></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-info"><h4>Total Keys</h4><h2 id="stat-keys">0</h2></div>
             </div>
             <div class="stat-card">
               <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-projects">0</h2></div>
             </div>
-            <div class="stat-card" onclick="showToast('Upgrade coming soon!')" style="cursor: pointer; border-color: var(--gold);">
-              <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1.2rem;">Get Unlimited</h2></div>
+            <div class="stat-card">
+              <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
             </div>
           </div>
 
@@ -230,7 +240,7 @@
           <div class="table-box">
             <div class="table-header"><h3>Active Keys</h3></div>
             <table class="script-table">
-              <thead><tr><th>Key</th><th>Project</th><th>HWID</th><th>Expires</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Key</th><th>Project</th><th>HWID</th><th>Expires</th><th>Executions</th><th>Actions</th></tr></thead>
               <tbody id="keys-tbody"></tbody>
             </table>
           </div>
@@ -251,6 +261,31 @@
   </div>
 </div>
 
+<!-- MODAL: CREATE SCRIPT -->
+<div class="modal-bg" id="create-modal">
+  <div class="modal">
+    <span class="close-btn" onclick="document.getElementById('create-modal').classList.remove('show')">&times;</span>
+    <h2>Create New Project</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Upload your Lua code to protect it.</p>
+    
+    <input type="text" id="new-script-name" placeholder="Project Name (e.g. Tazex Sniper)" />
+    <textarea id="new-script-code" placeholder="-- Paste your Lua code here..."></textarea>
+    
+    <div class="switch-container">
+      <div style="text-align: left;">
+        <h4 style="font-size: 0.9rem;">Keyless Script</h4>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">If enabled, users don't need a key to run this.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="new-script-keyless">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <button class="btn-gold" id="create-btn" style="width: 100%;" onclick="createScript()">Obfuscate & Save</button>
+  </div>
+</div>
+
 <!-- MODAL: EMAIL LOGIN -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
@@ -267,7 +302,7 @@
       <div style="flex:1; height:1px; background:var(--border);"></div> OR <div style="flex:1; height:1px; background:var(--border);"></div>
     </div>
 
-    <button class="btn-discord" onclick="loginDiscord()">Login with Discord</button>
+    <button class="btn-gold" style="width: 100%; background: var(--discord); color: white;" onclick="loginDiscord()">Login with Discord</button>
 
     <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
       <span id="toggle-text">Don't have an account?</span> 
@@ -319,12 +354,8 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const icon = sidebar.querySelector('.toggle-btn svg');
     sidebar.classList.toggle('collapsed');
-    
-    if (sidebar.classList.contains('collapsed')) {
-        icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-    } else {
-        icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
-    }
+    if (sidebar.classList.contains('collapsed')) icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+    else icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
 }
 
 function toggleAuthMode() {
@@ -426,7 +457,6 @@ function loadDashboard() {
         document.getElementById('user-discord-display').innerHTML = `• <span class="discord-tag">${currentAuth.discord_tag}</span>`;
     }
 
-    // FIXED PLAN DETECTION: Infer plan from API key if missing in DB
     let plan = currentAuth.plan;
     if (!plan) {
         if (currentAuth.api_key.startsWith('LXR-FREE-')) plan = 'free';
@@ -442,12 +472,18 @@ function loadDashboard() {
         document.getElementById('stat-limit').textContent = "∞";
     }
 
-    fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key)
+    // Load Stats
+    fetch('/api/manage?action=get_stats&api_key=' + currentAuth.api_key)
         .then(r => r.json())
         .then(data => {
-            document.getElementById('stat-projects').textContent = data.scripts ? data.scripts.length : 0;
-            renderProjects(data.scripts || []);
+            document.getElementById('stat-executions').textContent = data.totalExecutions || 0;
+            document.getElementById('stat-keys').textContent = data.totalKeys || 0;
+            document.getElementById('stat-projects').textContent = data.totalProjects || 0;
         });
+
+    fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key)
+        .then(r => r.json())
+        .then(data => renderProjects(data.scripts || []));
 }
 
 function logout() { localStorage.removeItem('luarix_auth'); currentAuth = null; showView('landing'); }
@@ -460,24 +496,66 @@ function renderProjects(scripts) {
     tbody.innerHTML = scripts.map(s => `
         <tr>
             <td><strong>${s.name}</strong></td>
-            <td><span style="color:var(--danger)">OFF</span></td>
+            <td><span style="color:${s.keyless ? 'var(--success)' : 'var(--danger)'}">${s.keyless ? 'ON' : 'OFF'}</span></td>
             <td><button class="action-btn">Manage</button></td>
         </tr>
     `).join('');
 }
 
 /* ==========================================
-   4. TABS: KEYS & BLACKLISTS
+   4. CREATE SCRIPT
+   ========================================== */
+async function createScript() {
+    const name = document.getElementById('new-script-name').value.trim();
+    const code = document.getElementById('new-script-code').value.trim();
+    const keyless = document.getElementById('new-script-keyless').checked;
+
+    if (!name || !code) return showToast("Name and code are required.");
+
+    const btn = document.getElementById('create-btn');
+    btn.textContent = "Encrypting..."; btn.disabled = true;
+
+    try {
+        // Simple XOR Encryption for Obfuscation
+        const key = Math.floor(Math.random() * 200) + 10;
+        const bytes = new TextEncoder().encode(code);
+        let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
+        const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
+
+        const res = await fetch('/api/create_script', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, code: encrypted, original_code: code, api_key: currentAuth.api_key, keyless })
+        });
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+
+        showToast("Project Created Successfully!");
+        document.getElementById('create-modal').classList.remove('show');
+        document.getElementById('new-script-name').value = '';
+        document.getElementById('new-script-code').value = '';
+        document.getElementById('new-script-keyless').checked = false;
+
+        loadDashboard(); // Refresh stats
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        btn.textContent = "Obfuscate & Save"; btn.disabled = false;
+    }
+}
+
+/* ==========================================
+   5. TABS: KEYS & BLACKLISTS
    ========================================== */
 async function loadKeys() {
     const tbody = document.getElementById('keys-tbody');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
 
     const res = await fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key);
     const data = await res.json();
     
     if (!data.keys || data.keys.length === 0) {
-        return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No keys found.</td></tr>';
+        return tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No keys found.</td></tr>';
     }
 
     tbody.innerHTML = data.keys.map(k => {
@@ -488,6 +566,7 @@ async function loadKeys() {
             <td>${script ? script.name : 'Unknown'}</td>
             <td>${k.hwid ? '✅ Locked' : '❌ None'}</td>
             <td>${k.expires_at ? new Date(k.expires_at).toLocaleDateString() : 'Forever'}</td>
+            <td><strong>${k.executions || 0}</strong></td>
             <td>
                 <button class="action-btn" onclick="resetKey('${k.key}')">Reset HWID</button>
                 <button class="action-btn delete" onclick="deleteKey('${k.key}')">Delete</button>
