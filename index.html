@@ -66,18 +66,7 @@
   .dash-layout { display: flex; height: 100%; }
   
   .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; animation: fadeIn 0.5s ease-out; }
-  
-  /* LOGO FIX */
-  .sidebar img { 
-    height: auto; 
-    max-height: 60px; 
-    width: 80%; 
-    object-fit: contain; 
-    margin: 0 auto 2rem auto; 
-    display: block;
-    mix-blend-mode: screen; 
-  }
-  
+  .sidebar img { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; }
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
   
@@ -92,7 +81,7 @@
   .stat-info h2 { font-size: 1.5rem; }
 
   /* Obfuscator Panel */
-  #obfuscator-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; animation: fadeIn 0.4s ease-out; }
+  #obfuscator-panel, #admin-panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; animation: fadeIn 0.4s ease-out; }
   label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;}
   input[type="text"], input[type="email"] { width: 100%; padding: 0.8rem 1rem; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--text); margin-bottom: 1rem; transition: 0.2s;}
   input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px rgba(245,197,24,0.1); }
@@ -116,10 +105,16 @@
   /* MODALS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; animation: slideDown 0.3s ease-out; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; animation: slideDown 0.3s ease-out; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
   .modal h2 { margin-bottom: 0.5rem; }
   .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
   .ltc-box { background: #000; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; word-break: break-all; color: var(--gold); font-size: 0.85rem; margin-bottom: 1rem;}
+  
+  /* NEW: Close Button & Secret Logo */
+  .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; line-height: 1; }
+  .close-btn:hover { color: var(--danger); transform: scale(1.1); }
+  .secret-logo { position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s; mix-blend-mode: screen; }
+  .secret-logo:hover { opacity: 1; filter: drop-shadow(0 0 8px var(--gold)); }
 </style>
 </head>
 <body>
@@ -191,6 +186,9 @@
       <img src="logo.png" alt="Luarix">
       <div class="menu-item active" onclick="toggleObfuscator()">Dashboard</div>
       <div class="menu-item" onclick="toggleObfuscator()">Create Project</div>
+      <!-- Admin Only Menu Item -->
+      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">Admin KeyGen</div>
+      
       <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">Log Out</div>
     </div>
 
@@ -212,6 +210,19 @@
         </div>
         <div class="stat-card" onclick="openUpgradeModal()" style="cursor: pointer; border-color: var(--gold);">
           <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1rem;">Get Unlimited</h2></div>
+        </div>
+      </div>
+
+      <!-- ADMIN KEY GENERATOR (Hidden by default) -->
+      <div id="admin-panel">
+        <h3 style="margin-bottom: 1rem; color: var(--gold);">Admin Key Generator</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Generate API keys to distribute in your Discord server.</p>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <button class="btn-gold" style="flex: 1;" onclick="generateKey('basic')">Generate Basic Key</button>
+            <button class="btn-gold" style="flex: 1; background: #222; color: #fff;" onclick="generateKey('premium')">Generate Premium Key</button>
+        </div>
+        <div id="key-result" style="display:none; background:#000; padding:1.5rem; border-radius:8px; border:1px solid var(--border); text-align:center;">
+            <!-- Key will appear here -->
         </div>
       </div>
 
@@ -256,9 +267,10 @@
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- LOGIN MODAL -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
+    <span class="close-btn" onclick="closeLogin()">&times;</span>
     <h2>Welcome to Luarix</h2>
     <p>Enter your email to manage your private projects.</p>
     
@@ -266,21 +278,27 @@
     <input type="text" id="login-key" placeholder="API Key (Leave blank for Free Plan)" />
     
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="loginUser()">Login / Register</button>
+    
+    <!-- Secret Admin Logo -->
+    <img src="logo.png" class="secret-logo" onclick="promptAdmin()" alt="Admin">
   </div>
 </div>
 
+<!-- PAY MODAL -->
 <div class="modal-bg" id="pay-modal">
   <div class="modal">
+    <span class="close-btn" onclick="document.getElementById('pay-modal').classList.remove('show')">&times;</span>
     <h2 id="pay-title">Upgrade to Basic</h2>
     <p>Send exact LTC amount to the address below. Once sent, open a ticket in our Discord with the TXID to get your API key.</p>
     <div class="ltc-box" id="ltc-address">ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3</div>
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="copyLTC()">Copy LTC Address</button>
-    <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="document.getElementById('pay-modal').classList.remove('show')">Close</button>
   </div>
 </div>
 
+<!-- UPGRADE MODAL -->
 <div class="modal-bg" id="upgrade-modal">
   <div class="modal">
+    <span class="close-btn" onclick="document.getElementById('upgrade-modal').classList.remove('show')">&times;</span>
     <h2>Upgrade Plan</h2>
     <p>Unlock unlimited obfuscations and private projects.</p>
     <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="openPayModal('Basic')">Buy Basic ($5/mo)</button>
@@ -332,7 +350,7 @@ async function uploadToHost(obfuscatedCode) {
 }
 
 /* ============================================================
-   2. MULTI-USER EMAIL AUTH SYSTEM
+   2. AUTHENTICATION & ADMIN SYSTEM
    ============================================================ */
 function getAuth() {
     const email = localStorage.getItem('luarix_active_user');
@@ -348,6 +366,9 @@ function getAuth() {
     }
     return auth;
 }
+
+function openLogin() { document.getElementById('login-modal').classList.add('show'); }
+function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
 
 function loginUser() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -379,10 +400,27 @@ function loginUser() {
     localStorage.setItem('luarix_auth_' + email, JSON.stringify(auth));
     localStorage.setItem('luarix_active_user', email);
     
-    document.getElementById('login-modal').classList.remove('show');
+    closeLogin();
     document.getElementById('login-email').value = '';
     document.getElementById('login-key').value = '';
     showView('dashboard');
+}
+
+function promptAdmin() {
+    const pass = prompt("Enter Admin Password:");
+    if (pass === "cubic%is@luarix^owner") {
+        // Create an admin session
+        const adminEmail = 'admin@luarix.com';
+        let auth = { email: adminEmail, plan: 'admin', usage: 0, expires: null };
+        localStorage.setItem('luarix_auth_' + adminEmail, JSON.stringify(auth));
+        localStorage.setItem('luarix_active_user', adminEmail);
+        
+        closeLogin();
+        showView('dashboard');
+        alert("Admin Access Granted.");
+    } else if (pass !== null) {
+        alert("Incorrect password.");
+    }
 }
 
 function logout() {
@@ -390,10 +428,8 @@ function logout() {
     showView('landing');
 }
 
-function openLogin() { document.getElementById('login-modal').classList.add('show'); }
-
 /* ============================================================
-   3. DASHBOARD & PRIVATE PROJECT MANAGEMENT
+   3. DASHBOARD & PROJECT MANAGEMENT
    ============================================================ */
 function showView(view) {
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
@@ -412,22 +448,58 @@ function updateDashboardUI() {
 
     const limitText = document.getElementById('stat-limit');
     const planText = document.getElementById('user-plan-text');
+    const adminBtn = document.getElementById('admin-menu-btn');
 
-    if (auth.plan === 'free') {
-        if (Date.now() > auth.resetDate) {
-            auth.usage = 0;
-            auth.resetDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
-            localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
-        }
-        const left = 20 - auth.usage;
-        limitText.textContent = left;
-        limitText.style.color = left > 0 ? 'var(--text)' : 'var(--danger)';
-        planText.textContent = auth.email + " | Plan: Free (Resets " + new Date(auth.resetDate).toLocaleDateString() + ")";
+    // Check if admin
+    if (auth.plan === 'admin') {
+        adminBtn.style.display = 'flex';
+        limitText.textContent = "∞";
+        limitText.style.color = "var(--gold)";
+        planText.textContent = "ADMIN ACCESS | Full Control";
+        document.getElementById('stat-limit').parentElement.parentElement.style.display = 'none'; // Hide limits for admin
     } else {
-        limitText.textContent = "Unlimited";
-        limitText.style.color = "var(--success)";
-        planText.textContent = auth.email + " | Plan: " + auth.plan.toUpperCase();
+        adminBtn.style.display = 'none';
+        document.getElementById('stat-limit').parentElement.parentElement.style.display = 'flex';
+        
+        if (auth.plan === 'free') {
+            if (Date.now() > auth.resetDate) {
+                auth.usage = 0;
+                auth.resetDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
+            }
+            const left = 20 - auth.usage;
+            limitText.textContent = left;
+            limitText.style.color = left > 0 ? 'var(--text)' : 'var(--danger)';
+            planText.textContent = auth.email + " | Plan: Free (Resets " + new Date(auth.resetDate).toLocaleDateString() + ")";
+        } else {
+            limitText.textContent = "Unlimited";
+            limitText.style.color = "var(--success)";
+            planText.textContent = auth.email + " | Plan: " + auth.plan.toUpperCase();
+        }
     }
+}
+
+// Admin Logic
+function toggleAdminPanel() {
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
+
+function generateKey(type) {
+    const chars = 'ABCDEF0123456789';
+    let rand = '';
+    for (let i = 0; i < 8; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREM-';
+    const key = prefix + rand;
+    
+    const resBox = document.getElementById('key-result');
+    resBox.style.display = 'block';
+    resBox.innerHTML = `
+        <h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4>
+        <div style="font-family: monospace; font-size: 1.5rem; color: var(--gold); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div>
+        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="navigator.clipboard.writeText('${key}'); alert('Key Copied to Clipboard!')">Copy Key</button>
+    `;
 }
 
 function openPayModal(plan) {
@@ -435,12 +507,8 @@ function openPayModal(plan) {
     document.getElementById('pay-modal').classList.add('show');
     document.getElementById('upgrade-modal').classList.remove('show');
 }
-
 function openUpgradeModal() { document.getElementById('upgrade-modal').classList.add('show'); }
-function copyLTC() {
-    navigator.clipboard.writeText('ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3');
-    alert("LTC Address Copied!");
-}
+function copyLTC() { navigator.clipboard.writeText('ltc1qjmvrrzml5utahgqnple7puxd9klh3wm3nkr0m3'); alert("LTC Address Copied!"); }
 
 function toggleObfuscator() {
     const panel = document.getElementById('obfuscator-panel');
@@ -453,10 +521,11 @@ function toggleObfuscator() {
         document.getElementById('protect-btn').textContent = "Obfuscate & Save Project";
     } else {
         panel.style.display = 'block';
+        document.getElementById('admin-panel').style.display = 'none'; // Close admin panel if open
     }
 }
 
-// PRIVATE PROJECTS (Keyed by Email)
+// PROJECTS
 function getProjects() {
     const auth = getAuth();
     if (!auth) return [];
@@ -606,6 +675,22 @@ async function doObfuscate() {
     } finally {
         btn.disabled = false;
     }
+}
+
+function copyText() {
+    const loaderCode = document.getElementById('loader-code');
+    loaderCode.select();
+    navigator.clipboard.writeText(loaderCode.value);
+    alert("Loader copied!");
+}
+
+function downloadLua() {
+    if (!currentObfuscatedCode) return;
+    const blob = new Blob([currentObfuscatedCode], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "luarix_protected.lua";
+    a.click();
 }
 </script>
 </body>
