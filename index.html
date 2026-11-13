@@ -34,6 +34,24 @@
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: var(--glow); }
 
+  /* HERO */
+  #view-landing { display: block; }
+  .hero { text-align: center; padding: 12rem 1rem 6rem; max-width: 900px; margin: 0 auto; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1;}
+  .hero h1 .highlight { color: var(--gold); }
+  .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+  
+  .pricing-section { padding: 4rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
+  .price-card.popular { border-color: var(--gold); box-shadow: 0 0 30px rgba(245, 197, 24, 0.05); }
+  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; letter-spacing: 0.5px; }
+  .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
+  .price span { font-size: 1rem; color: var(--text-muted); }
+  .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
+  .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+  .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
+
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
@@ -67,17 +85,64 @@
   .btn-group { display: flex; gap: 1rem; margin-top: 1rem;}
   .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
   .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
+  
+  /* MODALS */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+  .modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
+  .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
+  .modal input:focus { outline: none; border-color: var(--gold); }
 </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
 <nav id="main-nav">
   <a class="nav-brand" onclick="showView('landing')">Luarix</a>
   <div class="links">
+    <a onclick="document.getElementById('auth-modal').classList.add('show')">User Login</a>
     <a onclick="document.getElementById('admin-modal').classList.add('show')" style="color: var(--gold);">Admin Access</a>
+  </div>
+  <div id="nav-auth">
+    <button class="btn-gold" onclick="document.getElementById('auth-modal').classList.add('show')">Sign up</button>
   </div>
 </nav>
 
+<!-- LANDING PAGE -->
+<div id="view-landing">
+  <section class="hero">
+    <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
+    <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
+  </section>
+
+  <section class="pricing-section">
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Basic</h3>
+        <div class="price">$15<span>/mo</span></div>
+        <ul class="price-features">
+          <li>Unlimited obfuscation</li>
+          <li>Standard loaders</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+      </div>
+      <div class="price-card popular">
+        <h3>Premium</h3>
+        <div class="price">$25<span>/mo</span></div>
+        <ul class="price-features">
+          <li>Unlimited obfuscation</li>
+          <li>Fast HttpGet Loaders</li>
+          <li>Priority Support</li>
+        </ul>
+        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
     <div class="sidebar">
@@ -109,12 +174,22 @@
   </div>
 </div>
 
-<!-- MODALS (Simplified for space) -->
-<div class="modal-bg" id="admin-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
-  <div style="background:#111; padding:2rem; border-radius:12px; text-align:center;">
+<!-- MODALS -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal">
+    <h2>User Login</h2>
+    <p>Enter any email to login.</p>
+    <input type="email" id="user-email" placeholder="Email" />
+    <button class="btn-gold" style="width: 100%;" onclick="login('user')">Login</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="admin-modal">
+  <div class="modal">
     <h2>Admin Access</h2>
-    <input type="password" id="admin-pass" placeholder="Password" style="padding:1rem; margin:1rem 0; width:100%; background:#000; color:#fff; border:1px solid #333;">
-    <button class="btn-gold" onclick="login('admin')">Unlock</button>
+    <p>Enter password for free unlimited access.</p>
+    <input type="password" id="admin-pass" placeholder="Password" />
+    <button class="btn-gold" style="width: 100%;" onclick="login('admin')">Unlock</button>
   </div>
 </div>
 
@@ -155,7 +230,7 @@ async function uploadToHost(obfuscatedCode) {
         });
         if (!response.ok) return null;
         const data = await response.json();
-        return data.key; // Return just the key (e.g., "lFfpSHRFUK")
+        return data.key; 
     } catch (err) {
         return null;
     }
@@ -164,12 +239,36 @@ async function uploadToHost(obfuscatedCode) {
 /* ============================================================
    3. UI LOGIC
    ============================================================ */
-function login() {
-    if (document.getElementById('admin-pass').value !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect");
-    document.getElementById('admin-modal').style.display = 'none';
-    document.getElementById('view-dashboard').style.display = 'block';
+function showView(view) {
+    document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
+    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none';
+    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
 }
-function logout() { document.getElementById('view-dashboard').style.display = 'none'; }
+
+function login(type) {
+    if (type === 'user') {
+        if (!document.getElementById('user-email').value) return alert("Enter email");
+        document.getElementById('auth-modal').classList.remove('show');
+    } else {
+        const pass = document.getElementById('admin-pass').value;
+        if (pass !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect password");
+        document.getElementById('admin-modal').classList.remove('show');
+    }
+    localStorage.setItem('luarix_auth', 'true');
+    showView('dashboard');
+}
+
+function logout() {
+    localStorage.removeItem('luarix_auth');
+    showView('landing');
+}
+
+// Check session
+if (localStorage.getItem('luarix_auth')) {
+    showView('dashboard');
+} else {
+    showView('landing');
+}
 
 let currentLoaderUrl = "";
 let currentObfuscatedCode = "";
@@ -183,38 +282,33 @@ async function doObfuscate() {
     const loaderCode = document.getElementById('loader-code');
     const statusTitle = document.getElementById('status-title');
 
-    // Show UI immediately so user knows it's working
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
     output.classList.add('show');
     statusTitle.textContent = "Encrypting...";
     loaderCode.value = "Please wait...";
 
-    // Delay to allow UI to paint before freezing for encryption
     await new Promise(r => setTimeout(r, 50));
 
     try {
-        // 1. Encrypt
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
+        
         statusTitle.textContent = "Uploading to Luarix Servers...";
         btn.textContent = "⏳ Uploading...";
 
-        // 2. Upload to Pastes to get key
         const key = await uploadToHost(encrypted);
 
         if (key) {
-            // THE MAGIC: We use YOUR Vercel domain here!
+            // THIS GENERATES YOUR CUSTOM LUARIX URL!
             const customUrl = `https://${window.location.host}/api/raw?key=${key}`;
             currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
             statusTitle.textContent = "✓ Protected (HttpGet Loader)";
         } else {
-            // Fallback if pastes.dev is down
             currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
             statusTitle.textContent = "✓ Protected (Inline Loader)";
         }
 
-        // 3. Display safely
         loaderCode.value = currentLoaderUrl;
         setTimeout(() => output.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 
