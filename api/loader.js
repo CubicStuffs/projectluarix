@@ -115,7 +115,7 @@ VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 VerifyBtn.Font = Enum.Font.GothamBold
 
 local link = "${link}"
-local scriptUrl = "https://luarix-eight.vercel.app/api/verify_monetization?id=${scriptId}&key="
+local scriptUrl = "https://getluarix.vercel.app/api/verify_monetization?id=${scriptId}&key="
 
 local function setClipboard(text)
     if setclipboard then setclipboard(text) else toclipboard(text) end
