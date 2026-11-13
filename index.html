@@ -455,7 +455,14 @@
     <h2 id="manage-title">Manage Project</h2>
     <input type="hidden" id="manage-script-id">
 
-    <div class="switch-container" style="margin-top: 1.5rem;">
+    <!-- NEW: Update Code Section -->
+    <div class="form-group" style="text-align: left; margin-top: 1rem;">
+      <label>Update Script Code (Overwrites old code)</label>
+      <textarea id="update-script-code" placeholder="-- Paste your new/updated Lua code here..."></textarea>
+      <button class="btn-gold" style="width: 100%; background: var(--success); color: #fff; margin-bottom: 1rem;" onclick="updateCodeFromModal()">💾 Save New Code</button>
+    </div>
+
+    <div class="switch-container">
       <div style="text-align: left;">
         <h4 style="font-size: 0.9rem;">Keyless Script</h4>
         <p style="font-size: 0.75rem; color: var(--text-muted);">Toggle if users need a key to run this.</p>
@@ -765,6 +772,23 @@ async function deleteScriptFromModal() {
 }
 
 async function generateKeyFromModal() {
+ async function updateCodeFromModal() {
+    const id = document.getElementById('manage-script-id').value;
+    const code = document.getElementById('update-script-code').value.trim();
+    if (!code) return showToast("Please paste the new code first.");
+
+    // Encrypt the new code
+    const key = Math.floor(Math.random() * 200) + 10;
+    const bytes = new TextEncoder().encode(code);
+    let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
+    const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
+
+    await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
+    
+    document.getElementById('update-script-code').value = '';
+    document.getElementById('manage-modal').classList.remove('show');
+    showToast("Script code updated successfully!");
+}
     const id = document.getElementById('manage-script-id').value;
     const res = await fetch(`/api/manage?action=generate_key&api_key=${currentAuth.api_key}&script_id=${id}`, { method: 'POST' });
     const data = await res.json();
