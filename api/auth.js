@@ -1,54 +1,78 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
 export default async function handler(req, res) {
-    if (!req.query.code) {
-        const params = new URLSearchParams({
-            client_id: process.env.DISCORD_CLIENT_ID,
-            redirect_uri: process.env.DISCORD_REDIRECT_URI,
-            response_type: 'code',
-            scope: 'identify guilds.join email'
-        });
-        return res.redirect(`https://discord.com/api/oauth2/authorize?${params}`);
-    }
+    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-    const { code } = req.query;
+    const { action, email, password, paid_key, discord_tag, discord_id } = req.body;
+
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
     try {
-        // 1. Get Token
-        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                client_id: process.env.DISCORD_CLIENT_ID,
-                client_secret: process.env.DISCORD_CLIENT_SECRET,
-                grant_type: 'authorization_code',
-                code,
-                redirect_uri: process.env.DISCORD_REDIRECT_URI
-            })
-        });
-        const tokenData = await tokenRes.json();
+        // 1. Standard Login
+        if (action === 'login') {
+            const { data: user } = await supabase.from('users').select('*').eq('email', email).eq('password', password).maybeSingle();
+            if (!user) return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(200).json({ user });
+        }
 
-        // 2. Get User Info
-        const userRes = await fetch('https://discord.com/api/users/@me', {
-            headers: { Authorization: `Bearer ${tokenData.access_token}` }
-        });
-        const userData = await userRes.json();
+        // 2. Standard Signup
+        if (action === 'signup') {
+            const { data: existing } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+            if (existing) return res.status(400).json({ error: 'Account already exists' });
 
-        // 3. Force Join Server (Auto-Join)
-        await fetch(`https://discord.com/api/guilds/${process.env.DISCORD_GUILD_ID}/members/${userData.id}`, {
-            method: 'PUT',
-            headers: { 
-                Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ access_token: tokenData.access_token })
-        });
+            const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
+            const newKey = `LXR-FREE-${randomHex}`;
 
-        // 4. Redirect back to frontend with Discord Data (Do NOT create user yet)
-        return res.redirect(`/?discord_auth=${encodeURIComponent(JSON.stringify({
-            email: userData.email || `${userData.id}@discord.com`,
-            discord_tag: userData.username,
-            discord_id: userData.id
-        }))}`);
+            const { data: user, error } = await supabase.from('users').insert({
+                email, password, api_key: newKey, plan: 'free', usage: 0
+            }).select().single();
 
+            if (error) throw error;
+            return res.status(200).json({ user });
+        }
+
+        // 3. Discord Free Mode
+        if (action === 'free') {
+            let { data: user } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+            
+            if (!user) {
+                // Create new free account
+                const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
+                const newKey = `LXR-FREE-${randomHex}`;
+                const { data: newUser, error } = await supabase.from('users').insert({
+                    email, password: "discord_oauth_bypass", api_key: newKey, discord_id, plan: 'free', usage: 0
+                }).select().single();
+                if (error) throw error;
+                user = newUser;
+            } else {
+                // Update existing with discord info
+                await supabase.from('users').update({ discord_id }).eq('email', email);
+            }
+
+            user.discord_tag = discord_tag;
+            return res.status(200).json({ user });
+        }
+
+        // 4. Discord Link Paid Key
+        if (action === 'link_paid') {
+            if (!paid_key) return res.status(400).json({ error: 'API Key required' });
+
+            // Verify key exists
+            const { data: keyData } = await supabase.from('users').select('*').eq('api_key', paid_key).maybeSingle();
+            if (!keyData) return res.status(400).json({ error: 'Invalid API Key' });
+
+            // Link discord to this paid account
+            await supabase.from('users').update({ discord_id, email }).eq('api_key', paid_key);
+            
+            keyData.discord_tag = discord_tag;
+            return res.status(200).json({ user: keyData });
+        }
+
+        return res.status(400).json({ error: 'Invalid action' });
     } catch (err) {
-        return res.status(500).send('Discord Auth Failed');
+        console.error(err);
+        return res.status(500).json({ error: err.message });
     }
 }
