@@ -34,13 +34,6 @@
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: var(--glow); }
 
-  /* HERO */
-  #view-landing { display: block; }
-  .hero { text-align: center; padding: 12rem 1rem 6rem; max-width: 900px; margin: 0 auto; }
-  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1;}
-  .hero h1 .highlight { color: var(--gold); }
-  .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
-
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
@@ -62,60 +55,29 @@
   
   /* OUTPUT BOX */
   .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-  .output-box.show { display: block !important; }
+  .output-box.show { display: block; }
   .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   
   textarea#loader-code { 
-    width: 100%; 
-    height: 100px; 
-    background: #0a0a0a; 
-    color: var(--gold); 
-    border: 1px solid var(--border); 
-    border-radius: 8px; 
-    padding: 10px; 
-    font-family: monospace; 
-    font-size: 0.85rem;
-    resize: none; 
-    margin-bottom: 1rem; 
+    width: 100%; height: 100px; background: #0a0a0a; color: var(--gold); 
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px; 
+    font-family: monospace; font-size: 0.85rem; resize: none; margin-bottom: 1rem; 
   }
 
   .btn-group { display: flex; gap: 1rem; margin-top: 1rem;}
   .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
   .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
-  
-  /* MODALS */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
-  .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-  .modal h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
-  .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-  .modal input { width: 100%; padding: 1rem; margin-bottom: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
-  .modal input:focus { outline: none; border-color: var(--gold); }
 </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav id="main-nav">
   <a class="nav-brand" onclick="showView('landing')">Luarix</a>
   <div class="links">
-    <a onclick="document.getElementById('auth-modal').classList.add('show')">User Login</a>
     <a onclick="document.getElementById('admin-modal').classList.add('show')" style="color: var(--gold);">Admin Access</a>
-  </div>
-  <div id="nav-auth">
-    <button class="btn-gold" onclick="document.getElementById('auth-modal').classList.add('show')">Sign up</button>
   </div>
 </nav>
 
-<!-- LANDING PAGE -->
-<div id="view-landing">
-  <section class="hero">
-    <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
-    <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
-  </section>
-</div>
-
-<!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
     <div class="sidebar">
@@ -128,21 +90,12 @@
         <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Protect Script</h2>
         <div class="form-group">
           <label>Lua Source Code</label>
-          <textarea id="lua-source" placeholder="-- Paste your TAZEX SNIPER script or any other code here..."></textarea>
+          <textarea id="lua-source" placeholder="-- Paste your script here..."></textarea>
         </div>
         <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
         
-        <!-- PROGRESS BAR -->
-        <div id="progress-container" style="display:none; margin-top:1.5rem; background:#000; border:1px solid var(--border); border-radius:8px; padding:1rem;">
-          <div id="progress-text" style="font-size:0.85rem; color:var(--gold); margin-bottom:0.5rem; font-weight:bold; font-family:monospace;">Encrypting... 0%</div>
-          <div style="width:100%; height:8px; background:#222; border-radius:4px; overflow:hidden;">
-             <div id="progress-bar" style="height:100%; width:0%; background:var(--gold-grad); transition:width 0.1s;"></div>
-          </div>
-        </div>
-
         <div class="output-box" id="output">
           <h3 id="status-title">✓ Protected Successfully!</h3>
-          
           <label>Loader (Copy & Execute)</label>
           <textarea id="loader-code" readonly></textarea>
           
@@ -156,42 +109,30 @@
   </div>
 </div>
 
-<!-- MODALS -->
-<div class="modal-bg" id="auth-modal">
-  <div class="modal">
-    <h2>User Login</h2>
-    <p>Enter any email to login.</p>
-    <input type="email" id="user-email" placeholder="Email" />
-    <button class="btn-gold" style="width: 100%;" onclick="login('user')">Login</button>
-  </div>
-</div>
-
-<div class="modal-bg" id="admin-modal">
-  <div class="modal">
+<!-- MODALS (Simplified for space) -->
+<div class="modal-bg" id="admin-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+  <div style="background:#111; padding:2rem; border-radius:12px; text-align:center;">
     <h2>Admin Access</h2>
-    <p>Enter password for free unlimited access.</p>
-    <input type="password" id="admin-pass" placeholder="Password" />
-    <button class="btn-gold" style="width: 100%;" onclick="login('admin')">Unlock</button>
+    <input type="password" id="admin-pass" placeholder="Password" style="padding:1rem; margin:1rem 0; width:100%; background:#000; color:#fff; border:1px solid #333;">
+    <button class="btn-gold" onclick="login('admin')">Unlock</button>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   1. SYNCHRONOUS OBFUSCATOR (Extremely Fast & Stable)
+   1. SYNCHRONOUS OBFUSCATOR (UTF-8 Safe)
    ============================================================ */
 function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(source);
-    let hexString = "";
-    
-    // Fast loop to generate hex
     const hexArr = new Array(bytes.length);
+    
     for (let i = 0; i < bytes.length; i++) {
         hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
-    hexString = hexArr.join('');
+    const hexString = hexArr.join('');
 
-    const luaCode = `
+    return `
 -- Luarix Protected
 local h = "${hexString}"
 local k = ${key}
@@ -200,11 +141,10 @@ local s = h:gsub("%x%x", function(c)
 end)
 loadstring(s)()
 `.trim();
-    return luaCode;
 }
 
 /* ============================================================
-   2. UPLOADER
+   2. UPLOAD TO PASTES (Behind the scenes)
    ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
@@ -215,7 +155,7 @@ async function uploadToHost(obfuscatedCode) {
         });
         if (!response.ok) return null;
         const data = await response.json();
-        return `https://api.pastes.dev/${data.key}`;
+        return data.key; // Return just the key (e.g., "lFfpSHRFUK")
     } catch (err) {
         return null;
     }
@@ -224,31 +164,12 @@ async function uploadToHost(obfuscatedCode) {
 /* ============================================================
    3. UI LOGIC
    ============================================================ */
-function showView(view) {
-    document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
-    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'block' : 'none';
-    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
+function login() {
+    if (document.getElementById('admin-pass').value !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect");
+    document.getElementById('admin-modal').style.display = 'none';
+    document.getElementById('view-dashboard').style.display = 'block';
 }
-
-function login(type) {
-    if (type === 'user') {
-        if (!document.getElementById('user-email').value) return alert("Enter email");
-        document.getElementById('auth-modal').classList.remove('show');
-    } else {
-        const pass = document.getElementById('admin-pass').value;
-        if (pass !== 'cubic%is' + '@luarix' + '^owner') return alert("Incorrect password");
-        document.getElementById('admin-modal').classList.remove('show');
-    }
-    localStorage.setItem('luarix_auth', 'true');
-    showView('dashboard');
-}
-
-function logout() {
-    localStorage.removeItem('luarix_auth');
-    showView('landing');
-}
-
-if (localStorage.getItem('luarix_auth')) showView('dashboard');
+function logout() { document.getElementById('view-dashboard').style.display = 'none'; }
 
 let currentLoaderUrl = "";
 let currentObfuscatedCode = "";
@@ -260,48 +181,41 @@ async function doObfuscate() {
     const btn = document.getElementById('protect-btn');
     const output = document.getElementById('output');
     const loaderCode = document.getElementById('loader-code');
-    const progressContainer = document.getElementById('progress-container');
-    const progressBar = document.getElementById('progress-bar');
-    const progressText = document.getElementById('progress-text');
+    const statusTitle = document.getElementById('status-title');
 
-    // Reset UI
+    // Show UI immediately so user knows it's working
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
-    output.style.display = 'none'; // Hide output initially
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '50%';
-    progressText.textContent = "Encrypting script...";
+    output.classList.add('show');
+    statusTitle.textContent = "Encrypting...";
+    loaderCode.value = "Please wait...";
 
-    // Delay to let browser paint the UI before the heavy loop
+    // Delay to allow UI to paint before freezing for encryption
     await new Promise(r => setTimeout(r, 50));
 
     try {
         // 1. Encrypt
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
-        
-        progressBar.style.width = '100%';
-        progressText.textContent = "Uploading to server...";
+        statusTitle.textContent = "Uploading to Luarix Servers...";
         btn.textContent = "⏳ Uploading...";
 
-        // 2. Upload to get HttpGet URL
-        const rawUrl = await uploadToHost(encrypted);
+        // 2. Upload to Pastes to get key
+        const key = await uploadToHost(encrypted);
 
-        if (rawUrl) {
-            currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
-            document.getElementById('status-title').textContent = "✓ Protected (HttpGet Ready)";
+        if (key) {
+            // THE MAGIC: We use YOUR Vercel domain here!
+            const customUrl = `https://${window.location.host}/api/raw?key=${key}`;
+            currentLoaderUrl = `loadstring(game:HttpGet("${customUrl}"))()`;
+            statusTitle.textContent = "✓ Protected (HttpGet Loader)";
         } else {
-            // Fallback to Inline if upload fails
+            // Fallback if pastes.dev is down
             currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
-            document.getElementById('status-title').textContent = "✓ Protected (Inline Ready)";
+            statusTitle.textContent = "✓ Protected (Inline Loader)";
         }
 
-        // 3. Show Output
+        // 3. Display safely
         loaderCode.value = currentLoaderUrl;
-        output.style.display = 'block'; 
-        progressContainer.style.display = 'none';
-        
-        // Auto-scroll to show the result
         setTimeout(() => output.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 
     } catch (err) {
@@ -316,20 +230,16 @@ function copyText() {
     const loaderCode = document.getElementById('loader-code');
     loaderCode.select();
     navigator.clipboard.writeText(loaderCode.value);
-    alert("Loader copied to clipboard!");
+    alert("Loader copied!");
 }
 
 function downloadLua() {
     if (!currentObfuscatedCode) return;
     const blob = new Blob([currentObfuscatedCode], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = "luarix_protected.lua";
-    document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 }
 </script>
 </body>
