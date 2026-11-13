@@ -42,19 +42,6 @@
   .hero h1 .highlight { color: var(--gold); }
   .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
 
-  /* PRICING */
-  .pricing-section { padding: 4rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; position: relative; backdrop-filter: blur(10px); transition: 0.3s; }
-  .price-card:hover { transform: translateY(-5px); border-color: rgba(245, 197, 24, 0.3); }
-  .price-card.popular { border-color: var(--gold); box-shadow: var(--glow); }
-  .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 1rem; border-radius: 20px; letter-spacing: 1px; }
-  .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; color: var(--text); }
-  .price span { font-size: 1rem; color: var(--text-muted); font-weight: 500; }
-  .price-features { list-style: none; margin: 2rem 0; text-align: left; }
-  .price-features li { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
-
   /* DASHBOARD */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
@@ -63,7 +50,7 @@
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; font-weight: 500;}
   .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); }
   .main-content { flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 800px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 850px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   
   .form-group { margin-bottom: 1.5rem; }
   label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
@@ -77,8 +64,8 @@
   .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; animation: fadeIn 0.5s; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 1rem; }
-  .btn-group { display: flex; gap: 1rem; }
+  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;}
+  .btn-group { display: flex; gap: 1rem; margin-top: 1rem;}
   .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
   .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); }
   
@@ -112,32 +99,6 @@
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
     <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
   </section>
-
-  <section class="pricing-section">
-    <div class="pricing-grid">
-      <div class="price-card">
-        <h3>Basic</h3>
-        <div class="price">$15<span>/mo</span></div>
-        <ul class="price-features">
-          <li>Unlimited obfuscation</li>
-          <li>Standard loaders</li>
-          <li>Basic support</li>
-        </ul>
-        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
-      </div>
-      <div class="price-card popular">
-        <h3>Premium</h3>
-        <div class="price">$25<span>/mo</span></div>
-        <ul class="price-features">
-          <li>Unlimited obfuscation</li>
-          <li>Fast HttpGet Loaders</li>
-          <li>Priority Support</li>
-          <li>Anti-Tamper Protection</li>
-        </ul>
-        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
-      </div>
-    </div>
-  </section>
 </div>
 
 <!-- DASHBOARD -->
@@ -158,7 +119,8 @@
         <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
         
         <div class="output-box" id="output">
-          <h3>✓ Protected Successfully!</h3>
+          <h3 id="status-title">✓ Protected Successfully!</h3>
+          
           <label>HttpGet Loader (Copy & Execute)</label>
           <div class="code-block" id="loader-code"></div>
           
@@ -214,7 +176,6 @@ function encryptLua(source) {
         hexString += b.toString(16).padStart(2, '0');
     }
 
-    // Lua Wrapper
     const luaCode = `
 -- Luarix Protected (v4.0)
 local h = "${hexString}"
@@ -248,7 +209,7 @@ end
 }
 
 /* ============================================================
-   2. UPLOADER (Direct Link - Guaranteed to work)
+   2. UPLOADER (Fallback Safe)
    ============================================================ */
 async function uploadToHost(obfuscatedCode) {
     try {
@@ -257,13 +218,11 @@ async function uploadToHost(obfuscatedCode) {
             headers: { "Content-Type": "text/plain" },
             body: obfuscatedCode
         });
-        if (!response.ok) throw new Error("Upload failed");
+        if (!response.ok) return null;
         const data = await response.json();
-        
-        // Use the direct raw link. This NEVER fails in Roblox.
         return `https://api.pastes.dev/${data.key}`;
     } catch (err) {
-        console.error(err);
+        console.log("Upload failed, using Inline fallback.");
         return null;
     }
 }
@@ -306,25 +265,35 @@ async function doObfuscate() {
 
     const btn = document.getElementById('protect-btn');
     btn.disabled = true;
-    btn.textContent = "⏳ Encrypting & Uploading...";
+    btn.textContent = "⏳ Encrypting...";
 
+    // 1. Obfuscate immediately (client-side)
     try {
         const encrypted = encryptLua(source);
-        currentObfuscatedCode = encrypted; // Save for download
-        
-        const rawUrl = await uploadToHost(encrypted);
-        
-        if (!rawUrl) throw new Error("Failed to upload. Try again.");
+        currentObfuscatedCode = encrypted;
 
-        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+        // Generate Inline Loader (Works instantly, no internet needed)
+        const inlineLoader = `loadstring([==[\n${encrypted}\n]==])()`;
+        currentLoaderUrl = inlineLoader;
 
-        document.getElementById('loader-code').textContent = currentLoaderUrl;
+        // SHOW UI IMMEDIATELY (So you can download)
+        document.getElementById('loader-code').textContent = inlineLoader;
+        document.getElementById('status-title').textContent = "✓ Protected (Inline Loader Ready)";
         document.getElementById('output').classList.add('show');
-        
-        btn.disabled = false;
-        btn.textContent = "⚡ Obfuscate & Generate Loader";
+
+        // 2. Try to upload for HttpGet loader in background
+        btn.textContent = "⏳ Generating URL...";
+        const rawUrl = await uploadToHost(encrypted);
+
+        if (rawUrl) {
+            currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+            document.getElementById('loader-code').textContent = currentLoaderUrl;
+            document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
+        }
+
     } catch (err) {
-        alert("Error: " + err.message);
+        alert("Obfuscation Error: " + err.message);
+    } finally {
         btn.disabled = false;
         btn.textContent = "⚡ Obfuscate & Generate Loader";
     }
