@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 export default async function handler(req, res) {
-    const { api_key, action, key_id, script_id, discord_id } = req.query;
+    const { api_key, action, key_id, script_id, discord_id, provider, link } = req.query;
 
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -39,6 +39,15 @@ export default async function handler(req, res) {
             const { data: blacklists } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
 
             return res.status(200).json({ blacklists: blacklists || [] });
+        }
+
+        // NEW: Save Monetization
+        if (req.method === 'POST' && action === 'save_monetization') {
+            await supabase.from('scripts').update({ 
+                monetization_provider: provider, 
+                monetization_link: link 
+            }).eq('id', script_id).eq('api_key', api_key);
+            return res.status(200).json({ success: true });
         }
 
         if (req.method === 'POST' && action === 'delete_key') {
