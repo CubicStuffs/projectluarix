@@ -6,20 +6,32 @@
 <title>Luarix | Protect & Monetize your code</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --bg: #08080a; --bg-card: #0f111a; --bg-sidebar: #0b0b0f; --border: #1a1d2d; --text: #ffffff; --text-muted: #8892b0; --gold: #f5c518; --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); --success: #10b981; --danger: #ef4444; }
+  :root { 
+    --bg: #08080a; --bg-card: #0f111a; --bg-sidebar: #0b0b0f; --border: #1a1d2d; 
+    --text: #ffffff; --text-muted: #8892b0; --gold: #f5c518; 
+    --gold-grad: linear-gradient(135deg, #f5c518, #d4a017); 
+    --success: #10b981; --danger: #ef4444; 
+  }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  
+  /* ANIMATIONS */
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } 50% { box-shadow: 0 0 25px rgba(245, 197, 24, 0.6); } 100% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); } }
+  @keyframes toastSlideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+  /* NAVBAR */
   nav { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(15, 17, 26, 0.9); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 12px; z-index: 100; animation: slideDown 0.5s ease-out; }
+  .nav-brand { display: flex; align-items: center; cursor: pointer; transition: transform 0.2s; }
+  .nav-brand:hover { transform: scale(1.05); }
   .nav-brand img { height: 40px; mix-blend-mode: screen; } 
   nav .links { display: flex; gap: 1.8rem; }
-  nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; cursor: pointer; }
+  nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
   nav a:hover { color: var(--gold); }
   .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 197, 24, 0.4); }
 
+  /* LANDING PAGE */
   #view-landing { display: block; animation: fadeIn 0.8s ease-out; }
   .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; }
@@ -34,14 +46,39 @@
   .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
   .price-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
 
+  /* DASHBOARD LAYOUT */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; }
-  .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; position: relative; }
-  .sidebar-logo { height: 50px; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; }
-  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; }
-  .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); }
+  
+  /* SIDEBAR (Collapsible) */
+  .sidebar { 
+    width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); 
+    padding: 1.5rem 1rem; display: flex; flex-direction: column; 
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
+  }
+  .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
+  .sidebar.collapsed .menu-text { display: none; }
+  .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
+  .sidebar.collapsed .sidebar-logo { width: 40px; height: 40px; margin-bottom: 2rem; }
+  .sidebar.collapsed .toggle-btn svg { transform: rotate(180deg); }
 
-  .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
+  .sidebar-logo { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; mix-blend-mode: screen; transition: 0.3s; }
+  
+  .toggle-btn {
+    position: absolute; right: -12px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--gold); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 10; transition: 0.3s;
+  }
+  .toggle-btn:hover { background: var(--gold); color: #000; transform: scale(1.1); }
+
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden; transition: 0.2s; }
+  .menu-item:hover, .menu-item.active { background: rgba(245, 197, 24, 0.1); color: var(--gold); transform: translateX(5px); }
+  .sidebar.collapsed .menu-item:hover { transform: translateX(0) scale(1.1); }
+
+  /* MAIN CONTENT & WRAPPER (Fixes the gap) */
+  .main-content { flex: 1; padding: 2rem; overflow-y: auto; display: flex; justify-content: center; }
+  .content-wrapper { width: 100%; max-width: 1200px; } /* Centers content on ultra-wide screens */
+
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
   .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
   .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
@@ -58,7 +95,7 @@
   .output-box { display: none; margin-top: 1.5rem; background: #050505; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
   .code-box { width: 100%; height: 80px; background: #000; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; resize: none; margin-bottom: 1rem; }
 
-  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: 100%; }
   .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
   .script-table { width: 100%; border-collapse: collapse; text-align: left; }
   .script-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; border-bottom: 1px solid var(--border); }
@@ -72,11 +109,22 @@
   .toggle-on { background: rgba(16, 185, 129, 0.2); color: var(--success); }
   .toggle-off { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
+  /* MODALS & TOASTS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; position: relative; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 450px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
   .secret-logo { position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; }
+
+  /* BEAUTIFUL TOAST NOTIFICATION */
+  .toast-notification {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--bg-card); border: 1px solid var(--gold); border-left: 4px solid var(--gold);
+    color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999;
+    display: flex; align-items: center; gap: 10px;
+    animation: toastSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
 </style>
 </head>
 <body>
@@ -113,77 +161,101 @@
 
 <div id="view-dashboard">
   <div class="dash-layout">
-    <div class="sidebar">
+    
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <!-- Toggle Button (Restored) -->
+      <div class="toggle-btn" onclick="toggleSidebar()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </div>
+
       <img src="logo.png" class="sidebar-logo" alt="Luarix">
-      <div class="menu-item active" onclick="toggleObfuscator()">Dashboard</div>
-      <div class="menu-item" onclick="toggleObfuscator()">Create Project</div>
-      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">Admin KeyGen</div>
-      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">Log Out</div>
+      <div class="menu-item active" onclick="toggleObfuscator()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span class="menu-text">Dashboard</span>
+      </div>
+      <div class="menu-item" onclick="toggleObfuscator()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="menu-text">Create Project</span>
+      </div>
+      <div class="menu-item" id="admin-menu-btn" style="display:none;" onclick="toggleAdminPanel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+        <span class="menu-text">Admin KeyGen</span>
+      </div>
+      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span class="menu-text">Log Out</span>
+      </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="main-content">
-      <div class="dash-header">
-        <div>
-          <h1>Dashboard</h1>
-          <p id="user-plan-text" style="color: var(--text-muted); font-size: 0.9rem;">Plan: Loading...</p>
+      <div class="content-wrapper">
+        <div class="dash-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p id="user-plan-text" style="color: var(--text-muted); font-size: 0.9rem;">Plan: Loading...</p>
+          </div>
+          <button class="btn-gold" onclick="toggleObfuscator()">+ Create Project</button>
         </div>
-        <button class="btn-gold" onclick="toggleObfuscator()">+ Create Project</button>
-      </div>
 
-      <div class="api-key-box" id="api-key-box" style="display: none;">
-        <div>
-          <h4 style="color: var(--text-muted); font-size: 0.8rem;">Your API Key (Use this in Discord)</h4>
-          <code id="user-api-key">LXR-...</code>
+        <div class="api-key-box" id="api-key-box" style="display: none;">
+          <div>
+            <h4 style="color: var(--text-muted); font-size: 0.8rem;">Your API Key (Use this in Discord)</h4>
+            <code id="user-api-key">LXR-...</code>
+          </div>
+          <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="copyApiKey()">Copy Key</button>
         </div>
-        <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="copyApiKey()">Copy Key</button>
-      </div>
 
-      <div class="stats-grid">
-        <div class="stat-card" id="stat-card-limit">
-          <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
+        <div class="stats-grid">
+          <div class="stat-card" id="stat-card-limit">
+            <div class="stat-info"><h4>Obfuscations Left</h4><h2 id="stat-limit">20</h2></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-scripts">0</h2></div>
+          </div>
+          <div class="stat-card" onclick="openUpgradeModal()" style="cursor: pointer; border-color: var(--gold);">
+            <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1rem;">Get Unlimited</h2></div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-info"><h4>Total Projects</h4><h2 id="stat-scripts">0</h2></div>
-        </div>
-        <div class="stat-card" onclick="openUpgradeModal()" style="cursor: pointer; border-color: var(--gold);">
-          <div class="stat-info"><h4 style="color: var(--gold);">Upgrade Plan</h4><h2 style="font-size: 1rem;">Get Unlimited</h2></div>
-        </div>
-      </div>
 
-      <div id="admin-panel">
-        <h3>Admin Key Generator</h3>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <button class="btn-gold" onclick="generateAdminKey('basic')">Generate Basic Key</button>
-            <button class="btn-gold" onclick="generateAdminKey('premium')">Generate Premium Key</button>
+        <div id="admin-panel">
+          <h3>Admin Key Generator</h3>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+              <button class="btn-gold" onclick="generateAdminKey('basic')">Generate Basic Key</button>
+              <button class="btn-gold" onclick="generateAdminKey('premium')">Generate Premium Key</button>
+          </div>
+          <div id="key-result" style="display:none; margin-top: 1rem; background:#000; padding:1rem; border-radius:8px;"></div>
         </div>
-        <div id="key-result" style="display:none; margin-top: 1rem; background:#000; padding:1rem; border-radius:8px;"></div>
-      </div>
 
-      <div id="obfuscator-panel">
-        <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
-        <input type="hidden" id="edit-id" value="">
-        <label>Project Name</label>
-        <input type="text" id="project-name" placeholder="e.g. Tazex Sniper v2" />
-        <label>Lua Source Code</label>
-        <textarea id="lua-source" placeholder="-- Paste your script here..."></textarea>
-        <button class="btn-gold" id="protect-btn" onclick="doObfuscate()" style="width: 100%; padding: 1rem; margin-top: 1rem;">Obfuscate & Save Project</button>
-        
-        <div class="output-box" id="output">
-          <h3 id="status-title" style="color: var(--success); margin-bottom: 1rem;">Protected Successfully</h3>
-          <label>Loader URL</label>
-          <textarea id="loader-code" class="code-box" readonly></textarea>
-          <button class="btn-gold" style="background: #222; color: #fff;" onclick="copyText()">Copy Loader</button>
+        <div id="obfuscator-panel">
+          <h3 style="margin-bottom: 1.5rem;" id="panel-title">Create New Project</h3>
+          <input type="hidden" id="edit-id" value="">
+          <label>Project Name</label>
+          <input type="text" id="project-name" placeholder="e.g. Tazex Sniper v2" />
+          <label>Lua Source Code</label>
+          <textarea id="lua-source" placeholder="-- Paste your script here..."></textarea>
+          <button class="btn-gold" id="protect-btn" onclick="doObfuscate()" style="width: 100%; padding: 1rem; margin-top: 1rem;">Obfuscate & Save Project</button>
+          
+          <div class="output-box" id="output">
+            <h3 id="status-title" style="color: var(--success); margin-bottom: 1rem;">Protected Successfully</h3>
+            <label>Loader URL</label>
+            <textarea id="loader-code" class="code-box" readonly></textarea>
+            <button class="btn-gold" style="background: #222; color: #fff;" onclick="copyText()">Copy Loader</button>
+          </div>
         </div>
-      </div>
 
-      <div class="table-box">
-        <div class="table-header"><h3>My Projects</h3></div>
-        <table class="script-table">
-          <thead>
-            <tr><th>Project Name</th><th>Keyless</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="projects-tbody"></tbody>
-        </table>
+        <div class="table-box">
+          <div class="table-header"><h3>My Projects</h3></div>
+          <table class="script-table">
+            <thead>
+              <tr><th>Project Name</th><th>Keyless</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="projects-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -203,6 +275,52 @@
 <script>
 let allProjects = [];
 
+/* ==========================================
+   1. CUSTOM TOAST NOTIFICATION SYSTEM
+   ========================================== */
+function showToast(message) {
+    // Remove existing toast if any
+    const oldToast = document.querySelector('.toast-notification');
+    if (oldToast) oldToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        ${message}
+    `;
+    document.body.appendChild(toast);
+
+    // Slide down and remove after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'toastSlideUp 0.3s reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/* ==========================================
+   2. SIDEBAR TOGGLE
+   ========================================== */
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const icon = sidebar.querySelector('.toggle-btn svg');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+    } else {
+        icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
+    }
+}
+
+/* ==========================================
+   3. UI & AUTH LOGIC
+   ========================================== */
 function openLogin() { document.getElementById('login-modal').classList.add('show'); }
 function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
 function showView(view) { 
@@ -220,7 +338,7 @@ function getAuth() {
 async function loginUser() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
     const paidKey = document.getElementById('login-key').value.trim();
-    if (!email.includes('@')) return alert("Enter valid email");
+    if (!email.includes('@')) return showToast("Please enter a valid email.");
 
     const btn = document.querySelector('#login-modal button');
     btn.textContent = "Connecting..."; btn.disabled = true;
@@ -244,7 +362,7 @@ async function loginUser() {
         localStorage.setItem('luarix_active_user', email);
         
         closeLogin(); showView('dashboard'); loadDashboard();
-    } catch (err) { alert("Error: " + err.message); } 
+    } catch (err) { showToast("Error: " + err.message); } 
     finally { btn.textContent = "Login / Register"; btn.disabled = false; }
 }
 
@@ -306,6 +424,9 @@ function fetchProjects() {
     `).join('');
 }
 
+/* ==========================================
+   4. ACTION HANDLERS
+   ========================================== */
 function toggleObfuscator() { 
     const p = document.getElementById('obfuscator-panel');
     p.style.display = p.style.display === 'block' ? 'none' : 'block'; 
@@ -314,11 +435,11 @@ function toggleObfuscator() {
 
 async function doObfuscate() {
     const auth = getAuth();
-    if (auth.plan === 'free' && auth.usage >= 20) return alert("Limit reached. Upgrade or wait.");
+    if (auth.plan === 'free' && auth.usage >= 20) return showToast("Limit reached. Upgrade or wait.");
     
     const name = document.getElementById('project-name').value.trim() || "Untitled";
     const source = document.getElementById('lua-source').value.trim();
-    if (!source) return alert("Paste code first!");
+    if (!source) return showToast("Paste code first!");
 
     const btn = document.getElementById('protect-btn');
     btn.textContent = "Saving..."; btn.disabled = true;
@@ -326,7 +447,6 @@ async function doObfuscate() {
     document.getElementById('loader-code').value = "Connecting to database...";
 
     try {
-        // Simple XOR Encryption
         const key = Math.floor(Math.random() * 200) + 10;
         const bytes = new TextEncoder().encode(source);
         let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
@@ -339,7 +459,6 @@ async function doObfuscate() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        // THIS IS THE FIX: We define customUrl FIRST, then use it.
         const customUrl = `https://${window.location.host}/api/loader?id=${data.id}`;
         const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}"))()`;
         
@@ -351,14 +470,13 @@ async function doObfuscate() {
             localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
         }
 
-        // Save locally for UI
         allProjects.unshift({ id: data.id, name, keyless: false, loader });
         localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
         
         loadDashboard();
         document.getElementById('project-name').value = '';
         document.getElementById('lua-source').value = '';
-    } catch (err) { alert(err.message); } 
+    } catch (err) { showToast(err.message); } 
     finally { btn.textContent = "Obfuscate & Save Project"; btn.disabled = false; }
 }
 
@@ -374,7 +492,8 @@ async function toggleKeyless(id, currentStatus) {
         if (p) p.keyless = !currentStatus;
         localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
         fetchProjects();
-    } catch (err) { alert("Failed to toggle"); }
+        showToast("Keyless mode updated.");
+    } catch (err) { showToast("Failed to toggle"); }
 }
 
 async function generateProjectKey(id) {
@@ -388,9 +507,9 @@ async function generateProjectKey(id) {
         if (data.success) {
             prompt("Key generated! Copy it below:", data.key);
         } else {
-            alert(data.error);
+            showToast(data.error);
         }
-    } catch (err) { alert("Error generating key"); }
+    } catch (err) { showToast("Error generating key"); }
 }
 
 function editProject(id) {
@@ -408,12 +527,25 @@ function deleteProject(id) {
     allProjects = allProjects.filter(x => x.id !== id);
     localStorage.setItem('luarix_projects_' + auth.email, JSON.stringify(allProjects));
     fetchProjects();
+    showToast("Project deleted.");
 }
 
 function copyLoader(id) {
     const p = allProjects.find(x => x.id === id);
     navigator.clipboard.writeText(p.loader);
-    alert("Loader copied!");
+    showToast("Loader copied to clipboard!");
+}
+
+function copyApiKey() { 
+    navigator.clipboard.writeText(document.getElementById('user-api-key').textContent); 
+    showToast("API Key copied!"); 
+}
+
+function copyText() { 
+    const l = document.getElementById('loader-code'); 
+    l.select(); 
+    navigator.clipboard.writeText(l.value); 
+    showToast("Loader copied!"); 
 }
 
 function logout() { localStorage.removeItem('luarix_active_user'); showView('landing'); }
@@ -431,10 +563,8 @@ function generateAdminKey(type) {
     const res = document.getElementById('key-result');
     res.style.display = 'block'; res.innerHTML = `<div style="color:var(--gold); font-size:1.2rem;">${key}</div>`;
 }
-function copyApiKey() { navigator.clipboard.writeText(document.getElementById('user-api-key').textContent); alert("Copied!"); }
-function copyText() { const l = document.getElementById('loader-code'); l.select(); navigator.clipboard.writeText(l.value); alert("Copied!"); }
-function openPayModal() { alert("Payment system coming soon."); }
-function openUpgradeModal() { alert("Upgrade coming soon."); }
+function openPayModal() { showToast("Payment system coming soon."); }
+function openUpgradeModal() { showToast("Upgrade coming soon."); }
 
 if (localStorage.getItem('luarix_active_user')) { showView('dashboard'); loadDashboard(); }
 </script>
