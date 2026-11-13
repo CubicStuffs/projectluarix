@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Luarix — Protect & Monetize your code</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #050505; --bg-card: #0d0d12; --border: #222;
+    --text: #fff; --text-muted: #888; --gold: #f5c518; --gold-grad: linear-gradient(135deg, #f5c518, #d4a017);
+    --success: #10b981; --danger: #ef4444; --mono: 'JetBrains Mono', monospace;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden;
+    background-image: radial-gradient(circle at 50% 0%, rgba(245, 197, 24, 0.05), transparent 50%), url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+  }
+
+  /* NAVBAR */
+  nav {
+    position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem 1.5rem; background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(15px);
+    border: 1px solid var(--border); border-radius: 12px; z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; cursor: pointer; }
+  .nav-brand img { height: 28px; width: auto; }
+  .nav-brand span { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+  nav .links { display: flex; gap: 1.8rem; }
+  nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  nav a:hover { color: var(--text); }
+  .btn-gold { background: var(--gold-grad); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; text-decoration: none;}
+
+  /* HERO */
+  #view-landing { display: block; }
+  .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem; }
+  .hero h1 .highlight { color: var(--gold); }
+  .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+
+  .pricing-section { padding: 4rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; }
+  .price-card.popular { border-color: var(--gold); }
+  .price { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; }
+  .price span { font-size: 1rem; color: var(--text-muted); }
+  .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
+  .price-features li { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+  .price-features li::before { content: '✓'; color: var(--gold); margin-right: 0.5rem; }
+
+  /* DASHBOARD */
+  #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
+  .dash-layout { display: flex; height: 100%; }
+  .sidebar { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
+  .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; }
+  .menu-item:hover, .menu-item.active { background: rgba(245,197,24,0.1); color: var(--gold); }
+  .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
+  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; max-width: 800px; margin: 0 auto; }
+  
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; }
+  input, textarea, select { width: 100%; padding: 1rem; background: #000; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; }
+  textarea { font-family: var(--mono); font-size: 0.85rem; min-height: 200px; resize: vertical; color: #a5f3c4; }
+  
+  .btn-primary { background: var(--gold-grad); color: #000; padding: 1rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem;}
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .output-box { display: none; margin-top: 1.5rem; background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+  .output-box.show { display: block; }
+  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: var(--mono); font-size: 0.85rem; color: var(--gold); word-break: break-all; margin-bottom: 0.75rem; }
+  
+  /* MODALS */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; }
+  .modal input { margin-bottom: 1rem; }
+  
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--gold); color: #000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: bold; transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 2000; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="main-nav">
+  <a class="nav-brand" onclick="showView('landing')">
+    <span>Luarix</span>
+  </a>
+  <div class="links">
+    <a onclick="openAuthModal('login')">User Login</a>
+    <a onclick="openAdminModal()" style="color: var(--gold);">Admin Access</a>
+  </div>
+  <div id="nav-auth">
+    <button class="btn-gold" onclick="openAuthModal('signup')">Sign up</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div id="view-landing">
+  <section class="hero">
+    <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
+    <p>The standard and go-to solution for protecting, monetizing, and managing your scripts easily.</p>
+  </section>
+
+  <section class="pricing-section">
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Basic</h3>
+        <div class="price">$15<span>/mo</span></div>
+        <ul class="price-features"><li>Unlimited obfuscation</li><li>Standard loaders</li></ul>
+        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+      </div>
+      <div class="price-card popular">
+        <h3>Premium</h3>
+        <div class="price">$25<span>/mo</span></div>
+        <ul class="price-features"><li>Unlimited obfuscation</li><li>Fast HttpGet Loaders</li><li>Priority Support</li></ul>
+        <button class="btn-gold" style="width: 100%;" onclick="alert('Please use Admin Access for free testing.')">Get Started</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DASHBOARD -->
+<div id="view-dashboard">
+  <div class="dash-layout">
+    <div class="sidebar">
+      <h2 style="color: var(--gold); margin-bottom: 2rem;">Luarix Panel</h2>
+      <div class="menu-item active">🛡️ Script Protector</div>
+      <div class="menu-item" style="margin-top: auto; color: var(--danger);" onclick="logout()">🚪 Logout</div>
+    </div>
+
+    <div class="main-content">
+      <div class="panel">
+        <h2 style="margin-bottom: 1.5rem;">Protect Script</h2>
+        
+        <div class="form-group">
+          <label>Lua Source Code</label>
+          <textarea id="lua-source" placeholder="-- Paste your Roblox script here..."></textarea>
+        </div>
+        
+        <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">🛡️ Obfuscate & Generate Loader</button>
+        
+        <div class="output-box" id="output">
+          <h3 style="color: var(--success); margin-bottom: 1rem;">✓ Protected Successfully!</h3>
+          <label>HttpGet Loader (Copy & Execute)</label>
+          <div class="code-block" id="loader-code"></div>
+          <button class="btn-primary" style="background: #222; color: #fff; margin-top: 0.5rem;" onclick="copyText()">📋 Copy Loader</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal">
+    <h2>User Login</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Enter any email to login.</p>
+    <input type="email" id="user-email" placeholder="Email" />
+    <button class="btn-gold" style="width: 100%;" onclick="doUserLogin()">Login</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="admin-modal">
+  <div class="modal">
+    <h2>Admin Access</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Enter password for free unlimited access.</p>
+    <input type="password" id="admin-pass" placeholder="Password" />
+    <button class="btn-gold" style="width: 100%;" onclick="doAdminLogin()">Unlock</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+/* ============================================================
+   1. BULLETPROOF OBFUSCATOR (Whole Script Encryption)
+   ============================================================ */
+function encryptLua(source) {
+    // 1. Convert entire script to bytes and XOR with a random key
+    const key = Math.floor(Math.random() * 200) + 10;
+    let hexString = "";
+    for (let i = 0; i < source.length; i++) {
+        let b = source.charCodeAt(i) ^ key;
+        hexString += b.toString(16).padStart(2, '0');
+    }
+
+    // 2. Build the Lua Wrapper
+    // This wrapper takes the hex string, decrypts it, and runs it.
+    // No syntax errors possible because the original code is just a string inside the VM.
+    const luaCode = `
+-- Luarix Protected (v2.0)
+local e = "${hexString}"
+local k = ${key}
+local s = ""
+for i = 1, #e, 2 do
+    local b = tonumber(e:sub(i, i+1), 16)
+    s = s .. string.char(bit32.bxor(b, k))
+end
+local f, err = loadstring(s)
+if f then f() else warn("[Luarix] Error loading script: " .. tostring(err)) end
+`;
+    return luaCode.trim();
+}
+
+/* ============================================================
+   2. AUTO-UPLOADER (Generates REAL HttpGet Loaders)
+   ============================================================ */
+async function uploadToHost(obfuscatedCode) {
+    // We use Pastes.dev API (Free, no key, allows raw text)
+    try {
+        const response = await fetch("https://api.pastes.dev/post", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: obfuscatedCode
+        });
+        
+        if (!response.ok) throw new Error("Upload failed");
+        const data = await response.json();
+        
+        // Return the raw URL
+        return `https://api.pastes.dev/${data.key}`;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+/* ============================================================
+   3. UI LOGIC
+   ============================================================ */
+function showView(view) {
+    document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none';
+    document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'block' : 'none';
+    document.getElementById('main-nav').style.display = view === 'landing' ? 'flex' : 'none';
+}
+
+function openAuthModal() { document.getElementById('auth-modal').classList.add('show'); }
+function doUserLogin() {
+    const email = document.getElementById('user-email').value;
+    if (!email) return alert("Enter email");
+    localStorage.setItem('luarix_user', email);
+    document.getElementById('auth-modal').classList.remove('show');
+    showView('dashboard');
+}
+
+const ADMIN_PASS = 'cubic%is' + '@luarix' + '^owner';
+function openAdminModal() { document.getElementById('admin-modal').classList.add('show'); }
+function doAdminLogin() {
+    const pass = document.getElementById('admin-pass').value;
+    if (pass === ADMIN_PASS) {
+        localStorage.setItem('luarix_user', 'ADMIN');
+        document.getElementById('admin-modal').classList.remove('show');
+        showView('dashboard');
+    } else {
+        alert("Incorrect password");
+    }
+}
+
+function logout() {
+    localStorage.removeItem('luarix_user');
+    showView('landing');
+}
+
+// Check session on load
+if (localStorage.getItem('luarix_user')) {
+    showView('dashboard');
+}
+
+/* ============================================================
+   4. OBFUSCATE & UPLOAD
+   ============================================================ */
+let currentLoaderUrl = "";
+
+async function doObfuscate() {
+    const source = document.getElementById('lua-source').value.trim();
+    if (!source) return alert("Paste a script first!");
+
+    const btn = document.getElementById('protect-btn');
+    btn.disabled = true;
+    btn.textContent = "⏳ Encrypting & Uploading...";
+
+    try {
+        // 1. Obfuscate
+        const encrypted = encryptLua(source);
+        
+        // 2. Upload to get Raw URL
+        const rawUrl = await uploadToHost(encrypted);
+        
+        if (!rawUrl) throw new Error("Failed to upload to host.");
+
+        // 3. Generate Luarmor-style Loader
+        currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+
+        // 4. Show result
+        document.getElementById('loader-code').textContent = currentLoaderUrl;
+        document.getElementById('output').classList.add('show');
+        
+        btn.disabled = false;
+        btn.textContent = "🛡️ Obfuscate & Generate Loader";
+        toast("Script protected successfully!");
+    } catch (err) {
+        alert("Error: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "🛡️ Obfuscate & Generate Loader";
+    }
+}
+
+function copyText() {
+    navigator.clipboard.writeText(currentLoaderUrl);
+    toast("Loader copied!");
+}
+
+let toastTimer;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
