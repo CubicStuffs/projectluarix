@@ -76,8 +76,6 @@
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
-  
-  /* Collapsed State */
   .sidebar.collapsed { width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
@@ -375,12 +373,9 @@ function toggleSidebar() {
     
     sidebar.classList.toggle('collapsed');
     
-    // Check if it's collapsed to change the arrow direction
     if (sidebar.classList.contains('collapsed')) {
-        // Change to right arrow >
         icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
     } else {
-        // Change to left arrow <
         icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
     }
 }
@@ -414,17 +409,6 @@ warn("[Luarix] Launching Script... [5]")
 task.wait(0.2)
 loadstring(s)()
 `.trim();
-}
-
-async function uploadToHost(obfuscatedCode) {
-    try {
-        const response = await fetch("https://api.pastes.dev/post", {
-            method: "POST", headers: { "Content-Type": "text/plain" }, body: obfuscatedCode
-        });
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data.key; 
-    } catch (err) { return null; }
 }
 
 /* ============================================================
@@ -599,7 +583,7 @@ function toggleObfuscator() {
     }
 }
 
-// PROJECTS
+// PROJECTS (Local Storage for immediate UI update)
 function getProjects() {
     const auth = getAuth();
     if (!auth) return [];
@@ -668,6 +652,9 @@ function copySavedLoader(id) {
 let currentLoaderUrl = "";
 let currentObfuscatedCode = "";
 
+/* ============================================================
+   5. DATABASE INTEGRATION (NEW)
+   ============================================================ */
 async function doObfuscate() {
     const auth = getAuth();
     
@@ -675,7 +662,6 @@ async function doObfuscate() {
         return alert("You have reached your 20 free obfuscations. Please upgrade or wait for the reset.");
     }
 
-    const editId = document.getElementById('edit-id').value;
     const name = document.getElementById('project-name').value.trim() || "Untitled Project";
     const source = document.getElementById('lua-source').value.trim();
     
@@ -688,63 +674,65 @@ async function doObfuscate() {
     btn.disabled = true;
     btn.textContent = "Processing...";
     output.style.display = 'block';
-    loaderCode.value = "Please wait...";
+    loaderCode.value = "Saving to Database...";
 
     await new Promise(r => setTimeout(r, 50));
 
     try {
+        // 1. Obfuscate locally
         const encrypted = encryptLua(source);
         currentObfuscatedCode = encrypted;
-        
-        const key = await uploadToHost(encrypted);
-        let loader = "";
 
-        if (key) {
-            const customUrl = `https://${window.location.host}/api/raw?key=${key}`;
-            loader = `loadstring(game:HttpGet("${customUrl}"))()`;
-        } else {
-            loader = `loadstring([==[\n${encrypted}\n]==])()`;
-        }
+        // 2. Send to Vercel API (Which saves to Supabase)
+        const response = await fetch('/api/create_script', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                name: name, 
+                code: encrypted, 
+                api_key: auth.email // Using email as the API key for this demo
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!data.success) throw new Error(data.error || "Failed to save script to database");
+
+        // 3. Generate the new Key System Loader
+        const customUrl = `https://${window.location.host}/api/loader?id=${data.id}`;
+        const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}&key="..script_key.."&hwid="..(gethwid and gethwid() or game:GetService("RbxAnalyticsService"):GetClientId())))()`;
 
         loaderCode.value = loader;
         currentLoaderUrl = loader;
+        document.getElementById('status-title').textContent = "✓ Saved to Database & Protected!";
 
+        // 4. Update Limits (if free)
         if (auth.plan === 'free') {
             auth.usage += 1;
             localStorage.setItem('luarix_auth_' + auth.email, JSON.stringify(auth));
             updateDashboardUI();
         }
 
+        // 5. Save locally just so the table updates instantly on the site
         let projects = getProjects();
-        if (editId) {
-            const idx = projects.findIndex(p => p.id === editId);
-            if (idx !== -1) {
-                projects[idx].name = name;
-                projects[idx].loader = loader;
-                projects[idx].originalSource = source;
-                projects[idx].date = new Date().toLocaleDateString() + " (Edited)";
-            }
-        } else {
-            projects.unshift({
-                id: key || Date.now().toString(),
-                name: name,
-                date: new Date().toLocaleDateString(),
-                loader: loader,
-                originalSource: source
-            });
-        }
-        
+        projects.unshift({
+            id: data.id, // Use the ID from the database
+            name: name,
+            date: new Date().toLocaleDateString(),
+            loader: loader,
+            originalSource: source
+        });
         saveProjects(projects);
         loadProjects();
         
-        document.getElementById('edit-id').value = '';
+        // Reset form
         document.getElementById('project-name').value = '';
         document.getElementById('lua-source').value = '';
-        document.getElementById('panel-title').textContent = "Create New Project";
         btn.textContent = "Obfuscate & Save Project";
 
     } catch (err) {
         alert("Error: " + err.message);
+        document.getElementById('output').style.display = 'none';
         btn.textContent = "Obfuscate & Save Project";
     } finally {
         btn.disabled = false;
