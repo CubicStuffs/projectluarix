@@ -60,21 +60,14 @@
   .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--glow); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   
-  /* PROGRESS BAR */
-  #progress-container { display: none; margin-top: 1.5rem; background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
-  #progress-text { font-size: 0.85rem; color: var(--gold); margin-bottom: 0.5rem; font-weight: bold; font-family: monospace;}
-  .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
-  #progress-bar { height: 100%; width: 0%; background: var(--gold-grad); transition: width 0.1s; }
-  
   /* OUTPUT BOX */
-  .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; animation: fadeIn 0.5s; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .output-box { display: none; margin-top: 2rem; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .output-box.show { display: block !important; }
   .output-box h3 { color: var(--success); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   
-  /* Textarea for Loader (Prevents freezing on huge scripts) */
   textarea#loader-code { 
     width: 100%; 
-    height: 120px; 
+    height: 100px; 
     background: #0a0a0a; 
     color: var(--gold); 
     border: 1px solid var(--border); 
@@ -139,16 +132,18 @@
         </div>
         <button class="btn-primary" id="protect-btn" onclick="doObfuscate()">⚡ Obfuscate & Generate Loader</button>
         
-        <div id="progress-container">
-          <div id="progress-text">Encrypting... 0%</div>
-          <div class="progress-bg"><div id="progress-bar"></div></div>
+        <!-- PROGRESS BAR -->
+        <div id="progress-container" style="display:none; margin-top:1.5rem; background:#000; border:1px solid var(--border); border-radius:8px; padding:1rem;">
+          <div id="progress-text" style="font-size:0.85rem; color:var(--gold); margin-bottom:0.5rem; font-weight:bold; font-family:monospace;">Encrypting... 0%</div>
+          <div style="width:100%; height:8px; background:#222; border-radius:4px; overflow:hidden;">
+             <div id="progress-bar" style="height:100%; width:0%; background:var(--gold-grad); transition:width 0.1s;"></div>
+          </div>
         </div>
 
         <div class="output-box" id="output">
           <h3 id="status-title">✓ Protected Successfully!</h3>
           
           <label>Loader (Copy & Execute)</label>
-          <!-- CHANGED TO TEXTAREA TO PREVENT BROWSER CRASH -->
           <textarea id="loader-code" readonly></textarea>
           
           <div class="btn-group">
@@ -182,29 +177,30 @@
 
 <script>
 /* ============================================================
-   1. ASYNC CHUNKED OBFUSCATOR
+   1. SYNCHRONOUS OBFUSCATOR (Extremely Fast & Stable)
    ============================================================ */
-function encryptLuaChunked(source, onProgress, onComplete) {
+function encryptLua(source) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(source);
+    let hexString = "";
+    
+    // Fast loop to generate hex
     const hexArr = new Array(bytes.length);
-    let i = 0;
-    const chunkSize = 10000;
-
-    function processChunk() {
-        const end = Math.min(i + chunkSize, bytes.length);
-        for (; i < end; i++) {
-            hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
-        }
-
-        if (i < bytes.length) {
-            onProgress(i / bytes.length);
-            setTimeout(processChunk, 0);
-        } else {
-            onComplete(hexArr.join(''), key);
-        }
+    for (let i = 0; i < bytes.length; i++) {
+        hexArr[i] = (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
-    processChunk();
+    hexString = hexArr.join('');
+
+    const luaCode = `
+-- Luarix Protected
+local h = "${hexString}"
+local k = ${key}
+local s = h:gsub("%x%x", function(c) 
+    return string.char(bit32.bxor(tonumber(c, 16), k)) 
+end)
+loadstring(s)()
+`.trim();
+    return luaCode;
 }
 
 /* ============================================================
@@ -257,98 +253,69 @@ if (localStorage.getItem('luarix_auth')) showView('dashboard');
 let currentLoaderUrl = "";
 let currentObfuscatedCode = "";
 
-function doObfuscate() {
+async function doObfuscate() {
     const source = document.getElementById('lua-source').value.trim();
     if (!source) return alert("Paste a script first!");
 
     const btn = document.getElementById('protect-btn');
     const output = document.getElementById('output');
+    const loaderCode = document.getElementById('loader-code');
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
-    const loaderCode = document.getElementById('loader-code');
 
+    // Reset UI
     btn.disabled = true;
     btn.textContent = "⏳ Encrypting...";
-    output.classList.remove('show');
+    output.style.display = 'none'; // Hide output initially
     progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressBar.style.background = 'var(--gold-grad)';
-    progressText.textContent = 'Encrypting... 0%';
-    loaderCode.value = "";
-    
-    const startTime = Date.now();
+    progressBar.style.width = '50%';
+    progressText.textContent = "Encrypting script...";
 
-    encryptLuaChunked(source, 
-        (progress) => {
-            const percent = Math.floor(progress * 100);
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `Encrypting... ${percent}%`;
-        }, 
-        (hexString, key) => {
-            // Use a small delay to let the browser render the final 100% progress
-            setTimeout(() => {
-                try {
-                    const encrypted = `
--- Luarix Protected (v8.0)
-local h = "${hexString}"
-local k = ${key}
-local s = h:gsub("%x%x", function(c) 
-    return string.char(bit32.bxor(tonumber(c, 16), k)) 
-end)
-local f, err = loadstring(s)
-if f then f() else warn(err) end
-`.trim();
+    // Delay to let browser paint the UI before the heavy loop
+    await new Promise(r => setTimeout(r, 50));
 
-                    currentObfuscatedCode = encrypted;
-                    currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
+    try {
+        // 1. Encrypt
+        const encrypted = encryptLua(source);
+        currentObfuscatedCode = encrypted;
+        
+        progressBar.style.width = '100%';
+        progressText.textContent = "Uploading to server...";
+        btn.textContent = "⏳ Uploading...";
 
-                    // Safely inject into the textarea instead of a div
-                    loaderCode.value = currentLoaderUrl;
+        // 2. Upload to get HttpGet URL
+        const rawUrl = await uploadToHost(encrypted);
 
-                    const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-                    progressBar.style.width = '100%';
-                    progressBar.style.background = 'var(--success)';
-                    progressText.textContent = `Completed in ${timeTaken} seconds!`;
-                    
-                    // SHOW OUTPUT BOX
-                    output.classList.add('show');
-                    
-                    // Hide progress bar after 2 seconds
-                    setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
-                    
-                    // Force scroll down to show the output
-                    setTimeout(() => { output.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
-
-                    // Fetch HttpGet
-                    btn.textContent = "⏳ Fetching URL...";
-                    uploadToHost(encrypted).then(rawUrl => {
-                        if (rawUrl) {
-                            currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
-                            loaderCode.value = currentLoaderUrl;
-                            document.getElementById('status-title').textContent = "✓ Protected (HttpGet Loader Ready)";
-                        }
-                        btn.disabled = false;
-                        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-                    }).catch(() => {
-                        btn.disabled = false;
-                        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-                    });
-
-                } catch (err) {
-                    alert("Encryption Error: " + err.message);
-                    btn.disabled = false;
-                    btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
-                }
-            }, 50);
+        if (rawUrl) {
+            currentLoaderUrl = `loadstring(game:HttpGet("${rawUrl}"))()`;
+            document.getElementById('status-title').textContent = "✓ Protected (HttpGet Ready)";
+        } else {
+            // Fallback to Inline if upload fails
+            currentLoaderUrl = `loadstring([==[\n${encrypted}\n]==])()`;
+            document.getElementById('status-title').textContent = "✓ Protected (Inline Ready)";
         }
-    );
+
+        // 3. Show Output
+        loaderCode.value = currentLoaderUrl;
+        output.style.display = 'block'; 
+        progressContainer.style.display = 'none';
+        
+        // Auto-scroll to show the result
+        setTimeout(() => output.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+
+    } catch (err) {
+        alert("Error: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "⚡ OBFUSCATE & GENERATE LOADER";
+    }
 }
 
 function copyText() {
     const loaderCode = document.getElementById('loader-code');
     loaderCode.select();
-    document.execCommand("copy");
+    navigator.clipboard.writeText(loaderCode.value);
     alert("Loader copied to clipboard!");
 }
 
