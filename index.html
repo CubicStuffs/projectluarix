@@ -339,7 +339,7 @@ async function doObfuscate() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("https://${window.location.host}/api/loader?id=${data.id}&key="..script_key.."&hwid="..gethwid()))()`;
+        const loader = `script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("${customUrl}"))()`;
         document.getElementById('loader-code').value = loader;
         document.getElementById('status-title').textContent = "Saved successfully!";
 
