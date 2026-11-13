@@ -242,7 +242,7 @@
 
       <h2 id="script-loader">How to Use Loaders</h2>
       <p>Once you create a script on the dashboard, you will receive a loader URL. It looks like this:</p>
-      <div class="code-block">script_key="YOUR_KEY_HERE"; loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader?id=YOUR_SCRIPT_ID"))()</div>
+      <div class="code-block">local script_key = "YOUR_KEY_HERE"<br>local hwid = game:GetService("RbxAnalyticsService"):GetClientId()<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader?id=YOUR_SCRIPT_ID&key="..script_key.."&hwid="..hwid))()</div>
       <p>If the script is <strong>Keyless</strong>, users do not need a key. If it requires a key, users must redeem a key via your Discord panel and paste it into the <code>script_key</code> variable.</p>
 
       <h2 id="cmd-setpanel">/setpanel</h2>
@@ -309,7 +309,6 @@
         <span class="menu-text">Add to Discord</span>
       </div>
 
-      <!-- NEW TAB: ADMIN KEYS -->
       <div class="menu-item" id="tab-admin-keys" style="display: none;" onclick="switchTab('admin-keys')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
         <span class="menu-text" style="color: var(--gold);">Admin API Keys</span>
@@ -414,7 +413,6 @@
           </div>
         </div>
 
-        <!-- TAB: ADMIN KEYS -->
         <div id="content-admin-keys" style="display: none;">
           <div class="monetize-container" style="max-width: 800px;">
             <h3 style="color: var(--gold);">Admin API Key Generator</h3>
@@ -827,7 +825,7 @@ async function saveMonetization() {
 }
 
 /* ==========================================
-   6. ADMIN KEY GENERATOR (NEW)
+   6. ADMIN KEY GENERATOR
    ========================================== */
 function generateAdminKey(type) {
     const chars = 'ABCDEF0123456789';
