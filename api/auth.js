@@ -76,9 +76,9 @@ export default async function handler(req, res) {
             if (!keyData) return res.status(400).json({ error: 'Invalid API Key' });
 
             let plan = 'free';
-            if (paid_key.startsWith('LXR-PREM-')) plan = 'premium';
+            if (paid_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
             else if (paid_key.startsWith('LXR-BASIC-')) plan = 'basic';
-            else if (paid_key.startsWith('LXR-ADMIN-')) plan = 'admin';
+            else if (paid_key.startsWith('LXR-ADMIN-') || paid_key === 'ADMIN') plan = 'admin';
 
             const { error: updateErr } = await supabase.from('users').update({ discord_id, email, plan }).eq('api_key', paid_key);
             if (updateErr) return res.status(500).json({ error: "Update Error: " + updateErr.message });
