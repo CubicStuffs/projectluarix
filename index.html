@@ -205,7 +205,6 @@
     <a href="https://discord.gg/KSdDSrmaCT" target="_blank">Discord</a>
     <a onclick="showView('docs', 'faq')">F.A.Q</a>
   </div>
-  <!-- ✅ Yahan Sign in aur Sign up dono add kar diye hain -->
   <div id="nav-auth">
     <button class="btn-signin" onclick="openLogin()">Sign in</button>
     <button class="btn-gold" onclick="openSignup()">Sign up</button>
@@ -213,7 +212,6 @@
 </nav>
 
 <div id="view-landing">
-  <!-- ✅ Background Mockup Wapas Add Ho Gaya -->
   <div class="bg-dashboard-mockup">
     <div class="mockup-header"><div class="mockup-title"></div><div class="mockup-user"></div></div>
     <div class="mockup-stats"><div class="mockup-stat-box"></div><div class="mockup-stat-box"></div></div>
@@ -229,7 +227,6 @@
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
   </section>
 
-  <!-- ✅ Features Section Wapas Add Ho Gaya -->
   <section class="features-section">
     <h2>Powerful <span>Features</span> You'll Love</h2>
     <p class="subtitle">Everything you need to manage your scripts and users automatically.</p>
@@ -266,7 +263,6 @@
     <h2>Simple, transparent pricing</h2>
     <div class="pricing-grid">
       
-      <!-- FREE PLAN -->
       <div class="price-card">
         <h3>Free</h3>
         <p class="desc">Try out Luarix with basic features and 20 obfuscations per week.</p>
@@ -627,6 +623,9 @@
       <label for="signup-tos" style="margin: 0; font-size: 0.85rem;">I read and agree to the <a href="#" style="color: var(--gold);">Terms of Service</a></label>
     </div>
 
+    <!-- ✅ Turnstile Widget yahan aayega -->
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAAGAxWXrid9P4VJFA" data-theme="dark" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+
     <button class="btn-gold" style="width: 100%; padding: 1rem;" onclick="handleSignup()">REGISTER</button>
     <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem;">Don't have an invite code? <a href="https://discord.gg/KSdDSrmaCT" target="_blank" style="color: var(--gold); text-decoration: none;">Get one</a></p>
     <p style="text-align: center; margin-top: 0.5rem; font-size: 0.85rem;">Already have an account? <a href="#" onclick="openLogin()" style="color: var(--gold); text-decoration: none;">Log in</a></p>
@@ -755,31 +754,6 @@ async function handleSignup() {
     } catch (err) {
         showToast(err.message);
         if(window.turnstile) window.turnstile.reset(); // Reset widget on error
-    } finally {
-        btn.textContent = "REGISTER"; btn.disabled = false;
-    }
-}
-    if (!email || !discord_id) return showToast("Email and Discord ID are required.");
-    if (!tos) return showToast("You must agree to the Terms of Service.");
-<!-- ✅ Turnstile Widget -->
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAGAxWXrid9P4VJFA" data-theme="dark" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
-    const btn = document.querySelector('#signup-modal .btn-gold');
-    btn.textContent = "Registering..."; btn.disabled = true;
-
-    try {
-        const res = await fetch('/api/auth', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'signup', email, discord_id, paid_key })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Signup failed");
-
-        showToast(`Registered! Your API Key is: ${data.user.api_key}`);
-        currentAuth = data.user;
-        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
-        closeLogin(); loadDashboard();
-    } catch (err) {
-        showToast(err.message);
     } finally {
         btn.textContent = "REGISTER"; btn.disabled = false;
     }
