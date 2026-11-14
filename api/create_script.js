@@ -3,9 +3,8 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// ✅ STRONG OBFUSCATION LOGIC (Server-Side)
+// ✅ STEALTH OBFUSCATION LOGIC
 function customObfuscate(luaCode) {
-    // 1. String Encryption & Splitting
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(luaCode);
     let hex = ""; 
@@ -13,59 +12,54 @@ function customObfuscate(luaCode) {
         hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
     }
     
-    // 2. Split hex into chunks to prevent easy dumping
     const chunkSize = 500;
     let chunks = [];
     for (let i = 0; i < hex.length; i += chunkSize) {
         chunks.push(hex.substring(i, i + chunkSize));
     }
     
-    // 3. Generate a completely randomized variable name for the VM
-    const randVar = "v_" + crypto.randomBytes(4).toString('hex');
-    const loaderVar = "l_" + crypto.randomBytes(4).toString('hex');
+    // Randomize variable names heavily
+    const v1 = "_" + crypto.randomBytes(3).toString('hex');
+    const v2 = "_" + crypto.randomBytes(3).toString('hex');
+    const v3 = "_" + crypto.randomBytes(3).toString('hex');
     
-    // 4. Anti-Tamper & Custom VM State Machine
+    // Obfuscated strings (hookfunction, getrawmetatable, print, reverse)
     const obfuscatedCode = `
--- Luarix Custom VM (Anti-Dump)
-local ${randVar} = {
-    ${chunks.map((c, i) => `"${c}"`).join(',\n    ')}
-}
-local ${loaderVar} = ${key}
+local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
+local ${v2} = ${key}
 
--- 🛑 ANTI-TAMPER CHECKS
 pcall(function()
-    local env = getfenv(0)
-    if env.hookfunction or env.getrawmetatable or (env.debug and env.debug.getinfo) then
-        -- Dumper detected, crash the script safely
-        while true do end
+    local ${v3} = getfenv(0)
+    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
+    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
+    if ${v3}[_f1] or ${v3}[_f2] then 
+        local _x = 0
+        while true do _x = _x + 1 end 
     end
 end)
 
--- 🛑 ANTI-STRING DUMP
 pcall(function()
-    if string.reverse("") ~= "" or tostring(print) == "function: 0000" then
-        while true do end
+    local _p = string.char(112,114,105,110,116)
+    local _s = string.char(114,101,118,101,114,115,101)
+    if tostring(${v3}[_p]) == "function: 0000" or string[_s]("") ~= "" then
+        local _x = 0
+        while true do _x = _x + 1 end
     end
 end)
 
-local function ${randVar}_decrypt()
-    local finalHex = table.concat(${randVar}, "")
-    local s = finalHex:gsub("%x%x", function(c) 
-        return string.char(bit32.bxor(tonumber(c, 16), ${loaderVar})) 
+local function ${v1}_d()
+    local _h = table.concat(${v1}, "")
+    return _h:gsub("%x%x", function(c) 
+        return string.char(bit32.bxor(tonumber(c, 16), ${v2})) 
     end)
-    return s
 end
 
-local isSuccess, finalCode = pcall(function() return ${randVar}_decrypt() end)
-if isSuccess and finalCode then
-    local func, err = loadstring(finalCode)
-    if func then 
-        pcall(func) 
-    else
-        warn("[Luarix VM] Execution failed: " .. tostring(err))
+local _s, _c = pcall(${v1}_d)
+if _s and _c then
+    local _f, _e = loadstring(_c)
+    if _f then 
+        pcall(_f) 
     end
-else
-    warn("[Luarix VM] Decryption failed. Anti-Tamper triggered.")
 end
     `.trim();
 
@@ -89,7 +83,6 @@ export default async function handler(req, res) {
             user = newUser;
         }
 
-        // Obfuscation Limit Check
         if (user && user.plan === 'free') {
             let used = user.obfuscations_used || 0;
             let resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
@@ -107,7 +100,6 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        // ✅ Apply Strong Obfuscation here
         const finalObfuscatedCode = customObfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
