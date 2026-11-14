@@ -3,40 +3,53 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// 🚀 LUARIX V14 (The Abyss Engine - Anti-AI)
-function luarixV14Obfuscate(luaCode) {
-    // 1. Base64 Encode + XOR + Hex (Triple Layer)
-    const b64 = Buffer.from(luaCode, 'utf-8').toString('base64');
-    const bytes = new TextEncoder().encode(b64);
-    let hex = "";
-    const polyKey = Math.floor(Math.random() * 100) + 20;
-    
+// 🚀 LUARIX V15 (True State Machine / Anti-AI)
+function luarixV15Obfuscate(luaCode) {
+    const bytes = new TextEncoder().encode(luaCode);
+    let hexData = [];
+    let rollingKey = Math.floor(Math.random() * 100) + 50;
+    const initialKey = rollingKey;
+
+    // 1. Dynamic Key Encryption
     for (let i = 0; i < bytes.length; i++) {
-        // Polynomial Math (Harder for AI to solve)
-        let val = (bytes[i] ^ (polyKey + (i % 4))) + (polyKey * 2);
-        hex += (val % 256).toString(16).padStart(2, "0");
+        let enc = (bytes[i] ^ rollingKey) % 256;
+        hexData.push(enc.toString(16).padStart(2, "0"));
+        // Rolling key changes based on previous byte and index
+        rollingKey = (rollingKey * 33 + bytes[i] + i) % 256;
     }
 
-    // 2. Split into 3 chunks (AI cannot see full string at once)
-    const chunkSize = Math.ceil(hex.length / 3);
-    const c1 = hex.substring(0, chunkSize);
-    const c2 = hex.substring(chunkSize, chunkSize * 2);
-    const c3 = hex.substring(chunkSize * 2);
+    // 2. Shuffle the array (Control Flow Flattening)
+    let indexed = hexData.map((h, i) => ({ h, i }));
+    indexed.sort(() => Math.random() - 0.5);
+    const shuffled = indexed.map(obj => obj.h);
+    const indexMap = indexed.map(obj => obj.i);
 
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
+    const v5 = "_" + crypto.randomBytes(4).toString('hex');
+    const v6 = "_" + crypto.randomBytes(4).toString('hex');
 
-    // 3. Generate Fake VM Logic
+    // 3. Generate Virtual Machine Logic
     return `
 local _e = getfenv(0)
-local ${v1} = "${c1}" .. "${c2}" .. "${c3}"
-local ${v2} = ${polyKey}
-local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
-local _dec = ""
+local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
+local ${v2} = { ${indexMap.join(",")} }
+local ${v3} = ${initialKey}
+local ${v4} = ""
+local ${v5} = 1
+local ${v6} = 0
 
--- 🛑 FORT KNOX ANTI-TAMPER
+-- 🛑 Fake VM Execution (Wastes AI Tokens)
+while ${v6} < 50 do
+    ${v6} = ${v6} + 1
+    if ${v6} % 2 == 0 then
+        local _fake = (${v6} * ${initialKey}) % 255
+    end
+end
+
+-- 🛑 ANTI-TAMPER (Silent Crash)
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _h2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
@@ -46,48 +59,46 @@ pcall(function()
     end
 end)
 
--- 🧠 FAKE VM EXECUTION (Wastes AI Tokens)
-local _vm = 0
-while _vm < 100 do
-    _vm = _vm + 1
-    if _vm % 2 == 0 then
-        local _temp = (_vm * ${polyKey}) % 255
-    end
-end
-
--- 🔄 REAL DECRYPTION (Buried Deep)
-for i = 1, #${v1}, 2 do
-    local h = ${v1}:sub(i, i+1)
-    local b = tonumber(h, 16)
-    -- Reverse Polynomial
-    b = (b - (${v2} * 2)) % 256
-    b = bit32.bxor(b, (${v2} + (math.floor((i-1)/2) % 4)) % 256)
-    _dec = _dec .. string.char(b)
-end
-
--- 🔓 BASE64 DECODER + LOADSTRING
-local function b64_decode(data)
-    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    data = string.gsub(data, '[^'..b..'=]', '')
-    return (data:gsub('.', function(x)
-        if (x == '=') then return '' end
-        local r,f='',(b:find(x)-1)
-        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
-        return r
-    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
-        if (#x ~= 8) then return '' end
-        local c=0
-        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
-        return string.char(c)
-    end))
-end
-
-local _final = b64_decode(_dec)
-if _ls and _final then
-    local _f = _ls(_final)
-    if _f then
-        setfenv(_f, _e)
-        pcall(_f)
+-- 🔄 STATE MACHINE EXECUTION
+while true do
+    if ${v5} == 1 then
+        -- Opaque Predicate (Fake Math)
+        local _x = (${initialKey} * 3) % 7
+        if (_x * _x) % 2 == _x % 2 then
+            ${v5} = 2
+        else
+            ${v5} = 1
+        end
+    elseif ${v5} == 2 then
+        -- Reconstruct Array
+        local _tmpHex = {}
+        for i = 1, #${v2} do
+            _tmpHex[${v2}[i] + 1] = ${v1}[i]
+        end
+        ${v5} = 3
+    elseif ${v5} == 3 then
+        -- Decryption Logic
+        local _rk = ${v3}
+        for i = 1, #_tmpHex do
+            local b = tonumber(_tmpHex[i], 16)
+            b = bit32.bxor(b, _rk % 256)
+            ${v4} = ${v4} .. string.char(b)
+            _rk = (_rk * 33 + b + (i-1)) % 256
+        end
+        ${v5} = 4
+    elseif ${v5} == 4 then
+        -- Hidden Loadstring
+        local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+        if _ls then
+            local _f = _ls(${v4})
+            if _f then
+                setfenv(_f, _e)
+                pcall(_f)
+            end
+        end
+        ${v5} = 5
+    elseif ${v5} == 5 then
+        break
     end
 end
     `.trim();
@@ -116,7 +127,7 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        const finalObfuscatedCode = luarixV14Obfuscate(code);
+        const finalObfuscatedCode = luarixV15Obfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
         const { error } = await supabase.from('scripts').insert({ id: id, name: name, lua_code: finalObfuscatedCode, original_code: original_code, api_key: api_key, keyless: keyless || false });
