@@ -6,12 +6,8 @@ export default async function handler(req, res) {
     const { id, key, hwid } = req.query; 
     if (!id) return res.status(400).send('-- Error: Missing script ID.');
 
-    // ✅ FIX 1: SMART BROWSER CHECK
-    // Mobile executors (Delta, Arceus) ka User-Agent 'Mozilla' hota hai, par wo browser nahi hote.
     const userAgent = (req.headers['user-agent'] || '').toLowerCase();
     const isExecutor = userAgent.includes('roblox') || userAgent.includes('delta') || userAgent.includes('arceus') || userAgent.includes('fluxus') || userAgent.includes('codex') || userAgent.includes('solara');
-    
-    // Agar browser hai AUR executor nahi hai, tabhi HTML dikhao
     const isBrowser = (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari') || userAgent.includes('edge')) && !isExecutor;
 
     if (isBrowser) {
@@ -26,36 +22,17 @@ export default async function handler(req, res) {
                 <title>Luarix | Loadstring</title>
                 <style>
                     * { box-sizing: border-box; margin: 0; padding: 0; }
-                    body {
-                        background-color: #0f172a; color: #f8fafc;
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        display: flex; flex-direction: column; align-items: center; justify-content: center;
-                        min-height: 100vh; padding: 1rem;
-                    }
+                    body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
                     .container { width: 100%; max-width: 850px; text-align: center; }
                     .header { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; color: #f8fafc; }
                     .header img { height: 40px; filter: drop-shadow(0 0 10px rgba(245, 197, 24, 0.3)); }
-                    .code-box {
-                        background-color: #1e293b; border: 1px solid #334155; border-radius: 12px;
-                        padding: 1.5rem; position: relative; text-align: left; overflow-x: auto;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-                    }
-                    .code-box::-webkit-scrollbar { height: 8px; }
-                    .code-box::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
-                    .code-box::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-                    .code-content {
-                        font-family: 'Consolas', 'Courier New', monospace; font-size: 0.95rem;
-                        line-height: 1.6; white-space: pre; padding-right: 50px;
-                    }
+                    .code-box { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; position: relative; text-align: left; overflow-x: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                    .code-content { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.95rem; line-height: 1.6; white-space: pre; padding-right: 50px; }
                     .keyword { color: #f472b6; }
                     .string { color: #10b981; }
                     .comment { color: #64748b; font-style: italic; }
                     .function { color: #3b82f6; }
-                    .copy-btn {
-                        position: absolute; top: 1.2rem; right: 1.2rem; background-color: #334155;
-                        color: #f8fafc; border: none; padding: 0.5rem 1rem; border-radius: 6px;
-                        cursor: pointer; font-weight: 600; transition: 0.2s;
-                    }
+                    .copy-btn { position: absolute; top: 1.2rem; right: 1.2rem; background-color: #334155; color: #f8fafc; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
                     .copy-btn:hover { background-color: #475569; }
                     .footer { margin-top: 1.5rem; font-size: 0.95rem; color: #94a3b8; line-height: 1.6; }
                     .footer span { color: #f5c518; font-weight: 800; letter-spacing: 1px; }
@@ -93,10 +70,8 @@ export default async function handler(req, res) {
         `);
     }
 
-    // ✅ EXECUTOR LOGIC
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    // ✅ FIX 2: UNIVERSAL HTTP REQUEST & SAFE HWID (For Mobile Executors)
     if (!key) {
         const wrapper = `
 -- Luarix Universal Loader (Mobile Supported)
@@ -153,34 +128,40 @@ end
         return res.status(200).send(wrapper);
     }
 
-    // IF KEY IS PRESENT, VALIDATE AND SEND SCRIPT
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
     try {
         const { data: script, error: scriptErr } = await supabase.from('scripts').select('*').eq('id', id).single();
         if (scriptErr || !script) return res.status(404).send('-- Error: Script not found.');
         
-        // ✅ KILL SWITCH CHECK
         if (script.is_disabled) {
             return res.status(200).send('warn("[Luarix] This script has been temporarily disabled by the owner.")\ngame.Players.LocalPlayer:Kick("Script Disabled")');
         }
 
-        if (script.keyless) return res.status(200).send(script.lua_code);
+        // ✅ FIX 1: Keyless scripts ka bhi execution count badhao
+        if (script.keyless) {
+            // Naya SQL function call karo script ID ke sath
+            await supabase.rpc('increment_executions', { script_id: id });
+            return res.status(200).send(script.lua_code);
+        }
 
         const { data: keyData, error: keyErr } = await supabase.from('script_keys').select('*').eq('key', key).single();
         if (keyErr || !keyData || keyData.script_id !== id) return sendAuthError(res, "Invalid script_key.");
         if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) return sendAuthError(res, "This script_key has expired.");
         if (keyData.banned) return sendAuthError(res, "This key has been banned.");
 
-        // ✅ FIX 3: Mobile HWID Bypass & Fallback
         if (!keyData.hwid || keyData.hwid === "unknown" || keyData.hwid === "" || keyData.hwid.includes("_mobile")) {
             await supabase.from('script_keys').update({ hwid: hwid }).eq('key', key);
         } else if (keyData.hwid !== hwid && !hwid.includes("_mobile")) {
             return sendAuthError(res, "HWID Mismatch. This key is locked to another device.");
         }
 
+        // Key executions update
         const newExecs = (keyData.executions || 0) + 1;
         await supabase.from('script_keys').update({ executions: newExecs }).eq('key', key);
+
+        // ✅ FIX 2: Scripts table mein executions aur last_used update karo
+        await supabase.rpc('increment_executions', { script_id: id });
 
         return res.status(200).send(script.lua_code);
 
