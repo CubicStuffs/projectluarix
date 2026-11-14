@@ -3,7 +3,6 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// 🚀 LUARIX V8 ENGINE (Context Killer / Anti-AI)
 function luarixV8Obfuscate(luaCode) {
     const salt1 = Math.floor(Math.random() * 100) + 10;
     const salt2 = Math.floor(Math.random() * 50) + 5;
@@ -15,11 +14,12 @@ function luarixV8Obfuscate(luaCode) {
         hexArray.push(enc.toString(16).padStart(2, "0"));
     }
 
-    // 1. Shuffle the array (AI won't know the original order)
-    const shuffled = [...hexArray].sort(() => Math.random() - 0.5);
-    const indexMap = hexArray.map(h => shuffled.indexOf(h));
+    // ✅ FAST SHUFFLE (Prevents Vercel Timeout)
+    let indexed = hexArray.map((h, i) => ({ h, i }));
+    indexed.sort(() => Math.random() - 0.5);
+    const shuffled = indexed.map(obj => obj.h);
+    const indexMap = indexed.map(obj => obj.i);
 
-    // 2. Generate Junk Code (Opaque Predicates)
     let junk = "";
     for (let i = 0; i < 30; i++) {
         junk += `local _junk${i} = (${Math.random() * 1000} * ${Math.random() * 1000}) % 255\n`;
@@ -41,7 +41,6 @@ local ${v5} = ""
 
 ${junk}
 
--- Anti-Tamper (Silent Crash)
 pcall(function()
     local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
@@ -51,16 +50,12 @@ pcall(function()
     end
 end)
 
--- Reconstruct and Decrypt
 for _i = 1, #${v2} do
     local _idx = ${v2}[_i] + 1
     local _h = ${v1}[_idx]
     local _b = tonumber(_h, 16)
-    
-    -- Reverse math: ((b - salt2) % 256) ^ (salt1 + i)
     _b = (_b - ${v4}) % 256
     _b = bit32.bxor(_b, (${v3} + _i) % 256)
-    
     ${v5} = ${v5} .. string.char(_b)
 end
 
@@ -68,8 +63,7 @@ local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
 if _ls then
     local _func = _ls(${v5})
     if _func then
-        local _env = _e
-        setfenv(_func, _env)
+        setfenv(_func, _e)
         pcall(_func)
     end
 end
