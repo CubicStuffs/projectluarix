@@ -1,4 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
+function genScriptKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let key = '';
+  for (let i = 0; i < 32; i++) {
+    key += chars[crypto.randomInt(0, chars.length)];
+  }
+  return key;
+}
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 export default async function handler(req, res) {
