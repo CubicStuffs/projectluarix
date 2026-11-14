@@ -525,9 +525,9 @@
           <div id="admin-key-result" style="display: none; background: var(--bg-sidebar); padding: 2rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;"></div>
         </div>
       </div>
-    </div> <!-- ✅ FIX 1: Close main-content -->
-  </div> <!-- ✅ FIX 2: Close dash-layout -->
-</div> <!-- ✅ FIX 3: Close view-dashboard -->
+    </div> <!-- ✅ Close main-content -->
+  </div> <!-- ✅ Close dash-layout -->
+</div> <!-- ✅ Close view-dashboard -->
 
 <!-- MODALS -->
 <div class="modal-bg" id="create-modal">
@@ -641,7 +641,7 @@
 <script>
 let currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
-let currentOriginalCode = "";
+let currentDownloadCode = ""; // ✅ Updated Variable
 
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification'); if (oldToast) oldToast.remove();
@@ -883,10 +883,10 @@ async function openManageModal(id) {
     
     document.getElementById('manage-loader-text').innerText = `script_key="YOUR_KEY_HERE";\nloadstring(game:HttpGet("${window.location.origin}/api/loader/${id}"))()`;
     
-    currentOriginalCode = "";
+    currentDownloadCode = ""; // ✅ Changed to currentDownloadCode
     const res = await fetch(`/api/manage?action=get_script_details&api_key=${currentAuth.api_key}&script_id=${id}`);
     const data = await res.json();
-    if (data.original_code) currentOriginalCode = data.original_code;
+    if (data.code) currentDownloadCode = data.code; // ✅ Ab data.code ayega (encrypted)
     
     document.getElementById('manage-modal').classList.add('show');
 }
@@ -898,18 +898,18 @@ function copyLoader() {
 }
 
 function downloadOriginalCode() {
-    if (!currentOriginalCode) return showToast("Original code not available.");
+    if (!currentDownloadCode) return showToast("Code not available.");
     const scriptName = document.getElementById('manage-title').textContent.replace("Manage: ", "").trim();
-    const blob = new Blob([currentOriginalCode], { type: 'text/plain' });
+    const blob = new Blob([currentDownloadCode], { type: 'text/plain' }); // ✅ Changed to currentDownloadCode
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${scriptName}.lua`;
+    a.download = `${scriptName}_obfuscated.lua`; // ✅ Filename change kiya
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast("Downloaded!");
+    showToast("Obfuscated code Downloaded!");
 }
 
 async function toggleKillSwitchFromModal() {
