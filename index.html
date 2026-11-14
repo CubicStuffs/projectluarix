@@ -13,9 +13,7 @@
     --text: #f8fafc; --text-muted: #94a3b8; --gold: #f5c518; --primary: #3b82f6;
     --success: #10b981; --danger: #ef4444; --discord: #5865F2;
   }
-  
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; scroll-behavior: smooth; }
-  
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes toastSlideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -30,16 +28,9 @@
   .btn-gold { background: var(--gold); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 197, 24, 0.4); }
 
-  /* ✅ LANDING PAGE */
+  /* LANDING & FEATURES & PRICING */
   #view-landing { display: block; animation: fadeIn 0.8s ease-out; position: relative; overflow: hidden; min-height: 100vh; }
-  
-  .bg-dashboard-mockup {
-    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-    width: 1200px; height: 700px; opacity: 0.1; pointer-events: none; z-index: 0;
-    display: flex; flex-direction: column; gap: 20px;
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
-  }
+  .bg-dashboard-mockup { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 1200px; height: 700px; opacity: 0.1; pointer-events: none; z-index: 0; display: flex; flex-direction: column; gap: 20px; mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%); }
   .mockup-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
   .mockup-title { width: 150px; height: 20px; background: var(--text-muted); border-radius: 4px; }
   .mockup-user { width: 100px; height: 20px; background: var(--border); border-radius: 4px; }
@@ -53,7 +44,6 @@
   .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
   .hero h1 .highlight { color: var(--gold); }
 
-  /* ✅ FEATURES SECTION */
   .features-section { padding: 4rem 1rem; max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; text-align: center; }
   .features-section h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
   .features-section h2 span { color: var(--primary); }
@@ -64,10 +54,9 @@
   .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
   .feature-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
 
-  /* ✅ PRICING SECTION */
-  .pricing-section { padding: 4rem 1rem 6rem; max-width: 1250px; margin: 0 auto; position: relative; z-index: 2; }
+  .pricing-section { padding: 4rem 1rem 6rem; max-width: 1300px; margin: 0 auto; position: relative; z-index: 2; }
   .pricing-section h2 { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 3rem; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: stretch; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; align-items: stretch; }
   .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem 1.5rem; display: flex; flex-direction: column; position: relative; }
   .price-card.popular { border-color: var(--gold); animation: pulseGlow 3s infinite; transform: scale(1.02); z-index: 3; background: #1a2235; }
   .price-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.8rem; border-radius: 4px; }
@@ -85,7 +74,7 @@
   .price-card.popular .btn-buy { background: var(--gold); color: #000; border: none; }
   .price-card.popular .btn-buy:hover { background: #e0b310; }
 
-  /* ✅ FOOTER */
+  /* FOOTER */
   footer { background: #050810; padding: 4rem 2rem 2rem; border-top: 1px solid var(--border); position: relative; z-index: 2; }
   .footer-content { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; }
   .footer-brand { max-width: 300px; }
@@ -98,7 +87,7 @@
   .footer-bottom { max-width: 1100px; margin: 3rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
   .footer-bottom strong { color: var(--gold); }
 
-  /* ✅ DOCS PAGE & FAQ */
+  /* DOCS PAGE */
   #view-docs { display: none; padding-top: 6rem; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
   .docs-layout { display: flex; gap: 2rem; padding: 0 2rem 4rem 2rem; }
   .docs-sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 6rem; height: calc(100vh - 8rem); overflow-y: auto; border-right: 1px solid var(--border); padding-right: 1rem; }
@@ -106,7 +95,6 @@
   .docs-sidebar h3:first-child { margin-top: 0; }
   .docs-link { display: block; color: var(--text-muted); text-decoration: none; padding: 0.5rem 0; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
   .docs-link:hover { color: var(--text); }
-  
   .docs-content { flex: 1; max-width: 900px; }
   .docs-content h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
   .docs-content h2 { font-size: 1.8rem; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
@@ -114,50 +102,38 @@
   .docs-content p, .docs-content ul, .docs-content ol { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
   .docs-content ul, .docs-content ol { padding-left: 1.5rem; }
   .docs-content strong { color: var(--text); }
-  
   .warning-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--danger); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; margin-top: 1rem; }
   .warning-box h4 { color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
   .warning-box p { color: #fca5a5; margin-bottom: 0; font-size: 0.9rem; }
-  
   .info-box { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid var(--primary); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; margin-top: 1rem; }
   .info-box p { color: #93c5fd; margin-bottom: 0; font-size: 0.9rem; }
-  
   .code-block { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; color: var(--gold); margin-bottom: 1.5rem; overflow-x: auto; }
 
-  /* 🚀 DASHBOARD UI */
+  /* DASHBOARD UI */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
-  
   .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s, min-width 0.3s; z-index: 10; position: relative; }
   .sidebar.collapsed { width: 80px; min-width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text, .sidebar.collapsed .sidebar-logo { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
   .sidebar-logo { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; transition: 0.3s; filter: drop-shadow(0 0 15px rgba(245, 197, 24, 0.2)); }
-  
   .toggle-btn { position: absolute; left: 248px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: 0.3s; }
   .toggle-btn:hover { background: var(--border); }
-  
   .menu-item { padding: 0.8rem 1rem; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; white-space: nowrap; overflow: hidden; }
   .menu-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
   .menu-item.active { background: rgba(59, 130, 246, 0.1); color: var(--primary); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding-left: calc(1rem - 3px); }
-  
   .main-content { flex: 1; padding: 2rem 3rem; display: flex; flex-direction: column; overflow-y: auto; }
   .top-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
   .top-bar h1 { font-size: 1.8rem; font-weight: 600; }
   .top-bar p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
-  
-  /* Stats & Chart */
   .stats-chart-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
   .stat-card-big { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
   .stat-card-big h4 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
   .stat-card-big .val { font-size: 2.5rem; font-weight: 700; margin-top: 0.5rem; display: flex; align-items: center; gap: 10px; }
-  
   .chart-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; grid-column: span 2; height: 300px; display: flex; flex-direction: column; }
   .chart-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
   .chart-header h3 { font-size: 1rem; font-weight: 500; }
   .chart-container { flex: 1; position: relative; width: 100%; }
-  
-  /* Table */
   .table-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .table-header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
   .script-table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -165,28 +141,21 @@
   .script-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
   .script-table tr:last-child td { border-bottom: none; }
   .script-table tr:hover { background: rgba(255,255,255,0.01); }
-  
   .proj-name { display: flex; align-items: center; gap: 12px; font-weight: 600; }
   .proj-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background: #1e293b; }
   .proj-id { color: #64748b; font-size: 0.75rem; font-family: monospace; margin-top: 2px; font-weight: 400; }
-  
   .exec-container { display: flex; flex-direction: column; gap: 4px; width: 120px; }
   .exec-text { font-size: 0.75rem; color: #64748b; font-family: monospace; display: flex; justify-content: space-between; }
   .exec-bar { height: 4px; background: #334155; border-radius: 2px; display: flex; overflow: hidden; }
   .exec-bar .green { background: var(--success); }
   .exec-bar .red { background: var(--danger); }
   .last-used { font-size: 0.8rem; color: #94a3b8; }
-  
-  /* Buttons */
   .btn-action { padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .btn-edit { background: #2563eb; color: white; } .btn-edit:hover { background: #1d4ed8; }
   .btn-delete { background: #dc2626; color: white; } .btn-delete:hover { background: #b91c1c; }
   .btn-stats { background: #334155; color: white; padding: 8px 10px; } .btn-stats:hover { background: #475569; }
-  
   .btn-copy-icon { background: #334155; color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.8rem; transition: 0.2s; }
   .btn-copy-icon:hover { background: #475569; }
-  
-  /* Forms & Modals */
   .form-group { margin-bottom: 1rem; }
   label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 500;}
   input[type="text"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 0.8rem 1rem; background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 8px; color: var(--text); margin-bottom: 1rem; font-family: inherit; font-size: 0.95rem; outline: none; transition: 0.2s; }
@@ -196,10 +165,8 @@
   
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 650px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 450px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-  
-  /* Toggle */
   .switch-container { display: flex; align-items: center; justify-content: space-between; background: var(--bg-sidebar); border: 1px solid var(--border); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: left; }
   .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
   .switch input { opacity: 0; width: 0; height: 0; }
@@ -207,21 +174,8 @@
   .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
   input:checked + .slider { background-color: var(--success); }
   input:checked + .slider:before { transform: translateX(22px); }
-  
-  /* Kill Switch Toggle Danger State */
   input:checked + .slider.danger { background-color: var(--danger); }
-
   .toast-notification { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--primary); color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s forwards; }
-  
-  .discord-invite-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; }
-  .discord-logo { width: 100px; height: 100px; color: var(--discord); margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(88, 101, 242, 0.4)); }
-  .btn-discord-large { background: var(--discord); color: white; padding: 1rem 2.5rem; border-radius: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; border: none; cursor: pointer; margin-top: 1rem; }
-  .btn-discord-large:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3); }
-  
-  .provider-select-wrapper { display: flex; align-items: center; gap: 10px; background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 8px; padding-left: 1rem; margin-bottom: 1rem; }
-  .provider-select-wrapper img { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; background: white; padding: 2px; }
-  .provider-select-wrapper select { border: none; background: transparent; margin-bottom: 0; padding-left: 0; }
-
   .loader-code-box { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: left; position: relative; margin-bottom: 1.5rem; }
   .loader-code-box code { color: #10b981; font-family: monospace; font-size: 0.85rem; word-break: break-all; }
 </style>
@@ -239,82 +193,44 @@
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
 
-<!-- ✅ LANDING PAGE -->
 <div id="view-landing">
-  <div class="bg-dashboard-mockup">
-    <div class="mockup-header"><div class="mockup-title"></div><div class="mockup-user"></div></div>
-    <div class="mockup-stats"><div class="mockup-stat-box"></div><div class="mockup-stat-box"></div></div>
-    <div class="mockup-chart">
-      <div class="mockup-bar" style="height: 30%"></div><div class="mockup-bar" style="height: 60%"></div><div class="mockup-bar red" style="height: 80%"></div>
-      <div class="mockup-bar" style="height: 90%"></div><div class="mockup-bar" style="height: 40%"></div><div class="mockup-bar" style="height: 50%"></div>
-      <div class="mockup-bar red" style="height: 70%"></div><div class="mockup-bar" style="height: 35%"></div><div class="mockup-bar" style="height: 85%"></div>
-      <div class="mockup-bar" style="height: 45%"></div><div class="mockup-bar" style="height: 60%"></div><div class="mockup-bar red" style="height: 90%"></div>
-    </div>
-  </div>
-
   <section class="hero">
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
-  </section>
-
-  <section class="features-section">
-    <h2>Powerful <span>Features</span> You'll Love</h2>
-    <p class="subtitle">Everything you need to manage your scripts and users automatically.</p>
-    
-    <div class="features-grid">
-      <div class="feature-card">
-        <h3>🤖 Discord Bot</h3>
-        <p>Luarix comes with a ready-to-use Discord bot with a mini control panel for your users to redeem keys and reset HWIDs.</p>
-      </div>
-      <div class="feature-card">
-        <h3>🔑 Key Stocking</h3>
-        <p>Mass generate day-locked or lifetime keys and export them to list on your shop or whatever platform you use.</p>
-      </div>
-      <div class="feature-card">
-        <h3>⚙️ Runtime Variables</h3>
-        <p>Access key-specific data like discord ID, expiry, and HWID. Allow users to add custom logic for specific users.</p>
-      </div>
-      <div class="feature-card">
-        <h3>🔴 Kill Switch</h3>
-        <p>Disable your scripts anytime with one click. Take immediate effect for future executions and prevent unauthorized access.</p>
-      </div>
-      <div class="feature-card">
-        <h3>🔒 Encrypted Backups</h3>
-        <p>We encrypt & store your code in case you ever lose access to source. Never worry about losing your original files.</p>
-      </div>
-      <div class="feature-card">
-        <h3>📢 Ad Key System</h3>
-        <p>Built-in, compatible and customizable ad link system with an effective anti-bypass, protecting your revenue.</p>
-      </div>
-      <div class="feature-card">
-        <h3>🔌 Key Check API</h3>
-        <p>We have a Lua API that allows you to check key details before actually running the obfuscated script.</p>
-      </div>
-      <div class="feature-card">
-        <h3>🛡️ Automatic Integration</h3>
-        <p>When you upload your script, it will have a whitelist automatically embedded inside it. Just run the loadstring.</p>
-      </div>
-    </div>
   </section>
 
   <section class="pricing-section" id="pricing">
     <h2>Simple, transparent pricing</h2>
     <div class="pricing-grid">
       
+      <!-- ✅ FREE PLAN -->
+      <div class="price-card">
+        <h3>Free</h3>
+        <p class="desc">Try out Luarix with basic features and 20 obfuscations per week.</p>
+        <div class="price-amount">$0<span>/month</span></div>
+        <ul class="price-features">
+          <li>20 Obfuscations / week</li>
+          <li>Standard Loaders</li>
+          <li>Discord Bot Integration</li>
+          <li>Unlimited Scripts</li>
+          <li class="faded">Ad system (rewards)</li>
+          <li class="faded">Keyless (FFA) mode</li>
+        </ul>
+        <button class="btn-buy" onclick="openSignup()">Sign up Free</button>
+      </div>
+
       <div class="price-card">
         <h3>Basic</h3>
-        <p class="desc">If you just started developing scripts, this plan is ideal for you. You can always switch.</p>
+        <p class="desc">If you just started developing scripts, this plan is ideal for you.</p>
         <div class="price-amount">$15<span>/month</span></div>
         <ul class="price-features">
-          <li>API & Bot access</li>
-          <li>Webhook logs</li>
+          <li>Unlimited Obfuscations</li>
+          <li>Standard Loaders</li>
+          <li>Discord Bot Integration</li>
           <li>Up to 200 keys at once</li>
-          <li>Unlimited obf per month</li>
-          <li>Up to 2 scripts at once</li>
-          <li>1 project folder</li>
           <li>Ad system (rewards)</li>
           <li class="faded">Keyless (FFA) mode</li>
         </ul>
-        <button class="btn-buy" onclick="openLogin()">Buy Invite</button>
+        <button class="btn-buy" onclick="openSignup()">Buy Invite</button>
       </div>
 
       <div class="price-card popular">
@@ -322,21 +238,19 @@
         <p class="desc">Best plan for most users. If your script hub growing fast, this plan is recommended.</p>
         <div class="price-amount">$25<span>/month</span></div>
         <ul class="price-features">
-          <li>API & Bot access</li>
-          <li>Webhook logs</li>
+          <li>Unlimited Obfuscations</li>
+          <li>Fast HttpGet Loaders</li>
           <li>Up to 1,000 keys at once</li>
-          <li>Unlimited obf per month</li>
-          <li>Up to 8 scripts at once</li>
           <li>3 project folders</li>
           <li>Ad system (rewards)</li>
           <li>Keyless (FFA) mode</li>
         </ul>
-        <button class="btn-buy" onclick="openLogin()">Buy Invite</button>
+        <button class="btn-buy" onclick="openSignup()">Buy Invite</button>
       </div>
 
       <div class="price-card">
         <h3>Pro</h3>
-        <p class="desc">Everything in premium with higher usage limits. Recommended for high quality scripts.</p>
+        <p class="desc">Everything in premium with higher usage limits.</p>
         <div class="price-amount">$40<span>/month</span></div>
         <ul class="price-features">
           <li>API & Bot access</li>
@@ -345,102 +259,47 @@
           <li>Unlimited obf per month</li>
           <li>Up to 18 scripts at once</li>
           <li>6 project folders</li>
-          <li>Ad system (rewards)</li>
-          <li>Keyless (FFA) mode</li>
         </ul>
-        <button class="btn-buy" onclick="openLogin()">Buy Invite</button>
-      </div>
-
-      <div class="price-card">
-        <h3>Enterprise</h3>
-        <p class="desc">For large hubs with specialized needs. Enterprise users can request custom features.</p>
-        <div class="price-amount">Custom</div>
-        <ul class="price-features">
-          <li>Crypto currencies only</li>
-          <li>API ratelimit bypass</li>
-          <li>Advanced access control</li>
-          <li>Custom URLs in ad system</li>
-          <li>50k keys & 60 scripts</li>
-          <li>10 projects & unlimited obf</li>
-          <li>+ Everything in Pro</li>
-        </ul>
-        <button class="btn-buy" onclick="window.location.href='https://discord.gg/KSdDSrmaCT'">Contact Us</button>
+        <button class="btn-buy" onclick="openSignup()">Buy Invite</button>
       </div>
 
     </div>
   </section>
-
-  <footer>
-    <div class="footer-content">
-      <div class="footer-brand">
-        <img src="logo.png" alt="Luarix">
-        <p>Premium script protection & monetization platform. We <strong>do not</strong> steal, view, or share your script sources. Your code is 100% private and encrypted.</p>
-      </div>
-      <div class="footer-links">
-        <div class="footer-col">
-          <h4>Product</h4>
-          <a onclick="showView('docs', 'faq')">FAQ</a>
-          <a onclick="showView('docs')">Documentation</a>
-          <a href="https://discord.gg/KSdDSrmaCT" target="_blank">Discord</a>
-        </div>
-        <div class="footer-col">
-          <h4>Stuff</h4>
-          <a href="#">Terms of Service</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Contact</a>
-          <a href="#">Submit a Request</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      &copy; 2024 Luarix. All rights reserved. Landing page designed by the best front end designer <strong>Riley</strong>.
-    </div>
-  </footer>
 </div>
 
-<!-- ✅ FULL DOCS & FAQ -->
+<!-- DOCS PAGE -->
 <div id="view-docs">
   <div class="docs-layout">
     <div class="docs-sidebar">
       <h3>Getting Started</h3>
       <a href="#intro" class="docs-link">Introduction</a>
       <a href="#script-loader" class="docs-link">How to Use Loaders</a>
-      
       <h3>Dashboard Guide</h3>
       <a href="#create-project" class="docs-link">Creating a Project</a>
       <a href="#manage-keys" class="docs-link">Managing Keys & HWID</a>
       <a href="#kill-switch" class="docs-link">Kill Switch</a>
-
       <h3>Discord Bot</h3>
       <a href="#discord-setup" class="docs-link">Bot Setup</a>
       <a href="#discord-cmds" class="docs-link">Commands</a>
-
       <h3>F.A.Q</h3>
       <a href="#faq" class="docs-link">Common Questions</a>
     </div>
-
     <div class="docs-content">
       <h1 id="intro">👑 Luarix Documentation</h1>
-      
       <div class="warning-box">
         <h4>⚠️ IMPORTANT! ⚠️</h4>
         <p>Luarix is a premium script protection system. We <strong>do not</strong> steal, view, or share your script sources. Your API key is tied to your account, do not share it.</p>
       </div>
-
       <h2 id="script-loader">How to Use Loaders</h2>
       <p>When you create a script on the dashboard, you get a clean loader string. This loader checks the HWID, validates the key, and delivers the encrypted code safely.</p>
       <div class="code-block">script_key="YOUR_KEY_HERE";<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader/YOUR_SCRIPT_ID"))()</div>
       <p>If the script is set to <strong>Keyless</strong>, users do not need a key. They can just run the loadstring without the <code>script_key</code> variable.</p>
-
       <h2 id="create-project">Creating a Project</h2>
       <p>Click on the <strong>+ Create Project</strong> button on the dashboard. Paste your Lua code, give it a name, and choose if you want it to be Keyless. The code will be securely encrypted and saved.</p>
-
       <h2 id="manage-keys">Managing Keys & HWID</h2>
       <p>Inside the Manage Project modal, you can generate 32-character secure keys. Users can redeem these via your Discord panel. If a user gets a new PC, you can click <strong>Reset HWID</strong> in the Manage Keys tab to allow them to run the script on their new device.</p>
-
       <h2 id="kill-switch">Kill Switch (Disable Script)</h2>
       <p>If you ever need to instantly disable a script (due to bugs, exploits, or leaks), go to the Manage Project modal and toggle the <strong>Kill Switch (Disable Script)</strong>. Any user trying to execute the script will instantly be kicked with a "Script Disabled" message in the console.</p>
-
       <h2 id="discord-setup">Discord Bot Setup</h2>
       <p>To manage your keys and panels, invite our official Discord bot to your server and link your account.</p>
       <ol style="color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; padding-left: 1.5rem;">
@@ -448,7 +307,6 @@
         <li>Authorize the bot and give it <strong>Manage Roles</strong> permission.</li>
         <li>In your server, run <code>/link api_key: YOUR_API_KEY</code>.</li>
       </ol>
-
       <h2 id="discord-cmds">Discord Commands</h2>
       <ul>
         <li><strong>/setpanel</strong> - Creates a key redemption panel in the channel.</li>
@@ -457,28 +315,22 @@
         <li><strong>/blacklist</strong> - Ban a user from a specific project.</li>
         <li><strong>/masswhitelist</strong> - Instantly whitelist everyone with a specific role.</li>
       </ul>
-
       <h2 id="faq">Frequently Asked Questions (F.A.Q)</h2>
-      
       <h3>How do I get an API Key?</h3>
       <p>Log into the Dashboard. A free API key is automatically generated for you. If you want more limits, you can purchase a Basic or Premium plan.</p>
-
       <h3>My script says "HWID Mismatch". What do I do?</h3>
       <p>This means your key is locked to a different device. Go to the Discord panel and click the <strong>Reset HWID</strong> button, or go to the Dashboard > Manage Keys and click <strong>Reset HWID</strong>, then run the script again.</p>
-
       <h3>Why is my script saying "Script Disabled"?</h3>
       <p>The owner of the script has toggled the <strong>Kill Switch</strong> in their dashboard. The script is temporarily offline. Contact the script owner for more information.</p>
-
       <h3>How do I make my script free (Keyless)?</h3>
       <p>When creating a project on the dashboard, toggle the <strong>Keyless Script</strong> switch to ON. Or click "Edit" on an existing project to toggle it.</p>
-
       <h3>Does Luarix steal or view my script?</h3>
       <p><strong>Absolutely not.</strong> We encrypt your source code the moment it touches our servers. We do not have a "view source" option, and no staff member can read your Lua code.</p>
-
     </div>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="view-dashboard">
   <div class="dash-layout">
     <div class="sidebar" id="sidebar">
@@ -554,12 +406,10 @@
       <!-- MONETIZATION TAB -->
       <div id="content-monetize" style="display: none;">
         <div class="top-bar"><div><h1>Monetization</h1><p>Turn on monetization for Keyless scripts.</p></div></div>
-        
         <div class="chart-box" style="margin-bottom: 1.5rem;">
           <div class="chart-header"><h3>Daily Keys Generated (Last 7 Days)</h3></div>
           <div class="chart-container"><canvas id="keyChart"></canvas></div>
         </div>
-
         <div class="table-box" style="padding: 2rem; max-width: 600px;">
           <div class="form-group"><label>Select Project</label><select id="mon-script-select"></select></div>
           <div class="form-group">
@@ -593,7 +443,7 @@
 
 <!-- MODALS -->
 <div class="modal-bg" id="create-modal">
-  <div class="modal">
+  <div class="modal" style="max-width: 650px;">
     <span class="close-btn" onclick="document.getElementById('create-modal').classList.remove('show')">&times;</span>
     <h2>Create New Project</h2><p style="color: var(--text-muted); margin-bottom: 1.5rem;">Upload your Lua code to protect it.</p>
     <input type="text" id="new-script-name" placeholder="Project Name" />
@@ -604,7 +454,7 @@
 </div>
 
 <div class="modal-bg" id="manage-modal">
-  <div class="modal">
+  <div class="modal" style="max-width: 650px;">
     <span class="close-btn" onclick="document.getElementById('manage-modal').classList.remove('show')">&times;</span>
     <h2 id="manage-title">Manage Project</h2>
     <input type="hidden" id="manage-script-id">
@@ -624,7 +474,6 @@
       </div>
     </div>
 
-    <!-- ✅ KILL SWITCH TOGGLE -->
     <div class="switch-container" style="border-color: var(--danger);">
       <div><h4 style="font-size: 0.9rem; color: var(--danger);">Kill Switch (Disable Script)</h4><p style="font-size: 0.75rem; color: var(--text-muted);">If ON, users will get "Script Disabled" error.</p></div>
       <label class="switch"><input type="checkbox" id="manage-kill-switch-toggle" onchange="toggleKillSwitchFromModal()"><span class="slider danger"></span></label>
@@ -652,29 +501,49 @@
   </div>
 </div>
 
+<!-- ✅ LOGIN MODAL -->
 <div class="modal-bg" id="login-modal">
   <div class="modal">
     <span class="close-btn" onclick="closeLogin()">&times;</span>
-    <h2 id="auth-title">Welcome Back</h2><p id="auth-desc" style="color: var(--text-muted); margin-bottom: 1.5rem;">Login to your account</p>
-    <input type="email" id="auth-email" placeholder="Email Address" /><input type="password" id="auth-password" placeholder="Password" />
-    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="handleAuth()" id="auth-btn">Login</button>
-    <button class="btn-gold" style="width: 100%; background: var(--discord); color: white;" onclick="loginDiscord()">Login with Discord</button>
-    <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);"><span id="toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: var(--primary); text-decoration: none;" id="toggle-link">Sign Up</a></p>
-    <img src="logo.png" style="position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2;" onclick="promptAdmin()" alt="Admin">
+    <h2>Log in with API key</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Paste your 52-character API key to continue.</p>
+    <input type="text" id="login-api-key" placeholder="API key" style="text-align: center;" />
+    <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">New user? <a href="#" onclick="openSignup()" style="color: var(--gold); text-decoration: none;">Sign up</a></p>
+    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem; padding: 1rem;" onclick="handleApiLogin()">➜ Log in</button>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">By continuing you agree to our <a href="#" style="color: var(--gold);">Terms</a>.</p>
   </div>
 </div>
 
-<div class="modal-bg" id="discord-link-modal">
-  <div class="modal">
-    <h2>Welcome, <span id="dc-welcome-name" style="color: var(--discord);"></span>!</h2><p style="color: var(--text-muted); margin-bottom: 1.5rem;">Link your paid API key or continue with Free.</p>
-    <input type="text" id="dc-paid-key" placeholder="Paste Paid API Key (Optional)" />
-    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="linkDiscordAccount(true)">Link Paid Key</button>
-    <button class="btn-gold" style="width: 100%; background: #222; color: #fff;" onclick="linkDiscordAccount(false)">Continue with Free Plan</button>
+<!-- ✅ SIGNUP MODAL -->
+<div class="modal-bg" id="signup-modal">
+  <div class="modal" style="text-align: left;">
+    <span class="close-btn" onclick="closeLogin()">&times;</span>
+    <h2 style="text-align: center; margin-bottom: 1.5rem;">Register to Luarix</h2>
+    
+    <label>Email</label>
+    <input type="email" id="signup-email" placeholder="Email" />
+    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">* API key will be sent to this email address</p>
+
+    <label>Discord ID</label>
+    <input type="text" id="signup-discord" placeholder="Discord ID" />
+
+    <label>Invite Code (Optional)</label>
+    <input type="text" id="signup-invite" placeholder="Paste your Paid Key here" />
+    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">Leave blank to get a Free Plan API Key</p>
+
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+      <input type="checkbox" id="signup-tos" style="width: auto; margin: 0;" />
+      <label for="signup-tos" style="margin: 0; font-size: 0.85rem;">I read and agree to the <a href="#" style="color: var(--gold);">Terms of Service</a></label>
+    </div>
+
+    <button class="btn-gold" style="width: 100%; padding: 1rem;" onclick="handleSignup()">REGISTER</button>
+    <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem;">Don't have an invite code? <a href="https://discord.gg/KSdDSrmaCT" target="_blank" style="color: var(--gold); text-decoration: none;">Get one</a></p>
+    <p style="text-align: center; margin-top: 0.5rem; font-size: 0.85rem;">Already have an account? <a href="#" onclick="openLogin()" style="color: var(--gold); text-decoration: none;">Log in</a></p>
   </div>
 </div>
 
 <script>
-let isLoginMode = true, currentAuth = null, tempDiscordData = null, allProjects = [];
+let currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
 let currentOriginalCode = "";
 
@@ -686,36 +555,30 @@ function showToast(msg) {
     setTimeout(() => { toast.style.animation = 'toastSlideUp 0.3s reverse forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-function openLogin() { document.getElementById('login-modal').classList.add('show'); }
-function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
+function openLogin() { 
+    document.getElementById('signup-modal').classList.remove('show');
+    document.getElementById('login-modal').classList.add('show'); 
+}
+function openSignup() { 
+    document.getElementById('login-modal').classList.remove('show');
+    document.getElementById('signup-modal').classList.add('show'); 
+}
+function closeLogin() { 
+    document.getElementById('login-modal').classList.remove('show'); 
+    document.getElementById('signup-modal').classList.remove('show');
+}
+
 function showView(view, scrollToId = null) { 
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none'; 
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none'; 
     document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
     document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
-    
     if (view === 'docs') {
-        if (scrollToId) {
-            setTimeout(() => {
-                const el = document.getElementById(scrollToId);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        } else {
-            window.scrollTo(0, 0);
-        }
-    } else {
-        window.scrollTo(0, 0);
-    }
+        if (scrollToId) { setTimeout(() => { const el = document.getElementById(scrollToId); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100); } 
+        else { window.scrollTo(0, 0); }
+    } else { window.scrollTo(0, 0); }
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
-function toggleAuthMode() {
-    isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').textContent = isLoginMode ? "Welcome Back" : "Create an Account";
-    document.getElementById('auth-desc').textContent = isLoginMode ? "Login to your account" : "Sign up to start protecting scripts";
-    document.getElementById('auth-btn').textContent = isLoginMode ? "Login" : "Sign Up";
-    document.getElementById('toggle-text').textContent = isLoginMode ? "Don't have an account?" : "Already have an account?";
-    document.getElementById('toggle-link').textContent = isLoginMode ? "Sign Up" : "Login";
-}
 
 function switchTab(tab) {
     document.getElementById('content-dash').style.display = tab === 'dash' ? 'block' : 'none';
@@ -726,7 +589,6 @@ function switchTab(tab) {
     document.getElementById('content-admin-keys').style.display = tab === 'admin-keys' ? 'block' : 'none';
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
-
     if (tab === 'keys') loadKeys();
     if (tab === 'blacklist') loadBlacklists();
     if (tab === 'monetize') { loadMonetizationSelect(); renderChart('keyChart'); }
@@ -745,17 +607,60 @@ function promptAdmin() {
     } else if (pass !== null) { alert("Incorrect password."); }
 }
 
-async function handleAuth() {
-    const email = document.getElementById('auth-email').value.trim(); const password = document.getElementById('auth-password').value.trim();
-    if (!email || !password) return showToast("Please fill in all fields.");
-    const btn = document.getElementById('auth-btn'); btn.textContent = "Connecting..."; btn.disabled = true;
+async function handleApiLogin() {
+    const apiKey = document.getElementById('login-api-key').value.trim();
+    if (!apiKey) return showToast("Please enter your API key.");
+    
+    const btn = document.querySelector('#login-modal .btn-gold');
+    btn.textContent = "Logging in..."; btn.disabled = true;
+
     try {
-        const action = isLoginMode ? 'login' : 'signup';
-        const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, email, password }) });
-        const data = await res.json(); if (!res.ok) throw new Error(data.error || "Authentication failed");
-        currentAuth = data.user; localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'login_apikey', api_key: apiKey })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Invalid API Key");
+
+        currentAuth = data.user;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
         closeLogin(); loadDashboard();
-    } catch (err) { showToast(err.message); } finally { btn.textContent = isLoginMode ? "Login" : "Sign Up"; btn.disabled = false; }
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        btn.textContent = "➜ Log in"; btn.disabled = false;
+    }
+}
+
+async function handleSignup() {
+    const email = document.getElementById('signup-email').value.trim();
+    const discord_id = document.getElementById('signup-discord').value.trim();
+    const paid_key = document.getElementById('signup-invite').value.trim();
+    const tos = document.getElementById('signup-tos').checked;
+
+    if (!email || !discord_id) return showToast("Email and Discord ID are required.");
+    if (!tos) return showToast("You must agree to the Terms of Service.");
+
+    const btn = document.querySelector('#signup-modal .btn-gold');
+    btn.textContent = "Registering..."; btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'signup', email, discord_id, paid_key })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Signup failed");
+
+        showToast(`Registered! Your API Key is: ${data.user.api_key}`);
+        currentAuth = data.user;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        closeLogin(); loadDashboard();
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        btn.textContent = "REGISTER"; btn.disabled = false;
+    }
 }
 
 function loginDiscord() { window.location.href = '/api/discord-auth'; }
@@ -767,22 +672,12 @@ if (urlParams.has('discord_auth')) {
     catch (err) { window.history.replaceState({}, document.title, "/"); showToast("Authentication error."); }
 }
 
-async function linkDiscordAccount(isPaid) {
-    const paidKey = document.getElementById('dc-paid-key').value.trim(); document.getElementById('discord-link-modal').classList.remove('show');
-    try {
-        const action = isPaid ? 'link_paid' : 'free';
-        const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, email: tempDiscordData.email, password: "discord_oauth_bypass", paid_key: paidKey, discord_tag: tempDiscordData.discord_tag, discord_id: tempDiscordData.discord_id }) });
-        const data = await res.json(); if (!res.ok) throw new Error(data.error || "Failed to link account");
-        currentAuth = data.user; localStorage.setItem('luarix_auth', JSON.stringify(currentAuth)); loadDashboard();
-    } catch (err) { showToast(err.message); }
-}
-
 function loadDashboard() {
     if (!currentAuth) { const saved = localStorage.getItem('luarix_auth'); if (saved) currentAuth = JSON.parse(saved); else return showView('landing'); }
     showView('dashboard');
     document.getElementById('user-email-display').textContent = currentAuth.email;
     document.getElementById('user-api-key').textContent = currentAuth.api_key;
-    if (currentAuth.discord_tag) document.getElementById('user-discord-display').innerHTML = `• <span style="color: var(--discord); font-weight:bold;">${currentAuth.discord_tag}</span>`;
+    if (currentAuth.discord_id) document.getElementById('user-discord-display').innerHTML = `• <span style="color: var(--discord); font-weight:bold;">${currentAuth.discord_id}</span>`;
 
     let plan = currentAuth.plan;
     if (!plan) {
@@ -852,7 +747,6 @@ function renderProjects(scripts) {
         const greenPct = Math.floor(Math.random() * 40) + 40;
         const times = ['1 min ago', '5 mins ago', '1 hour ago', '2 days ago', 'Just now'];
         
-        // ✅ Show if script is disabled
         const status = s.is_disabled ? '<span style="color:var(--danger); font-weight:600; font-size:0.75rem; background:rgba(239,68,68,0.1); padding:2px 6px; border-radius:4px;">OFF</span>' : '<span style="color:var(--success); font-weight:600; font-size:0.75rem; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">ON</span>';
         
         return `
@@ -878,7 +772,6 @@ async function openManageModal(id) {
     document.getElementById('manage-script-id').value = id; 
     document.getElementById('manage-title').textContent = "Manage: " + script.name;
     
-    // ✅ Set Toggles
     document.getElementById('manage-keyless-toggle').checked = script.keyless; 
     document.getElementById('manage-kill-switch-toggle').checked = script.is_disabled || false; 
     
@@ -916,7 +809,6 @@ function downloadOriginalCode() {
     showToast("Downloaded!");
 }
 
-// ✅ NEW: Toggle Kill Switch
 async function toggleKillSwitchFromModal() {
     const id = document.getElementById('manage-script-id').value; 
     const isDisabled = document.getElementById('manage-kill-switch-toggle').checked;
@@ -959,7 +851,10 @@ async function updateCodeFromModal() {
     const key = Math.floor(Math.random() * 200) + 10; const bytes = new TextEncoder().encode(code); let hex = ""; 
     for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
     const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
-    await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
+    
+    const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) return showToast(data.error || "Failed to update code");
     
     document.getElementById('update-script-code').value = ''; 
     document.getElementById('manage-modal').classList.remove('show'); 
@@ -976,7 +871,8 @@ async function createScript() {
         for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
         const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
         const res = await fetch('/api/create_script', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, code: encrypted, original_code: code, api_key: currentAuth.api_key, keyless }) });
-        const data = await res.json(); if (!data.success) throw new Error(data.error);
+        const data = await res.json(); 
+        if (!res.ok) throw new Error(data.error || "Failed to create script");
         
         document.getElementById('create-modal').classList.remove('show');
         document.getElementById('new-script-name').value = ''; document.getElementById('new-script-code').value = ''; document.getElementById('new-script-keyless').checked = false; 
