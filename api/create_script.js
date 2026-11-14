@@ -3,56 +3,71 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// 🚀 LUARIX V9 ENGINE (Chunked State Machine)
-function luarixV9Obfuscate(luaCode) {
-    const chunkSize = 50;
-    let chunks = [];
-    for (let i = 0; i < luaCode.length; i += chunkSize) {
-        chunks.push(luaCode.substring(i, i + chunkSize));
+// 🚀 LUARIX V10 ENGINE (Mini-Virtual Machine)
+function luarixV10Obfuscate(luaCode) {
+    // 1. Break string into numeric opcodes (simulating bytecode)
+    const bytes = new TextEncoder().encode(luaCode);
+    let opcodes = [];
+    const salt = Math.floor(Math.random() * 50) + 10;
+    
+    for (let i = 0; i < bytes.length; i++) {
+        // Complex Opcode mapping
+        let op = ((bytes[i] + salt) * 3) % 256;
+        opcodes.push(op);
     }
 
-    const salt = Math.floor(Math.random() * 100) + 10;
-    let encodedChunks = [];
-    
-    chunks.forEach((chunk, index) => {
-        let hex = "";
-        for (let i = 0; i < chunk.length; i++) {
-            let enc = ((chunk.charCodeAt(i) ^ (salt + i)) + (index * 5)) % 256;
-            hex += enc.toString(16).padStart(2, "0");
-        }
-        encodedChunks.push(`"${hex}"`);
-    });
+    const v1 = "_" + crypto.randomBytes(4).toString('hex');
+    const v2 = "_" + crypto.randomBytes(4).toString('hex');
+    const v3 = "_" + crypto.randomBytes(4).toString('hex');
+    const v4 = "_" + crypto.randomBytes(4).toString('hex');
 
-    const vTable = "_" + crypto.randomBytes(4).toString('hex');
-    const vSalt = "_" + crypto.randomBytes(4).toString('hex');
-    const vIndex = "_" + crypto.randomBytes(4).toString('hex');
-
-    // Obfuscated 'loadstring' and 'string.char'
+    // 2. Generate the Lua Mini-VM Interpreter
     return `
 local _e = getfenv(0)
-local ${vTable} = { ${encodedChunks.join(",")} }
-local ${vSalt} = ${salt}
-local ${vIndex} = 1
-local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+local ${v1} = { ${opcodes.join(",")} }
+local ${v2} = ${salt}
+local ${v3} = ""
+local ${v4} = 0
 
-while ${vIndex} <= #${vTable} do
-    local _hex = ${vTable}[${vIndex}]
-    local _dec = ""
-    for i = 1, #_hex, 2 do
-        local b = tonumber(_hex:sub(i, i+1), 16)
-        b = (b - ((${vIndex} - 1) * 5)) % 256
-        b = bit32.bxor(b, (${vSalt} + (i-1)/2) % 256)
-        _dec = _dec .. string.char(b)
+-- FAKE EXECUTION BLOCK (AI ki aankh mein dhool)
+for _x = 1, 100 do
+    local _y = (_x * 32) % ${salt}
+    if _y == 99 then _y = 0 end
+end
+
+-- 🛑 ANTI-TAMPER (Silent Crash if hooked)
+pcall(function()
+    local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
+    local _h2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
+    if _e[_h1] or _e[_h2] then
+        local function _c() _c() end
+        _c()
+    end
+end)
+
+-- 🔄 VM INTERPRETER STATE MACHINE
+while true do
+    ${v4} = ${v4} + 1
+    if ${v4} > #${v1} then
+        break
     end
     
-    local _f = _ls(_dec)
+    local _op = ${v1}[${v4}]
+    -- Reverse Opcode
+    local _b = math.floor(_op / 3) - ${v2}
+    if _b < 0 then _b = _b + 256 end
+    
+    ${v3} = ${v3} .. string.char(_b)
+end
+
+-- HIDDEN LOADSTRING
+local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+if _ls then
+    local _f = _ls(${v3})
     if _f then
-        local _env = _e
-        setfenv(_f, _env)
+        setfenv(_f, _e)
         pcall(_f)
     end
-    
-    ${vIndex} = ${vIndex} + 1
 end
     `.trim();
 }
@@ -80,7 +95,7 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        const finalObfuscatedCode = luarixV9Obfuscate(code);
+        const finalObfuscatedCode = luarixV10Obfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
         const { error } = await supabase.from('scripts').insert({ id: id, name: name, lua_code: finalObfuscatedCode, original_code: original_code, api_key: api_key, keyless: keyless || false });
