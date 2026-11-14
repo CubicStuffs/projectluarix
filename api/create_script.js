@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// ✅ STEALTH OBFUSCATION LOGIC
+// ✅ SAFE OBFUSCATION LOGIC (No Freezing)
 function customObfuscate(luaCode) {
     const key = Math.floor(Math.random() * 200) + 10;
     const bytes = new TextEncoder().encode(luaCode);
@@ -18,32 +18,16 @@ function customObfuscate(luaCode) {
         chunks.push(hex.substring(i, i + chunkSize));
     }
     
-    // Randomize variable names heavily
     const v1 = "_" + crypto.randomBytes(3).toString('hex');
     const v2 = "_" + crypto.randomBytes(3).toString('hex');
-    const v3 = "_" + crypto.randomBytes(3).toString('hex');
     
-    // Obfuscated strings (hookfunction, getrawmetatable, print, reverse)
     const obfuscatedCode = `
 local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
 local ${v2} = ${key}
 
 pcall(function()
-    local ${v3} = getfenv(0)
-    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if ${v3}[_f1] or ${v3}[_f2] then 
-        local _x = 0
-        while true do _x = _x + 1 end 
-    end
-end)
-
-pcall(function()
-    local _p = string.char(112,114,105,110,116)
-    local _s = string.char(114,101,118,101,114,115,101)
-    if tostring(${v3}[_p]) == "function: 0000" or string[_s]("") ~= "" then
-        local _x = 0
-        while true do _x = _x + 1 end
+    if tostring(print) == "function: 0000" then
+        return
     end
 end)
 
