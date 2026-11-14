@@ -1,17 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-// 🚀 LUARIX V12 MINI-VM ENGINE (For Update Script Code)
-function luarixV12Obfuscate(luaCode) {
+// 🚀 LUARIX V13 (The Chaos Engine)
+function luarixV13Obfuscate(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
-    let encryptedBytes = [];
-    let currentKey = Math.floor(Math.random() * 200) + 10;
-    const initialKey = currentKey;
-
+    let realData = "";
+    const salt = Math.floor(Math.random() * 50) + 10;
+    
     for (let i = 0; i < bytes.length; i++) {
-        let enc = bytes[i] ^ (currentKey % 256);
-        encryptedBytes.push(enc);
-        currentKey = (currentKey * 33 + 17) % 256; 
+        let b = bytes[i] ^ (salt + (i % 7));
+        realData += b.toString(16).padStart(2, "0");
+    }
+
+    let fakeArray = [];
+    const realIndex = Math.floor(Math.random() * 5);
+    for (let j = 0; j < 5; j++) {
+        if (j === realIndex) {
+            fakeArray.push(`"${realData}"`);
+        } else {
+            let fakeHex = "";
+            for (let k = 0; k < bytes.length; k++) {
+                fakeHex += Math.floor(Math.random() * 255).toString(16).padStart(2, "0");
+            }
+            fakeArray.push(`"${fakeHex}"`);
+        }
     }
 
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
@@ -19,14 +31,16 @@ function luarixV12Obfuscate(luaCode) {
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
     const v5 = "_" + crypto.randomBytes(4).toString('hex');
+    const v6 = "_" + crypto.randomBytes(4).toString('hex');
 
     return `
 local _e = getfenv(0)
-local ${v1} = { ${encryptedBytes.join(",")} }
-local ${v2} = ${initialKey}
-local ${v3} = ""
-local ${v4} = 1
+local ${v1} = { ${fakeArray.join(",")} }
+local ${v2} = ${realIndex}
+local ${v3} = ${salt}
+local ${v4} = ""
 local ${v5} = 1
+local ${v6} = 0
 
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -39,25 +53,24 @@ end)
 
 while true do
     if ${v5} == 1 then
-        local _x = (${initialKey} * 3) % 7
-        if (_x * _x) % 2 == _x % 2 then
+        local _x = (${salt} * 3) % 7
+        if _x > 0 then
             ${v5} = 2
         else
-            ${v5} = 1 
+            ${v5} = 1
         end
     elseif ${v5} == 2 then
-        while ${v4} <= #${v1} do
-            local _b = ${v1}[${v4}]
-            local _dec = bit32.bxor(_b, (${v2} % 256))
-            ${v3} = ${v3} .. string.char(_dec)
-            ${v2} = (${v2} * 33 + 17) % 256
-            ${v4} = ${v4} + 1
+        local _realHex = ${v1}[${v2} + 1]
+        for i = 1, #_realHex, 2 do
+            local b = tonumber(_realHex:sub(i, i+1), 16)
+            b = bit32.bxor(b, (${v3} + ((i-1)/2) % 7) % 256)
+            ${v4} = ${v4} .. string.char(b)
         end
         ${v5} = 3
     elseif ${v5} == 3 then
         local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
         if _ls then
-            local _f = _ls(${v3})
+            local _f = _ls(${v4})
             if _f then
                 setfenv(_f, _e)
                 pcall(_f)
@@ -79,9 +92,8 @@ function genScriptKey() {
 }
 
 export default async function handler(req, res) {
-    // ✅ FIX: Supabase client ko handler ke andar rakha hai (Vercel Cold Start Fix)
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-        return res.status(500).json({ error: 'Supabase environment variables are missing in Vercel!' });
+        return res.status(500).json({ error: 'Supabase env variables are missing in Vercel!' });
     }
     
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -90,19 +102,11 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ==========================================
-        // ✅ GET REQUESTS (Dashboard Data Loading)
-        // ==========================================
-        
         if (action === 'get_chart_data') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (scriptErr) throw scriptErr;
-            
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
             const scriptIds = scripts.map(s => s.id);
-            
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
-            if (keyErr) throw keyErr;
+            const { data: keys } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
             
             const dailyKeys = {}, dailyExecs = {}, today = new Date();
             for (let i = 6; i >= 0; i--) {
@@ -127,42 +131,26 @@ export default async function handler(req, res) {
         }
 
         if (action === 'get_stats') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (scriptErr) throw scriptErr;
-            
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
             const scriptIds = scripts.map(s => s.id);
-            
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
-            if (keyErr) throw keyErr;
-            
-            const totalExecutions = (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
-            return res.status(200).json({ totalExecutions, totalKeys: (keys || []).length, totalProjects: scripts.length });
+            const { data: keys } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
+            return res.status(200).json({ totalExecutions: (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0), totalKeys: (keys || []).length, totalProjects: scripts.length });
         }
 
         if (action === 'get_keys') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
-            if (scriptErr) throw scriptErr;
-            
+            const { data: scripts } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
             const scriptIds = scripts.map(s => s.id);
-            
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-            if (keyErr) throw keyErr;
-            
+            const { data: keys } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
             return res.status(200).json({ keys: keys || [], scripts });
         }
 
         if (action === 'get_blacklists') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (scriptErr) throw scriptErr;
-            
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ blacklists: [] });
             const scriptIds = scripts.map(s => s.id);
-            
-            const { data: blacklists, error: blErr } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-            if (blErr) throw blErr;
-            
+            const { data: blacklists } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
@@ -172,25 +160,18 @@ export default async function handler(req, res) {
             return res.status(200).json({ code: script.lua_code });
         }
 
-        // ==========================================
-        // ✅ POST REQUESTS (Mutating Data)
-        // ==========================================
-
         if (req.method === 'POST' && action === 'save_monetization') {
             await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'delete_key') {
             await supabase.from('script_keys').delete().eq('key', key_id);
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'reset_hwid') {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'remove_blacklist') {
             if (!discord_id || !script_id) return res.status(400).json({ error: 'Missing discord_id or script_id' });
             const { data, error } = await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id).select();
@@ -198,17 +179,14 @@ export default async function handler(req, res) {
             if (!data || data.length === 0) return res.status(404).json({ error: 'Blacklist entry not found in database' });
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'delete_script') {
             await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'toggle_keyless') {
             await supabase.from('scripts').update({ keyless: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'toggle_kill_switch') {
             await supabase.from('scripts').update({ is_disabled: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -233,8 +211,7 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            // ✅ V12 ENGINE APPLIED HERE
-            const finalObfuscatedCode = luarixV12Obfuscate(rawCode); 
+            const finalObfuscatedCode = luarixV13Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
