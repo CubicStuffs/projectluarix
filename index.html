@@ -29,15 +29,42 @@
   .btn-gold { background: var(--gold); color: #000; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
   .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 197, 24, 0.4); }
 
-  /* LANDING & DOCS */
-  #view-landing { display: block; animation: fadeIn 0.8s ease-out; }
-  .hero { text-align: center; padding: 10rem 1rem 4rem; max-width: 900px; margin: 0 auto; }
-  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; }
-  .hero h1 .highlight { color: var(--gold); }
-  .pricing-section { padding: 2rem 1rem 8rem; max-width: 1100px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; }
+  /* ✅ LANDING PAGE WITH BACKGROUND CHART */
+  #view-landing { display: block; animation: fadeIn 0.8s ease-out; position: relative; overflow: hidden; min-height: 100vh; }
   
+  .bg-dashboard-mockup {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 1200px; height: 700px; opacity: 0.15; pointer-events: none; z-index: 0;
+    display: flex; flex-direction: column; gap: 20px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+  }
+  
+  .mockup-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+  .mockup-title { width: 150px; height: 20px; background: var(--text-muted); border-radius: 4px; }
+  .mockup-user { width: 100px; height: 20px; background: var(--border); border-radius: 4px; }
+  
+  .mockup-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .mockup-stat-box { height: 100px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; }
+  
+  .mockup-chart { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: flex-end; gap: 8px; padding: 20px; }
+  .mockup-bar { flex: 1; background: var(--success); border-radius: 4px 4px 0 0; opacity: 0.8; }
+  .mockup-bar.red { background: var(--danger); }
+  
+  .mockup-table { display: flex; flex-direction: column; gap: 10px; }
+  .mockup-row { height: 50px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; padding: 0 20px; gap: 15px; }
+  .mockup-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--border); }
+  .mockup-line { width: 200px; height: 10px; background: var(--border); border-radius: 4px; }
+
+  .hero { text-align: center; padding: 12rem 1rem 4rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 2; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  .hero h1 .highlight { color: var(--gold); }
+  
+  .pricing-section { padding: 2rem 1rem 8rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; backdrop-filter: blur(10px); background: rgba(30, 41, 59, 0.8); }
+  
+  /* DOCS */
   #view-docs { display: none; padding-top: 6rem; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
   .docs-layout { display: flex; gap: 2rem; padding: 0 2rem 4rem 2rem; }
   .docs-sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 6rem; height: calc(100vh - 8rem); overflow-y: auto; border-right: 1px solid var(--border); padding-right: 1rem; }
@@ -110,7 +137,7 @@
   .exec-bar .red { background: var(--danger); }
   .last-used { font-size: 0.8rem; color: #94a3b8; }
   
-  /* ✅ PREMIUM BUTTONS WITH SVG ICONS */
+  /* Buttons */
   .btn-action { padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .btn-edit { background: #2563eb; color: white; } .btn-edit:hover { background: #1d4ed8; }
   .btn-delete { background: #dc2626; color: white; } .btn-delete:hover { background: #b91c1c; }
@@ -170,7 +197,57 @@
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
 
+<!-- ✅ LANDING PAGE WITH NEW BACKGROUND -->
 <div id="view-landing">
+  
+  <!-- Background Mockup -->
+  <div class="bg-dashboard-mockup">
+    <div class="mockup-header">
+      <div class="mockup-title"></div>
+      <div class="mockup-user"></div>
+    </div>
+    <div class="mockup-stats">
+      <div class="mockup-stat-box"></div>
+      <div class="mockup-stat-box"></div>
+    </div>
+    <div class="mockup-chart">
+      <div class="mockup-bar" style="height: 30%"></div>
+      <div class="mockup-bar" style="height: 60%"></div>
+      <div class="mockup-bar red" style="height: 80%"></div>
+      <div class="mockup-bar" style="height: 90%"></div>
+      <div class="mockup-bar" style="height: 40%"></div>
+      <div class="mockup-bar" style="height: 50%"></div>
+      <div class="mockup-bar red" style="height: 70%"></div>
+      <div class="mockup-bar" style="height: 35%"></div>
+      <div class="mockup-bar" style="height: 85%"></div>
+      <div class="mockup-bar" style="height: 45%"></div>
+      <div class="mockup-bar" style="height: 60%"></div>
+      <div class="mockup-bar red" style="height: 90%"></div>
+      <div class="mockup-bar" style="height: 30%"></div>
+      <div class="mockup-bar" style="height: 75%"></div>
+      <div class="mockup-bar" style="height: 55%"></div>
+      <div class="mockup-bar" style="height: 80%"></div>
+      <div class="mockup-bar" style="height: 40%"></div>
+      <div class="mockup-bar red" style="height: 65%"></div>
+      <div class="mockup-bar" style="height: 95%"></div>
+      <div class="mockup-bar" style="height: 50%"></div>
+    </div>
+    <div class="mockup-table">
+      <div class="mockup-row">
+        <div class="mockup-avatar"></div>
+        <div class="mockup-line"></div>
+      </div>
+      <div class="mockup-row">
+        <div class="mockup-avatar"></div>
+        <div class="mockup-line"></div>
+      </div>
+      <div class="mockup-row">
+        <div class="mockup-avatar"></div>
+        <div class="mockup-line"></div>
+      </div>
+    </div>
+  </div>
+
   <section class="hero">
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
   </section>
@@ -232,7 +309,6 @@
 
         <div class="api-key-box" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <div><h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Your API Key</h4><code id="user-api-key" style="color: var(--primary); font-size: 1.1rem; font-weight: bold; font-family: monospace;">LXR-...</code></div>
-          <!-- ✅ FIXED: Copy Button SVG -->
           <button class="btn-copy-icon" onclick="copyApiKey()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>
         </div>
 
@@ -333,14 +409,12 @@
   </div>
 </div>
 
-<!-- ✅ REVAMPED: MANAGE MODAL (Loader + Download + Edit) -->
 <div class="modal-bg" id="manage-modal">
   <div class="modal">
     <span class="close-btn" onclick="document.getElementById('manage-modal').classList.remove('show')">&times;</span>
     <h2 id="manage-title">Manage Project</h2>
     <input type="hidden" id="manage-script-id">
     
-    <!-- LOADER SECTION -->
     <div style="text-align: left; margin-top: 1.5rem;">
       <label>Loader Code (Send this to buyers)</label>
       <div class="loader-code-box">
@@ -356,19 +430,16 @@
       </div>
     </div>
 
-    <!-- KEYLESS TOGGLE -->
     <div class="switch-container">
       <div><h4 style="font-size: 0.9rem;">Keyless Script</h4><p style="font-size: 0.75rem; color: var(--text-muted);">If ON, users don't need a key.</p></div>
       <label class="switch"><input type="checkbox" id="manage-keyless-toggle" onchange="toggleKeylessFromModal()"><span class="slider"></span></label>
     </div>
 
-    <!-- ACTIONS -->
     <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
       <button class="btn-gold" style="flex: 1;" onclick="generateKeyFromModal()">🔑 Generate Key</button>
       <button class="btn-gold" style="flex: 1; background: var(--danger); color: #fff;" onclick="deleteScriptFromModal()">🗑️ Delete</button>
     </div>
 
-    <!-- UPDATE CODE SECTION -->
     <div style="text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem;">
       <label>Update Script Code</label>
       <textarea id="update-script-code" placeholder="-- Paste new code here to overwrite..." style="min-height: 100px;"></textarea>
@@ -405,7 +476,7 @@
 <script>
 let isLoginMode = true, currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
-let currentOriginalCode = ""; // Store for download
+let currentOriginalCode = "";
 
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification'); if (oldToast) oldToast.remove();
@@ -585,7 +656,6 @@ async function deleteProjectFromTable(id) {
     loadDashboard(); showToast("Project deleted.");
 }
 
-// ✅ NEW: Fetch Loader and Original Code on Modal Open
 async function openManageModal(id) {
     const script = allProjects.find(s => s.id === id); if (!script) return;
     
@@ -595,10 +665,8 @@ async function openManageModal(id) {
     document.getElementById('manage-key-result').style.display = 'none';
     document.getElementById('update-script-code').value = ''; 
     
-    // Set Loader Code
     document.getElementById('manage-loader-text').innerText = `script_key="YOUR_KEY_HERE";\nloadstring(game:HttpGet("${window.location.origin}/api/loader/${id}"))()`;
     
-    // Fetch Original Code for Download
     currentOriginalCode = "";
     const res = await fetch(`/api/manage?action=get_script_details&api_key=${currentAuth.api_key}&script_id=${id}`);
     const data = await res.json();
@@ -662,7 +730,7 @@ async function updateCodeFromModal() {
     document.getElementById('update-script-code').value = ''; 
     document.getElementById('manage-modal').classList.remove('show'); 
     showToast("Script code updated successfully!");
-    loadDashboard(); // Refresh
+    loadDashboard();
 }
 
 async function createScript() {
@@ -679,8 +747,7 @@ async function createScript() {
         document.getElementById('create-modal').classList.remove('show');
         document.getElementById('new-script-name').value = ''; document.getElementById('new-script-code').value = ''; document.getElementById('new-script-keyless').checked = false; 
         
-        // ✅ Auto open Manage Modal for the new script
-        await loadDashboard(); // Wait for projects to load
+        await loadDashboard();
         openManageModal(data.id);
         
     } catch (err) { showToast(err.message); } finally { btn.textContent = "Obfuscate & Save"; btn.disabled = false; }
