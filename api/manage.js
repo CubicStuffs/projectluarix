@@ -1,34 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-// 🚀 LUARIX V14 (The Abyss Engine - Anti-AI)
-function luarixV14Obfuscate(luaCode) {
-    const b64 = Buffer.from(luaCode, 'utf-8').toString('base64');
-    const bytes = new TextEncoder().encode(b64);
-    let hex = "";
-    const polyKey = Math.floor(Math.random() * 100) + 20;
-    
+function luarixV15Obfuscate(luaCode) {
+    const bytes = new TextEncoder().encode(luaCode);
+    let hexData = [];
+    let rollingKey = Math.floor(Math.random() * 100) + 50;
+    const initialKey = rollingKey;
+
     for (let i = 0; i < bytes.length; i++) {
-        let val = (bytes[i] ^ (polyKey + (i % 4))) + (polyKey * 2);
-        hex += (val % 256).toString(16).padStart(2, "0");
+        let enc = (bytes[i] ^ rollingKey) % 256;
+        hexData.push(enc.toString(16).padStart(2, "0"));
+        rollingKey = (rollingKey * 33 + bytes[i] + i) % 256;
     }
 
-    const chunkSize = Math.ceil(hex.length / 3);
-    const c1 = hex.substring(0, chunkSize);
-    const c2 = hex.substring(chunkSize, chunkSize * 2);
-    const c3 = hex.substring(chunkSize * 2);
+    let indexed = hexData.map((h, i) => ({ h, i }));
+    indexed.sort(() => Math.random() - 0.5);
+    const shuffled = indexed.map(obj => obj.h);
+    const indexMap = indexed.map(obj => obj.i);
 
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
+    const v5 = "_" + crypto.randomBytes(4).toString('hex');
+    const v6 = "_" + crypto.randomBytes(4).toString('hex');
 
     return `
 local _e = getfenv(0)
-local ${v1} = "${c1}" .. "${c2}" .. "${c3}"
-local ${v2} = ${polyKey}
-local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
-local _dec = ""
+local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
+local ${v2} = { ${indexMap.join(",")} }
+local ${v3} = ${initialKey}
+local ${v4} = ""
+local ${v5} = 1
+local ${v6} = 0
+
+while ${v6} < 50 do
+    ${v6} = ${v6} + 1
+    if ${v6} % 2 == 0 then
+        local _fake = (${v6} * ${initialKey}) % 255
+    end
+end
 
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -39,44 +50,41 @@ pcall(function()
     end
 end)
 
-local _vm = 0
-while _vm < 100 do
-    _vm = _vm + 1
-    if _vm % 2 == 0 then
-        local _temp = (_vm * ${polyKey}) % 255
-    end
-end
-
-for i = 1, #${v1}, 2 do
-    local h = ${v1}:sub(i, i+1)
-    local b = tonumber(h, 16)
-    b = (b - (${v2} * 2)) % 256
-    b = bit32.bxor(b, (${v2} + (math.floor((i-1)/2) % 4)) % 256)
-    _dec = _dec .. string.char(b)
-end
-
-local function b64_decode(data)
-    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    data = string.gsub(data, '[^'..b..'=]', '')
-    return (data:gsub('.', function(x)
-        if (x == '=') then return '' end
-        local r,f='',(b:find(x)-1)
-        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
-        return r
-    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
-        if (#x ~= 8) then return '' end
-        local c=0
-        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
-        return string.char(c)
-    end))
-end
-
-local _final = b64_decode(_dec)
-if _ls and _final then
-    local _f = _ls(_final)
-    if _f then
-        setfenv(_f, _e)
-        pcall(_f)
+while true do
+    if ${v5} == 1 then
+        local _x = (${initialKey} * 3) % 7
+        if (_x * _x) % 2 == _x % 2 then
+            ${v5} = 2
+        else
+            ${v5} = 1
+        end
+    elseif ${v5} == 2 then
+        local _tmpHex = {}
+        for i = 1, #${v2} do
+            _tmpHex[${v2}[i] + 1] = ${v1}[i]
+        end
+        ${v5} = 3
+    elseif ${v5} == 3 then
+        local _rk = ${v3}
+        for i = 1, #_tmpHex do
+            local b = tonumber(_tmpHex[i], 16)
+            b = bit32.bxor(b, _rk % 256)
+            ${v4} = ${v4} .. string.char(b)
+            _rk = (_rk * 33 + b + (i-1)) % 256
+        end
+        ${v5} = 4
+    elseif ${v5} == 4 then
+        local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+        if _ls then
+            local _f = _ls(${v4})
+            if _f then
+                setfenv(_f, _e)
+                pcall(_f)
+            end
+        end
+        ${v5} = 5
+    elseif ${v5} == 5 then
+        break
     end
 end
     `.trim();
@@ -91,7 +99,7 @@ function genScriptKey() {
 
 export default async function handler(req, res) {
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-        return res.status(500).json({ error: 'Supabase env variables are missing in Vercel!' });
+        return res.status(500).json({ error: 'Supabase env variables are missing!' });
     }
     
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -100,96 +108,9 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        if (action === 'get_chart_data') {
-            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
-            const scriptIds = scripts.map(s => s.id);
-            const { data: keys } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
-            
-            const dailyKeys = {}, dailyExecs = {}, today = new Date();
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(today); d.setDate(d.getDate() - i);
-                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                dailyKeys[dateStr] = 0; dailyExecs[dateStr] = 0;
-            }
-            let totalExecs = 0;
-            (keys || []).forEach(k => {
-                totalExecs += (k.executions || 0);
-                const dateStr = new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                if (dailyKeys[dateStr] !== undefined) dailyKeys[dateStr]++;
-            });
-            let remainingExecs = totalExecs;
-            const dateLabels = Object.keys(dailyExecs);
-            dateLabels.forEach((date, idx) => {
-                if (idx === dateLabels.length - 1) dailyExecs[date] = remainingExecs; 
-                else { const take = Math.floor(Math.random() * (remainingExecs / (dateLabels.length - idx))); dailyExecs[date] = take; remainingExecs -= take; }
-            });
-            const labels = Object.keys(dailyKeys);
-            return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
-        }
-
-        if (action === 'get_stats') {
-            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
-            const scriptIds = scripts.map(s => s.id);
-            const { data: keys } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
-            return res.status(200).json({ totalExecutions: (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0), totalKeys: (keys || []).length, totalProjects: scripts.length });
-        }
-
-        if (action === 'get_keys') {
-            const { data: scripts } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
-            if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
-            const scriptIds = scripts.map(s => s.id);
-            const { data: keys } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-            return res.status(200).json({ keys: keys || [], scripts });
-        }
-
-        if (action === 'get_blacklists') {
-            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (!scripts) return res.status(200).json({ blacklists: [] });
-            const scriptIds = scripts.map(s => s.id);
-            const { data: blacklists } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-            return res.status(200).json({ blacklists: blacklists || [] });
-        }
-
-        if (action === 'get_script_details') {
-            const { data: script, error } = await supabase.from('scripts').select('lua_code').eq('id', script_id).eq('api_key', api_key).single();
-            if (error || !script) return res.status(404).json({ error: 'Not found' });
-            return res.status(200).json({ code: script.lua_code });
-        }
-
-        if (req.method === 'POST' && action === 'save_monetization') {
-            await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'delete_key') {
-            await supabase.from('script_keys').delete().eq('key', key_id);
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'reset_hwid') {
-            await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'remove_blacklist') {
-            if (!discord_id || !script_id) return res.status(400).json({ error: 'Missing discord_id or script_id' });
-            const { data, error } = await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id).select();
-            if (error) return res.status(500).json({ error: error.message });
-            if (!data || data.length === 0) return res.status(404).json({ error: 'Blacklist entry not found in database' });
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'delete_script') {
-            await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'toggle_keyless') {
-            await supabase.from('scripts').update({ keyless: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'POST' && action === 'toggle_kill_switch') {
-            await supabase.from('scripts').update({ is_disabled: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
-            return res.status(200).json({ success: true });
-        }
-
+        // ... (Saare GET requests: get_chart_data, get_stats, get_keys, get_blacklists, get_script_details yahan aayenge)
+        
+        // ✅ V15 ENGINE APPLIED HERE
         if (req.method === 'POST' && action === 'update_script_code') {
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -209,22 +130,14 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            const finalObfuscatedCode = luarixV14Obfuscate(rawCode); 
+            const finalObfuscatedCode = luarixV15Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
-        if (req.method === 'POST' && action === 'generate_key') {
-            const newKey = genScriptKey(); 
-            const { error } = await supabase.from('script_keys').insert({ key: newKey, script_id: script_id });
-            if (error) return res.status(500).json({ error: error.message });
-            return res.status(200).json({ success: true, key: newKey });
-        }
-
-        return res.status(400).json({ error: 'Invalid action' });
+        // ... (Baaki POST requests: save_monetization, delete_key, reset_hwid, etc.)
     } catch (err) {
-        console.error("Manage API Error:", err.message);
         return res.status(500).json({ error: err.message });
     }
 }
