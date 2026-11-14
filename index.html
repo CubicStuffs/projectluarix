@@ -576,7 +576,13 @@ function promptAdmin() {
     const pass = prompt("Enter Admin Password:");
     if (pass === "cubic%is@luarix^owner") {
         const adminEmail = 'admin@luarix.com';
-        const secureAdminKey = `LXR-ADMIN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        // ✅ FIX: crypto-secure 8-char admin API key generation
+        const randomValues = new Uint8Array(8);
+        crypto.getRandomValues(randomValues);
+        const adminChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let adminRand = '';
+        for (let i = 0; i < 8; i++) adminRand += adminChars[randomValues[i] % adminChars.length];
+        const secureAdminKey = `LXR-ADMIN-${adminRand}`;
         
         let auth = { email: adminEmail, api_key: secureAdminKey, plan: 'admin', usage: 0, expires: null };
         
@@ -682,8 +688,9 @@ function loadDashboard() {
     if (!plan) {
         if (currentAuth.api_key.startsWith('LXR-FREE-')) plan = 'free';
         else if (currentAuth.api_key.startsWith('LXR-BASIC-')) plan = 'basic';
-        else if (currentAuth.api_key.startsWith('LXR-PREM-')) plan = 'premium';
-        else if (currentAuth.api_key === 'ADMIN') plan = 'admin';
+        // ✅ FIX: LXR-PREM- → LXR-PREMIUM- to match new key format
+        else if (currentAuth.api_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
+        else if (currentAuth.api_key.startsWith('LXR-ADMIN-') || currentAuth.api_key === 'ADMIN') plan = 'admin';
         else plan = 'free';
     }
 
@@ -931,11 +938,14 @@ async function saveMonetization() {
    7. ADMIN KEY GENERATOR & UTILS
    ========================================== */
 function generateAdminKey(type) {
-    const chars = 'ABCDEF0123456789';
+    // ✅ FIX: crypto-secure 8-char admin key, LXR-PREMIUM- prefix
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const randomValues = new Uint8Array(8);
+    crypto.getRandomValues(randomValues);
     let rand = '';
-    for (let i = 0; i < 8; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 8; i++) rand += chars[randomValues[i] % chars.length];
     
-    const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREM-';
+    const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREMIUM-';
     const key = prefix + rand;
     
     const resBox = document.getElementById('admin-key-result');
