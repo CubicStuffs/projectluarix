@@ -588,18 +588,23 @@
   </div>
 </div>
 
-<!-- ✅ LOGIN MODAL -->
-<div class="modal-bg" id="login-modal">
-  <div class="modal">
-    <span class="close-btn" onclick="closeLogin()">&times;</span>
-    <h2>Log in with API key</h2>
-    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Paste your 52-character API key to continue.</p>
-    <input type="text" id="login-api-key" placeholder="API key" style="text-align: center;" />
-    <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">New user? <a href="#" onclick="openSignup()" style="color: var(--gold); text-decoration: none;">Sign up</a></p>
-    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem; padding: 1rem;" onclick="handleApiLogin()">➜ Log in</button>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">By continuing you agree to our <a href="#" style="color: var(--gold);">Terms</a>.</p>
-  </div>
-</div>
+    <!-- ✅ LOGIN MODAL -->
+    <div class="modal-bg" id="login-modal">
+      <div class="modal" style="position: relative;"> <!-- Position relative zaroori hai -->
+        <span class="close-btn" onclick="closeLogin()">&times;</span>
+        <h2>Log in with API key</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Paste your 52-character API key to continue.</p>
+        <input type="text" id="login-api-key" placeholder="API key" style="text-align: center;" />
+        <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">New user? <a href="#" onclick="openSignup()" style="color: var(--gold); text-decoration: none;">Sign up</a></p>
+        <button class="btn-gold" style="width: 100%; margin-bottom: 1rem; padding: 1rem;" onclick="handleApiLogin()">➜ Log in</button>
+        
+        <!-- ✅ Ye wali line sirf ek baar aayegi -->
+        <p style="font-size: 0.8rem; color: var(--text-muted);">By continuing you agree to our <a href="#" style="color: var(--gold);">Terms</a>.</p>
+
+        <!-- ✅ Admin Login Logo (Hidden Button) -->
+        <img src="logo.png" style="position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.2'" onclick="promptAdmin()" alt="Admin">
+      </div>
+    </div>
 
 <!-- ✅ SIGNUP MODAL -->
 <div class="modal-bg" id="signup-modal">
