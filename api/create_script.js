@@ -3,39 +3,36 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// 🚀 LUARIX V10 ENGINE (Mini-Virtual Machine)
-function luarixV10Obfuscate(luaCode) {
-    // 1. Break string into numeric opcodes (simulating bytecode)
+// 🚀 LUARIX V12 (Mini-VM Compiler)
+function luarixV12Obfuscate(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
-    let opcodes = [];
-    const salt = Math.floor(Math.random() * 50) + 10;
-    
+    let encryptedBytes = [];
+    let currentKey = Math.floor(Math.random() * 200) + 10;
+    const initialKey = currentKey;
+
+    // 1. Per-Instruction Encryption (Rolling Key)
     for (let i = 0; i < bytes.length; i++) {
-        // Complex Opcode mapping
-        let op = ((bytes[i] + salt) * 3) % 256;
-        opcodes.push(op);
+        let enc = bytes[i] ^ (currentKey % 256);
+        encryptedBytes.push(enc);
+        currentKey = (currentKey * 33 + 17) % 256; // Rolling Key Math
     }
 
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
+    const v5 = "_" + crypto.randomBytes(4).toString('hex');
 
-    // 2. Generate the Lua Mini-VM Interpreter
+    // 2. Generate Lua VM Interpreter
     return `
 local _e = getfenv(0)
-local ${v1} = { ${opcodes.join(",")} }
-local ${v2} = ${salt}
+local ${v1} = { ${encryptedBytes.join(",")} }
+local ${v2} = ${initialKey}
 local ${v3} = ""
-local ${v4} = 0
+local ${v4} = 1
+local ${v5} = 1
 
--- FAKE EXECUTION BLOCK (AI ki aankh mein dhool)
-for _x = 1, 100 do
-    local _y = (_x * 32) % ${salt}
-    if _y == 99 then _y = 0 end
-end
-
--- 🛑 ANTI-TAMPER (Silent Crash if hooked)
+-- 🛑 ANTI-TAMPER (Fort Knox)
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _h2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
@@ -45,28 +42,41 @@ pcall(function()
     end
 end)
 
--- 🔄 VM INTERPRETER STATE MACHINE
+-- 🔄 CONTROL FLOW FLATTENING (State Machine)
 while true do
-    ${v4} = ${v4} + 1
-    if ${v4} > #${v1} then
+    if ${v5} == 1 then
+        -- Opaque Predicate (Fake Math, always true)
+        local _x = (${initialKey} * 3) % 7
+        if (_x * _x) % 2 == _x % 2 then
+            ${v5} = 2
+        else
+            ${v5} = 1 -- Fake Loop
+        end
+    elseif ${v5} == 2 then
+        -- Rolling Key Decryption
+        while ${v4} <= #${v1} do
+            local _b = ${v1}[${v4}]
+            local _dec = bit32.bxor(_b, (${v2} % 256))
+            ${v3} = ${v3} .. string.char(_dec)
+            
+            -- Update Rolling Key
+            ${v2} = (${v2} * 33 + 17) % 256
+            ${v4} = ${v4} + 1
+        end
+        ${v5} = 3
+    elseif ${v5} == 3 then
+        -- Hidden Loadstring
+        local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+        if _ls then
+            local _f = _ls(${v3})
+            if _f then
+                setfenv(_f, _e)
+                pcall(_f)
+            end
+        end
+        ${v5} = 4
+    elseif ${v5} == 4 then
         break
-    end
-    
-    local _op = ${v1}[${v4}]
-    -- Reverse Opcode
-    local _b = math.floor(_op / 3) - ${v2}
-    if _b < 0 then _b = _b + 256 end
-    
-    ${v3} = ${v3} .. string.char(_b)
-end
-
--- HIDDEN LOADSTRING
-local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
-if _ls then
-    local _f = _ls(${v3})
-    if _f then
-        setfenv(_f, _e)
-        pcall(_f)
     end
 end
     `.trim();
@@ -95,7 +105,7 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        const finalObfuscatedCode = luarixV10Obfuscate(code);
+        const finalObfuscatedCode = luarixV12Obfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
         const { error } = await supabase.from('scripts').insert({ id: id, name: name, lua_code: finalObfuscatedCode, original_code: original_code, api_key: api_key, keyless: keyless || false });
