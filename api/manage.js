@@ -10,7 +10,7 @@ function genScriptKey() {
   return key;
 }
 
-// ✅ LUARIX V3 ENGINE (Anti-AI)
+// ✅ LUARIX V3 ENGINE (Fort Knox Anti-Tamper)
 function luarixV3Obfuscate(luaCode) {
     const key1 = Math.floor(Math.random() * 200) + 10;
     const key2 = Math.floor(Math.random() * 100) + 5;
@@ -52,16 +52,31 @@ local function _check_math()
     return false
 end
 
+-- 🛑 FORT KNOX ANTI-TAMPER (Checks 9 Dumper Functions)
 pcall(function()
-    local env = getfenv(0)
-    local h = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    local r = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if env[h] or env[r] then
-        local function crash() crash() end
-        crash()
+    local _e = getfenv(0)
+    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
+    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
+    local _f3 = string.char(104,111,111,107,109,101,116,97,109,101,116,104,111,100)
+    local _f4 = string.char(100,101,98,117,103)
+    local _f5 = string.char(103,101,116,117,112,118,97,108,117,101,115)
+    local _f6 = string.char(115,101,116,117,112,118,97,108,117,101)
+    local _f7 = string.char(103,101,116,103,99)
+    local _f8 = string.char(103,101,116,99,111,110,110,101,99,116,105,111,110,115)
+    local _f9 = string.char(103,101,116,114,101,103)
+
+    if _e[_f1] or _e[_f2] or _e[_f3] or _e[_f4] or _e[_f5] or _e[_f6] or _e[_f7] or _e[_f8] or _e[_f9] then
+        local function _crash() _crash() end
+        _crash()
+    end
+    
+    if tostring(loadstring) ~= "function: builtin" and string.find(tostring(loadstring), "0x") == nil then
+        local function _crash2() _crash2() end
+        _crash2()
     end
 end)
 
+-- 🔄 VM State Machine
 local ${v4} = ${s1}
 while true do
     if _check_math() then
