@@ -47,11 +47,18 @@ export default async function handler(req, res) {
             let finalApiKey = paid_key;
             let plan = 'free';
 
-            if (paid_key) {
-                if (!paid_key.startsWith('LXR-BASIC-') && !paid_key.startsWith('LXR-PREMIUM-') && !paid_key.startsWith('LXR-ADMIN-')) {
+                if (paid_key) {
+                // ✅ Pro key format add kiya
+                if (!paid_key.startsWith('LXR-BASIC-') && !paid_key.startsWith('LXR-PREMIUM-') && !paid_key.startsWith('LXR-PRO-') && !paid_key.startsWith('LXR-ADMIN-')) {
                     return res.status(400).json({ error: 'Invalid Invite Code format' });
                 }
-                plan = paid_key.startsWith('LXR-BASIC-') ? 'basic' : (paid_key.startsWith('LXR-PREMIUM-') ? 'premium' : 'admin');
+                
+                // ✅ Plan assign kiya
+                if (paid_key.startsWith('LXR-BASIC-')) plan = 'basic';
+                else if (paid_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
+                else if (paid_key.startsWith('LXR-PRO-')) plan = 'pro';
+                else if (paid_key.startsWith('LXR-ADMIN-') || paid_key === 'ADMIN') plan = 'admin';
+                
                 const { data: keyExists } = await supabase.from('users').select('*').eq('api_key', paid_key).maybeSingle();
                 if (keyExists) return res.status(400).json({ error: 'This invite code has already been used' });
             } else {
