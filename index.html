@@ -23,7 +23,7 @@
 
   /* NAVBAR */
   nav { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 1100px; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 12px; z-index: 100; animation: slideDown 0.5s ease-out; }
-  .nav-brand img { height: 40px; mix-blend-mode: screen; } 
+  .nav-brand img { height: 45px; object-fit: contain; } 
   nav .links { display: flex; gap: 1.8rem; }
   nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
   nav a:hover { color: var(--text); }
@@ -66,7 +66,7 @@
   .sidebar.collapsed { width: 80px; min-width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text, .sidebar.collapsed .sidebar-logo { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
-  .sidebar-logo { height: auto; max-height: 50px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; transition: 0.3s; filter: drop-shadow(0 0 10px rgba(245, 197, 24, 0.2)); }
+  .sidebar-logo { height: auto; max-height: 60px; width: 80%; object-fit: contain; margin: 0 auto 2rem auto; display: block; transition: 0.3s; filter: drop-shadow(0 0 15px rgba(245, 197, 24, 0.4)); }
   
   .toggle-btn { position: absolute; left: 248px; top: 2rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: 0.3s; }
   .toggle-btn:hover { background: var(--border); }
