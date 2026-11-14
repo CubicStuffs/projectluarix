@@ -110,7 +110,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // ✅ Update Script Code (SAFE OBFUSCATION)
+        // ✅ Update Script Code (FIXED FOR LARGE FILES & STEALTH OBFUSCATION)
         if (req.method === 'POST' && action === 'update_script_code') {
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -129,7 +129,10 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            const rawCode = req.query.original_code || req.query.code;
+            // ✅ FIX: Reading code from req.body instead of req.query
+            const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
+            if (!rawCode) return res.status(400).json({ error: 'No code provided' });
+
             const key = Math.floor(Math.random() * 200) + 10;
             const bytes = new TextEncoder().encode(rawCode);
             let hex = ""; 
@@ -141,14 +144,28 @@ export default async function handler(req, res) {
             
             const v1 = "_" + crypto.randomBytes(3).toString('hex');
             const v2 = "_" + crypto.randomBytes(3).toString('hex');
+            const v3 = "_" + crypto.randomBytes(3).toString('hex');
             
             const finalObfuscatedCode = `
 local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
 local ${v2} = ${key}
 
 pcall(function()
-    if tostring(print) == "function: 0000" then
-        return
+    local ${v3} = getfenv(0)
+    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
+    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
+    if ${v3}[_f1] or ${v3}[_f2] then 
+        local _x = 0
+        while true do _x = _x + 1 end 
+    end
+end)
+
+pcall(function()
+    local _p = string.char(112,114,105,110,116)
+    local _s = string.char(114,101,118,101,114,115,101)
+    if tostring(${v3}[_p]) == "function: 0000" or string[_s]("") ~= "" then
+        local _x = 0
+        while true do _x = _x + 1 end
     end
 end)
 
