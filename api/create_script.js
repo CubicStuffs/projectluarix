@@ -3,116 +3,78 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// ✅ LUARIX V3 ENGINE (Fort Knox Anti-Tamper)
-function luarixV3Obfuscate(luaCode) {
-    // 1. Advanced Encryption (Multi-layer)
-    const key1 = Math.floor(Math.random() * 200) + 10;
-    const key2 = Math.floor(Math.random() * 100) + 5;
-    
+// 🚀 LUARIX V4 ENGINE (AI-Poison)
+function luarixV4Obfuscate(luaCode) {
+    const salt = Math.floor(Math.random() * 100) + 50;
     const bytes = new TextEncoder().encode(luaCode);
     let hex = "";
+    
+    // Rolling XOR + Index-based Decryption (AI cannot do this easily)
     for (let i = 0; i < bytes.length; i++) {
-        // (Byte ^ key1) + key2
-        let enc = ((bytes[i] ^ key1) + key2) % 256;
-        hex += enc.toString(16).padStart(2, "0");
+        let b = bytes[i] ^ (salt + (i % 7));
+        hex += b.toString(16).padStart(2, "0");
     }
 
-    // 2. Split into chunks
-    const chunkSize = 300;
-    let chunks = [];
-    for (let i = 0; i < hex.length; i += chunkSize) {
-        chunks.push(hex.substring(i, i + chunkSize));
+    // Generate 50 lines of useless junk code to fill AI's context window
+    let poison = "";
+    for (let i = 0; i < 50; i++) {
+        const a = Math.floor(Math.random() * 10000);
+        const b = Math.floor(Math.random() * 10000);
+        poison += `
+local _p${i} = ${a} * ${b}
+local _q${i} = _p${i} % ${Math.floor(Math.random() * 100) + 1}
+if _q${i} > ${Math.floor(Math.random() * 5000)} then
+    _q${i} = _q${i} - 1
+end
+`;
     }
 
-    // 3. Randomize Variables & State IDs
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
-    const v3 = "_" + crypto.randomBytes(4).toString('hex');
-    const v4 = "_" + crypto.randomBytes(4).toString('hex');
-    
-    // Opaque Predicate IDs
-    const s1 = Math.floor(Math.random() * 1000) + 100;
-    const s2 = Math.floor(Math.random() * 1000) + 2000;
-    const s3 = Math.floor(Math.random() * 1000) + 3000;
 
-    // Opaque Predicate Math
-    const mathX = Math.floor(Math.random() * 50) + 1;
-    const mathY = Math.floor(Math.random() * 50) + 1;
+    return `
+-- Luarix V4 (AI-Poison Engine)
+local _env = getfenv(0)
+local ${v1} = "${hex}"
+local ${v2} = ${salt}
 
-    // 4. The V3 Virtual Machine Wrapper
-    const obfuscatedCode = `
--- Luarix V3 (AI-Resistant VM)
-local ${v1} = { ${chunks.map(c => `"${c}"`).join(",")} }
-local ${v2} = ${key1}
-local ${v3} = ${key2}
-local ${v4} = ${s1}
+-- 🛑 FAKE JUNK CODE (Makes AI confused)
+${poison}
 
--- 🛑 Opaque Predicates (Fake Logic to confuse AI)
-local function _check_math()
-    local a = ${mathX}
-    local b = ${mathY}
-    local c = (a * b) + (a ^ 2) - (b ^ 2)
-    if c == ((a * b) + (a * a) - (b * b)) then
-        return true
-    end
-    return false
-end
-
--- 🛑 FORT KNOX ANTI-TAMPER (Checks 9 Dumper Functions)
+-- 🛑 FORT KNOX ANTI-TAMPER (Silent Crash)
 pcall(function()
-    local _e = getfenv(0)
     local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    local _f3 = string.char(104,111,111,107,109,101,116,97,109,101,116,104,111,100)
-    local _f4 = string.char(100,101,98,117,103)
-    local _f5 = string.char(103,101,116,117,112,118,97,108,117,101,115)
-    local _f6 = string.char(115,101,116,117,112,118,97,108,117,101)
-    local _f7 = string.char(103,101,116,103,99)
-    local _f8 = string.char(103,101,116,99,111,110,110,101,99,116,105,111,110,115)
-    local _f9 = string.char(103,101,116,114,101,103)
-
-    if _e[_f1] or _e[_f2] or _e[_f3] or _e[_f4] or _e[_f5] or _e[_f6] or _e[_f7] or _e[_f8] or _e[_f9] then
-        local function _crash() _crash() end
-        _crash()
-    end
-    
-    if tostring(loadstring) ~= "function: builtin" and string.find(tostring(loadstring), "0x") == nil then
-        local function _crash2() _crash2() end
-        _crash2()
+    local _f3 = string.char(100,101,98,117,103)
+    if _env[_f1] or _env[_f2] or _env[_f3] then
+        local function _c() _c() end
+        _c()
     end
 end)
 
 -- 🔄 VM State Machine
-local ${v4} = ${s1}
-while true do
-    if _check_math() then
-        if ${v4} == ${s1} then
-            local _hex = table.concat(${v1}, "")
-            local _dec = ""
-            for i = 1, #_hex, 2 do
-                local b = tonumber(_hex:sub(i, i+1), 16)
-                b = (b - ${v3}) % 256
-                _dec = _dec .. string.char(bit32.bxor(b, ${v2}))
-            end
-            ${v4} = ${s2}
-            local _func = loadstring(_dec)
-            if _func then
-                local _env = getfenv(_func)
-                setfenv(_func, _env)
-                pcall(_func)
-            end
-        elseif ${v4} == ${s2} then
-            ${v4} = ${s3}
-        elseif ${v4} == ${s3} then
-            break
-        end
-    else
-        ${v4} = ${s1} -- Fake loop
+local _ls = _env[string.char(108,111,97,100,115,116,114,105,110,103)]
+local _bx = bit32.bxor
+local _ch = string.char
+local _sb = string.sub
+local _tn = tonumber
+local _dec = ""
+
+for _i = 1, #${v1}, 2 do
+    local _h = _sb(${v1}, _i, _i+1)
+    local _b = _tn(_h, 16)
+    local _mod = (_i / 2) % 7
+    _b = _bx(_b, (${v2} + _mod) % 256)
+    _dec = _dec .. _ch(_b)
+end
+
+if _ls then
+    local _f = _ls(_dec)
+    if _f then
+        pcall(_f)
     end
 end
     `.trim();
-
-    return obfuscatedCode;
 }
 
 export default async function handler(req, res) {
@@ -143,7 +105,7 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        const finalObfuscatedCode = luarixV3Obfuscate(code);
+        const finalObfuscatedCode = luarixV4Obfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
         const { error } = await supabase.from('scripts').insert({
