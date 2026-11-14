@@ -1,4 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
+function genApiKey(plan) {
+  const planUpper = (plan || 'FREE').toUpperCase();
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let out = '';
+  for (let i = 0; i < 8; i++) {
+    out += chars[crypto.randomInt(0, chars.length)];
+  }
+  return `LXR-${planUpper}-${out}`;
+}
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
@@ -20,8 +31,7 @@ export default async function handler(req, res) {
             const { data: existing } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
             if (existing) return res.status(400).json({ error: 'Account already exists' });
 
-            const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
-            const newKey = `LXR-FREE-${randomHex}`;
+            const newKey = genApiKey('FREE');
 
             const { data: user, error } = await supabase.from('users').insert({
                 email, password, api_key: newKey, plan: 'free', usage: 0
@@ -36,8 +46,7 @@ export default async function handler(req, res) {
             if (fetchErr) return res.status(500).json({ error: "Fetch Error: " + fetchErr.message });
             
             if (!user) {
-                const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
-                const newKey = `LXR-FREE-${randomHex}`;
+                const newKey = genApiKey('FREE');
                 
                 const { data: newUser, error: insertErr } = await supabase.from('users').insert({
                     email, 
@@ -69,7 +78,7 @@ export default async function handler(req, res) {
             let plan = 'free';
             if (paid_key.startsWith('LXR-PREM-')) plan = 'premium';
             else if (paid_key.startsWith('LXR-BASIC-')) plan = 'basic';
-            else if (paid_key === 'ADMIN') plan = 'admin';
+            else if (paid_key.startsWith('LXR-ADMIN-')) plan = 'admin';
 
             const { error: updateErr } = await supabase.from('users').update({ discord_id, email, plan }).eq('api_key', paid_key);
             if (updateErr) return res.status(500).json({ error: "Update Error: " + updateErr.message });
