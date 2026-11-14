@@ -1,46 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-// 🚀 LUARIX V13 (The Chaos Engine)
-function luarixV13Obfuscate(luaCode) {
-    const bytes = new TextEncoder().encode(luaCode);
-    let realData = "";
-    const salt = Math.floor(Math.random() * 50) + 10;
+// 🚀 LUARIX V14 (The Abyss Engine - Anti-AI)
+function luarixV14Obfuscate(luaCode) {
+    const b64 = Buffer.from(luaCode, 'utf-8').toString('base64');
+    const bytes = new TextEncoder().encode(b64);
+    let hex = "";
+    const polyKey = Math.floor(Math.random() * 100) + 20;
     
     for (let i = 0; i < bytes.length; i++) {
-        let b = bytes[i] ^ (salt + (i % 7));
-        realData += b.toString(16).padStart(2, "0");
+        let val = (bytes[i] ^ (polyKey + (i % 4))) + (polyKey * 2);
+        hex += (val % 256).toString(16).padStart(2, "0");
     }
 
-    let fakeArray = [];
-    const realIndex = Math.floor(Math.random() * 5);
-    for (let j = 0; j < 5; j++) {
-        if (j === realIndex) {
-            fakeArray.push(`"${realData}"`);
-        } else {
-            let fakeHex = "";
-            for (let k = 0; k < bytes.length; k++) {
-                fakeHex += Math.floor(Math.random() * 255).toString(16).padStart(2, "0");
-            }
-            fakeArray.push(`"${fakeHex}"`);
-        }
-    }
+    const chunkSize = Math.ceil(hex.length / 3);
+    const c1 = hex.substring(0, chunkSize);
+    const c2 = hex.substring(chunkSize, chunkSize * 2);
+    const c3 = hex.substring(chunkSize * 2);
 
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
-    const v5 = "_" + crypto.randomBytes(4).toString('hex');
-    const v6 = "_" + crypto.randomBytes(4).toString('hex');
 
     return `
 local _e = getfenv(0)
-local ${v1} = { ${fakeArray.join(",")} }
-local ${v2} = ${realIndex}
-local ${v3} = ${salt}
-local ${v4} = ""
-local ${v5} = 1
-local ${v6} = 0
+local ${v1} = "${c1}" .. "${c2}" .. "${c3}"
+local ${v2} = ${polyKey}
+local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
+local _dec = ""
 
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -51,34 +39,44 @@ pcall(function()
     end
 end)
 
-while true do
-    if ${v5} == 1 then
-        local _x = (${salt} * 3) % 7
-        if _x > 0 then
-            ${v5} = 2
-        else
-            ${v5} = 1
-        end
-    elseif ${v5} == 2 then
-        local _realHex = ${v1}[${v2} + 1]
-        for i = 1, #_realHex, 2 do
-            local b = tonumber(_realHex:sub(i, i+1), 16)
-            b = bit32.bxor(b, (${v3} + ((i-1)/2) % 7) % 256)
-            ${v4} = ${v4} .. string.char(b)
-        end
-        ${v5} = 3
-    elseif ${v5} == 3 then
-        local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
-        if _ls then
-            local _f = _ls(${v4})
-            if _f then
-                setfenv(_f, _e)
-                pcall(_f)
-            end
-        end
-        ${v5} = 4
-    elseif ${v5} == 4 then
-        break
+local _vm = 0
+while _vm < 100 do
+    _vm = _vm + 1
+    if _vm % 2 == 0 then
+        local _temp = (_vm * ${polyKey}) % 255
+    end
+end
+
+for i = 1, #${v1}, 2 do
+    local h = ${v1}:sub(i, i+1)
+    local b = tonumber(h, 16)
+    b = (b - (${v2} * 2)) % 256
+    b = bit32.bxor(b, (${v2} + (math.floor((i-1)/2) % 4)) % 256)
+    _dec = _dec .. string.char(b)
+end
+
+local function b64_decode(data)
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    data = string.gsub(data, '[^'..b..'=]', '')
+    return (data:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+        return r
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
+end
+
+local _final = b64_decode(_dec)
+if _ls and _final then
+    local _f = _ls(_final)
+    if _f then
+        setfenv(_f, _e)
+        pcall(_f)
     end
 end
     `.trim();
@@ -211,7 +209,7 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            const finalObfuscatedCode = luarixV13Obfuscate(rawCode); 
+            const finalObfuscatedCode = luarixV14Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
