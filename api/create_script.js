@@ -3,69 +3,56 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-function luarixV8Obfuscate(luaCode) {
-    const salt1 = Math.floor(Math.random() * 100) + 10;
-    const salt2 = Math.floor(Math.random() * 50) + 5;
-    const bytes = new TextEncoder().encode(luaCode);
+// 🚀 LUARIX V9 ENGINE (Chunked State Machine)
+function luarixV9Obfuscate(luaCode) {
+    const chunkSize = 50;
+    let chunks = [];
+    for (let i = 0; i < luaCode.length; i += chunkSize) {
+        chunks.push(luaCode.substring(i, i + chunkSize));
+    }
+
+    const salt = Math.floor(Math.random() * 100) + 10;
+    let encodedChunks = [];
     
-    let hexArray = [];
-    for (let i = 0; i < bytes.length; i++) {
-        let enc = ((bytes[i] ^ (salt1 + i)) + salt2) % 256;
-        hexArray.push(enc.toString(16).padStart(2, "0"));
-    }
+    chunks.forEach((chunk, index) => {
+        let hex = "";
+        for (let i = 0; i < chunk.length; i++) {
+            let enc = ((chunk.charCodeAt(i) ^ (salt + i)) + (index * 5)) % 256;
+            hex += enc.toString(16).padStart(2, "0");
+        }
+        encodedChunks.push(`"${hex}"`);
+    });
 
-    // ✅ FAST SHUFFLE (Prevents Vercel Timeout)
-    let indexed = hexArray.map((h, i) => ({ h, i }));
-    indexed.sort(() => Math.random() - 0.5);
-    const shuffled = indexed.map(obj => obj.h);
-    const indexMap = indexed.map(obj => obj.i);
+    const vTable = "_" + crypto.randomBytes(4).toString('hex');
+    const vSalt = "_" + crypto.randomBytes(4).toString('hex');
+    const vIndex = "_" + crypto.randomBytes(4).toString('hex');
 
-    let junk = "";
-    for (let i = 0; i < 30; i++) {
-        junk += `local _junk${i} = (${Math.random() * 1000} * ${Math.random() * 1000}) % 255\n`;
-    }
-
-    const v1 = "_" + crypto.randomBytes(4).toString('hex');
-    const v2 = "_" + crypto.randomBytes(4).toString('hex');
-    const v3 = "_" + crypto.randomBytes(4).toString('hex');
-    const v4 = "_" + crypto.randomBytes(4).toString('hex');
-    const v5 = "_" + crypto.randomBytes(4).toString('hex');
-
+    // Obfuscated 'loadstring' and 'string.char'
     return `
 local _e = getfenv(0)
-local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
-local ${v2} = { ${indexMap.join(",")} }
-local ${v3} = ${salt1}
-local ${v4} = ${salt2}
-local ${v5} = ""
-
-${junk}
-
-pcall(function()
-    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if _e[_f1] or _e[_f2] then
-        local function _c() _c() end
-        _c()
-    end
-end)
-
-for _i = 1, #${v2} do
-    local _idx = ${v2}[_i] + 1
-    local _h = ${v1}[_idx]
-    local _b = tonumber(_h, 16)
-    _b = (_b - ${v4}) % 256
-    _b = bit32.bxor(_b, (${v3} + _i) % 256)
-    ${v5} = ${v5} .. string.char(_b)
-end
-
+local ${vTable} = { ${encodedChunks.join(",")} }
+local ${vSalt} = ${salt}
+local ${vIndex} = 1
 local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
-if _ls then
-    local _func = _ls(${v5})
-    if _func then
-        setfenv(_func, _e)
-        pcall(_func)
+
+while ${vIndex} <= #${vTable} do
+    local _hex = ${vTable}[${vIndex}]
+    local _dec = ""
+    for i = 1, #_hex, 2 do
+        local b = tonumber(_hex:sub(i, i+1), 16)
+        b = (b - ((${vIndex} - 1) * 5)) % 256
+        b = bit32.bxor(b, (${vSalt} + (i-1)/2) % 256)
+        _dec = _dec .. string.char(b)
     end
+    
+    local _f = _ls(_dec)
+    if _f then
+        local _env = _e
+        setfenv(_f, _env)
+        pcall(_f)
+    end
+    
+    ${vIndex} = ${vIndex} + 1
 end
     `.trim();
 }
@@ -93,7 +80,7 @@ export default async function handler(req, res) {
             await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
         }
 
-        const finalObfuscatedCode = luarixV8Obfuscate(code);
+        const finalObfuscatedCode = luarixV9Obfuscate(code);
         const id = crypto.randomBytes(16).toString('hex');
         
         const { error } = await supabase.from('scripts').insert({ id: id, name: name, lua_code: finalObfuscatedCode, original_code: original_code, api_key: api_key, keyless: keyless || false });
