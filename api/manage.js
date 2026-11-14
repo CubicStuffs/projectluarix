@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ✅ FIXED: get_chart_data is now a separate block
+        // ✅ Fetch Chart Data (Executions & Keys)
         if (action === 'get_chart_data') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) {
@@ -67,6 +67,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ labels, executions: execData, keys: keyData });
         }
 
+        // ✅ Fetch Stats
         if (action === 'get_stats') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
@@ -80,6 +81,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ totalExecutions, totalKeys, totalProjects: scripts.length });
         }
 
+        // ✅ Fetch Keys and Projects
         if (action === 'get_keys') {
             const { data: scripts } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
@@ -90,6 +92,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ keys: keys || [], scripts });
         }
 
+        // ✅ Fetch Blacklists
         if (action === 'get_blacklists') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ blacklists: [] });
@@ -100,6 +103,14 @@ export default async function handler(req, res) {
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
+        // ✅ NEW: Fetch Original Code for Download
+        if (action === 'get_script_details') {
+            const { data: script, error } = await supabase.from('scripts').select('original_code').eq('id', script_id).eq('api_key', api_key).single();
+            if (error || !script) return res.status(404).json({ error: 'Not found' });
+            return res.status(200).json({ original_code: script.original_code });
+        }
+
+        // ✅ Save Monetization
         if (req.method === 'POST' && action === 'save_monetization') {
             await supabase.from('scripts').update({ 
                 monetization_provider: provider, 
@@ -108,31 +119,37 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Delete Key
         if (req.method === 'POST' && action === 'delete_key') {
             await supabase.from('script_keys').delete().eq('key', key_id);
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Reset HWID
         if (req.method === 'POST' && action === 'reset_hwid') {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Remove Blacklist
         if (req.method === 'POST' && action === 'remove_blacklist') {
             await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id);
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Delete Project
         if (req.method === 'POST' && action === 'delete_script') {
             await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Toggle Keyless
         if (req.method === 'POST' && action === 'toggle_keyless') {
             await supabase.from('scripts').update({ keyless: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Update Script Code
         if (req.method === 'POST' && action === 'update_script_code') {
             await supabase.from('scripts').update({ 
                 lua_code: req.query.code,
@@ -141,6 +158,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
+        // ✅ Generate Key (32-char)
         if (req.method === 'POST' && action === 'generate_key') {
             const newKey = genScriptKey(); 
             const { error } = await supabase.from('script_keys').insert({ key: newKey, script_id: script_id });
