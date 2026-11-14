@@ -127,7 +127,7 @@
   /* DASHBOARD UI */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
   .dash-layout { display: flex; height: 100%; width: 100%; }
-  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s, min-width 0.3s; z-index: 10; position: relative; }
+  .sidebar { width: 260px; min-width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; transition: width 0.3s, min-width 0.3s, left 0.3s; z-index: 999; position: relative; }
   .sidebar.collapsed { width: 80px; min-width: 80px; padding: 1.5rem 0.5rem; }
   .sidebar.collapsed .menu-text, .sidebar.collapsed .sidebar-logo { display: none; }
   .sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
@@ -193,6 +193,55 @@
   .toast-notification { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--primary); color: var(--text); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s forwards; }
   .loader-code-box { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: left; position: relative; margin-bottom: 1.5rem; }
   .loader-code-box code { color: #10b981; font-family: monospace; font-size: 0.85rem; word-break: break-all; }
+
+  /* ✅ FIXED DISCORD TAB CSS */
+  .discord-invite-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; }
+  .discord-logo { width: 80px; height: 80px; color: var(--discord); margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(88, 101, 242, 0.4)); }
+  .btn-discord-large { background: var(--discord); color: white; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; border: none; cursor: pointer; margin-top: 1rem; }
+  .btn-discord-large:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3); }
+
+  /* ✅ MOBILE RESPONSIVE FIXES */
+  @media (max-width: 768px) {
+      /* Navbar */
+      nav { flex-direction: column; padding: 1rem; gap: 1rem; width: 95%; top: 0.5rem; }
+      nav .links { gap: 1rem; flex-wrap: wrap; justify-content: center; font-size: 0.9rem; }
+      #nav-auth { width: 100%; justify-content: center; }
+      
+      /* Dashboard Sidebar */
+      .sidebar { position: fixed; left: -100%; height: 100vh; transition: left 0.3s ease; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+      .sidebar.active { left: 0; }
+      .toggle-btn { left: auto; right: -36px; background: var(--bg-card); border: 1px solid var(--border); }
+      .main-content { padding: 1rem; }
+      .top-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .top-bar button { width: 100%; }
+      
+      /* Grids */
+      .stats-chart-wrapper { grid-template-columns: 1fr; }
+      .chart-box { grid-column: span 1; height: 250px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .price-card.popular { transform: scale(1); }
+      
+      /* Tables */
+      .table-box { overflow-x: auto; }
+      .script-table { min-width: 600px; }
+      
+      /* Docs */
+      .docs-layout { flex-direction: column; padding: 0 1rem; }
+      .docs-sidebar { width: 100%; height: auto; position: static; display: flex; overflow-x: auto; gap: 1rem; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+      .docs-sidebar h3 { display: none; }
+      .docs-link { white-space: nowrap; padding: 0.5rem; background: var(--bg-card); border-radius: 6px; }
+      
+      /* Modals */
+      .modal { padding: 1.5rem; width: 95%; max-width: 100%; }
+      .modal-bg { align-items: flex-end; }
+      .modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; animation: slideDown 0.3s ease-out; }
+      
+      /* Footer */
+      .footer-content { flex-direction: column; text-align: center; align-items: center; }
+      .footer-links { flex-direction: column; gap: 2rem; }
+      .hero { padding: 8rem 1rem 3rem; }
+  }
 </style>
 </head>
 <body>
@@ -480,13 +529,20 @@
         </div>
       </div>
 
-      <!-- DISCORD TAB -->
+      <!-- ✅ FIXED DISCORD TAB -->
       <div id="content-discord" style="display: none;">
         <div class="top-bar"><div><h1>Add to Discord</h1></div></div>
         <div class="table-box discord-invite-box">
-          <svg class="discord-logo" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
-          <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">Add Luarix to your Server</h2>
-          <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">Invite Bot</a>
+          <!-- Inline SVG with explicit width/height to prevent it from getting huge -->
+          <svg class="discord-logo" viewBox="0 0 71 55" fill="currentColor" width="80" height="80">
+            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/>
+          </svg>
+          <h2 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">Add Luarix to your Server</h2>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem; max-width: 500px; line-height: 1.6;">Invite our official Discord Bot to your server to start generating keys, managing whitelists, and creating control panels for your buyers automatically.</p>
+          <a href="https://discord.com/api/oauth2/authorize?client_id=1570852279186231366&permissions=268520448&scope=bot%20applications.commands" target="_blank" class="btn-discord-large">
+            <svg viewBox="0 0 71 55" width="24" height="24" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A38 38 0 0025.4.3.2.2 0 0025.2.2 58.4 58.4 0 0010.5 4.9.2.2 0 0010.4 5C1.5 18.1-1 30.9.3 43.5a.2.2 0 00.1.2A58.7 58.7 0 0018 55a.2.2 0 00.2-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.2 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4c.4-.3.7-.6 1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0c.4.3.7.6 1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.2 41.8 41.8 0 003.6 5.9.2.2 0 00.2.1A58.6 58.6 0 0070.6 43.7a.2.2 0 00.1-.2C72 29.3 68.3 16.6 60.2 5a.2.2 0 00-.1-.1zM24 36.3c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1zm23 0c-3.5 0-6.3-3.2-6.3-7.1s2.8-7.1 6.3-7.1c3.5 0 6.3 3.2 6.3 7.1s-2.8 7.1-6.3 7.1z"/></svg>
+            Invite Bot
+          </a>
         </div>
       </div>
 
@@ -517,17 +573,17 @@
       <div id="content-admin-keys" style="display: none;">
         <div class="top-bar"><div><h1 style="color: var(--primary);">Admin API Key Generator</h1></div></div>
         <div class="table-box" style="padding: 2rem; max-width: 900px;">
-          <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-            <button class="btn-gold" style="flex: 1;" onclick="generateAdminKey('basic')">Basic Key ($5/mo)</button>
-            <button class="btn-gold" style="flex: 1; background: var(--primary); color: #fff;" onclick="generateAdminKey('premium')">Premium Key ($10/mo)</button>
-            <button class="btn-gold" style="flex: 1; background: var(--success); color: #fff;" onclick="generateAdminKey('pro')">Pro Key ($15/mo)</button>
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+            <button class="btn-gold" style="flex: 1; min-width: 200px;" onclick="generateAdminKey('basic')">Basic Key ($5/mo)</button>
+            <button class="btn-gold" style="flex: 1; min-width: 200px; background: var(--primary); color: #fff;" onclick="generateAdminKey('premium')">Premium Key ($10/mo)</button>
+            <button class="btn-gold" style="flex: 1; min-width: 200px; background: var(--success); color: #fff;" onclick="generateAdminKey('pro')">Pro Key ($15/mo)</button>
           </div>
           <div id="admin-key-result" style="display: none; background: var(--bg-sidebar); padding: 2rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;"></div>
         </div>
       </div>
-    </div> <!-- ✅ Close main-content -->
-  </div> <!-- ✅ Close dash-layout -->
-</div> <!-- ✅ Close view-dashboard -->
+    </div> 
+  </div> 
+</div> 
 
 <!-- MODALS -->
 <div class="modal-bg" id="create-modal">
@@ -552,11 +608,11 @@
       <div class="loader-code-box">
         <code id="manage-loader-text">Loading...</code>
       </div>
-      <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-        <button class="btn-copy-icon" style="flex: 1; justify-content: center;" onclick="copyLoader()">
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem;">
+        <button class="btn-copy-icon" style="flex: 1; min-width: 150px; justify-content: center;" onclick="copyLoader()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Loader
         </button>
-        <button class="btn-copy-icon" style="flex: 1; justify-content: center; background: #0f172a; border: 1px solid var(--success); color: var(--success);" onclick="downloadOriginalCode()">
+        <button class="btn-copy-icon" style="flex: 1; min-width: 150px; justify-content: center; background: #0f172a; border: 1px solid var(--success); color: var(--success);" onclick="downloadOriginalCode()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download Code
         </button>
       </div>
@@ -572,9 +628,9 @@
       <label class="switch"><input type="checkbox" id="manage-keyless-toggle" onchange="toggleKeylessFromModal()"><span class="slider"></span></label>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
-      <button class="btn-gold" style="flex: 1;" onclick="generateKeyFromModal()">🔑 Generate Key</button>
-      <button class="btn-gold" style="flex: 1; background: var(--danger); color: #fff;" onclick="deleteScriptFromModal()">🗑️ Delete</button>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 2rem;">
+      <button class="btn-gold" style="flex: 1; min-width: 150px;" onclick="generateKeyFromModal()">🔑 Generate Key</button>
+      <button class="btn-gold" style="flex: 1; min-width: 150px; background: var(--danger); color: #fff;" onclick="deleteScriptFromModal()">🗑️ Delete</button>
     </div>
 
     <div style="text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem;">
@@ -641,7 +697,7 @@
 <script>
 let currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
-let currentDownloadCode = ""; // ✅ Updated Variable
+let currentDownloadCode = ""; 
 
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification'); if (oldToast) oldToast.remove();
@@ -669,12 +725,26 @@ function showView(view, scrollToId = null) {
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none'; 
     document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
     document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
+    
+    // Auto-close sidebar on mobile when navigating
+    if(window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+    }
+
     if (view === 'docs') {
         if (scrollToId) { setTimeout(() => { const el = document.getElementById(scrollToId); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100); } 
         else { window.scrollTo(0, 0); }
     } else { window.scrollTo(0, 0); }
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() { 
+    const sidebar = document.getElementById('sidebar');
+    if(window.innerWidth <= 768) {
+        sidebar.classList.toggle('active');
+    } else {
+        sidebar.classList.toggle('collapsed'); 
+    }
+}
 
 function switchTab(tab) {
     document.getElementById('content-dash').style.display = tab === 'dash' ? 'block' : 'none';
@@ -688,6 +758,11 @@ function switchTab(tab) {
     if (tab === 'keys') loadKeys();
     if (tab === 'blacklist') loadBlacklists();
     if (tab === 'monetize') { loadMonetizationSelect(); renderChart('keyChart'); }
+    
+    // Auto-close sidebar on mobile when tab changes
+    if(window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+    }
 }
 
 function promptAdmin() {
@@ -734,7 +809,6 @@ async function handleSignup() {
     const paid_key = document.getElementById('signup-invite').value.trim();
     const tos = document.getElementById('signup-tos').checked;
 
-    // ✅ NEW: Get Turnstile Token
     const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!turnstileResponse) return showToast("Please complete the security check.");
 
@@ -747,7 +821,6 @@ async function handleSignup() {
     try {
         const res = await fetch('/api/auth', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            // ✅ NEW: Send token to backend
             body: JSON.stringify({ action: 'signup', email, discord_id, paid_key, turnstile_token: turnstileResponse })
         });
         const data = await res.json();
@@ -759,7 +832,7 @@ async function handleSignup() {
         closeLogin(); loadDashboard();
     } catch (err) {
         showToast(err.message);
-        if(window.turnstile) window.turnstile.reset(); // Reset widget on error
+        if(window.turnstile) window.turnstile.reset();
     } finally {
         btn.textContent = "REGISTER"; btn.disabled = false;
     }
@@ -785,7 +858,7 @@ function loadDashboard() {
     if (!plan) {
         if (currentAuth.api_key.startsWith('LXR-BASIC-')) plan = 'basic';
         else if (currentAuth.api_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
-        else if (currentAuth.api_key.startsWith('LXR-PRO-')) plan = 'pro'; // ✅ Pro add kiya
+        else if (currentAuth.api_key.startsWith('LXR-PRO-')) plan = 'pro'; 
         else if (currentAuth.api_key.startsWith('LXR-ADMIN-') || currentAuth.api_key === 'ADMIN') plan = 'admin';
         else plan = 'free';
     }
@@ -883,10 +956,10 @@ async function openManageModal(id) {
     
     document.getElementById('manage-loader-text').innerText = `script_key="YOUR_KEY_HERE";\nloadstring(game:HttpGet("${window.location.origin}/api/loader/${id}"))()`;
     
-    currentDownloadCode = ""; // ✅ Changed to currentDownloadCode
+    currentDownloadCode = ""; 
     const res = await fetch(`/api/manage?action=get_script_details&api_key=${currentAuth.api_key}&script_id=${id}`);
     const data = await res.json();
-    if (data.code) currentDownloadCode = data.code; // ✅ Ab data.code ayega (encrypted)
+    if (data.code) currentDownloadCode = data.code; 
     
     document.getElementById('manage-modal').classList.add('show');
 }
@@ -900,11 +973,11 @@ function copyLoader() {
 function downloadOriginalCode() {
     if (!currentDownloadCode) return showToast("Code not available.");
     const scriptName = document.getElementById('manage-title').textContent.replace("Manage: ", "").trim();
-    const blob = new Blob([currentDownloadCode], { type: 'text/plain' }); // ✅ Changed to currentDownloadCode
+    const blob = new Blob([currentDownloadCode], { type: 'text/plain' }); 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${scriptName}_obfuscated.lua`; // ✅ Filename change kiya
+    a.download = `${scriptName}_obfuscated.lua`; 
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1036,7 +1109,6 @@ function generateAdminKey(type) {
     let rand = '';
     for (let i = 0; i < 8; i++) rand += chars[randomValues[i] % chars.length];
     
-    // ✅ Ab Basic, Premium aur Pro teeno keys banengi
     let prefix = 'LXR-BASIC-';
     if (type === 'premium') prefix = 'LXR-PREMIUM-';
     else if (type === 'pro') prefix = 'LXR-PRO-';
