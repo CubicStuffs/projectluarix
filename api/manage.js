@@ -149,6 +149,12 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
+        // ✅ NEW: Kill Switch Toggle (Isko bahar nikal do)
+        if (req.method === 'POST' && action === 'toggle_kill_switch') {
+            await supabase.from('scripts').update({ is_disabled: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
+            return res.status(200).json({ success: true });
+        }
+
         // ✅ Update Script Code
         if (req.method === 'POST' && action === 'update_script_code') {
             await supabase.from('scripts').update({ 
