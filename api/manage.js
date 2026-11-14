@@ -10,7 +10,7 @@ function genScriptKey() {
   return key;
 }
 
-// 🚀 LUARIX V8 ENGINE (Context Killer / Anti-AI)
+// 🚀 FAST V8 ENGINE
 function luarixV8Obfuscate(luaCode) {
     const salt1 = Math.floor(Math.random() * 100) + 10;
     const salt2 = Math.floor(Math.random() * 50) + 5;
@@ -22,8 +22,10 @@ function luarixV8Obfuscate(luaCode) {
         hexArray.push(enc.toString(16).padStart(2, "0"));
     }
 
-    const shuffled = [...hexArray].sort(() => Math.random() - 0.5);
-    const indexMap = hexArray.map(h => shuffled.indexOf(h));
+    let indexed = hexArray.map((h, i) => ({ h, i }));
+    indexed.sort(() => Math.random() - 0.5);
+    const shuffled = indexed.map(obj => obj.h);
+    const indexMap = indexed.map(obj => obj.i);
 
     let junk = "";
     for (let i = 0; i < 30; i++) {
@@ -68,8 +70,7 @@ local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
 if _ls then
     local _func = _ls(${v5})
     if _func then
-        local _env = _e
-        setfenv(_func, _env)
+        setfenv(_func, _e)
         pcall(_func)
     end
 end
