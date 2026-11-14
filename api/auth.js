@@ -13,8 +13,6 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-    
-    // ✅ NEW: turnstile_token add kiya
     const { action, email, password, paid_key, discord_tag, discord_id, api_key, turnstile_token } = req.body;
 
     try {
@@ -26,7 +24,7 @@ export default async function handler(req, res) {
         }
 
         if (action === 'signup') {
-            // ✅ NEW: Verify Turnstile Token
+            // ✅ Verify Turnstile Token
             if (!turnstile_token) return res.status(400).json({ error: 'Security check missing.' });
             
             const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
@@ -47,13 +45,11 @@ export default async function handler(req, res) {
             let finalApiKey = paid_key;
             let plan = 'free';
 
-                if (paid_key) {
-                // ✅ Pro key format add kiya
+            if (paid_key) {
                 if (!paid_key.startsWith('LXR-BASIC-') && !paid_key.startsWith('LXR-PREMIUM-') && !paid_key.startsWith('LXR-PRO-') && !paid_key.startsWith('LXR-ADMIN-')) {
                     return res.status(400).json({ error: 'Invalid Invite Code format' });
                 }
                 
-                // ✅ Plan assign kiya
                 if (paid_key.startsWith('LXR-BASIC-')) plan = 'basic';
                 else if (paid_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
                 else if (paid_key.startsWith('LXR-PRO-')) plan = 'pro';
@@ -66,15 +62,13 @@ export default async function handler(req, res) {
             }
 
             const { data: user, error } = await supabase.from('users').insert({
-                email, discord_id, api_key: finalApiKey, plan: plan, usage: 0,
+                email, discord_id, api_key: finalApiKey, plan: plan,
                 obfuscations_used: 0, obfuscation_reset_at: new Date().toISOString()
             }).select().single();
 
             if (error) return res.status(500).json({ error: "Supabase Error: " + error.message });
             return res.status(200).json({ user });
         }
-        
-        // ... (baaki discord oauth ka code waise hi rahega)
     } catch (err) {
         return res.status(500).json({ error: "Server Error: " + err.message });
     }
