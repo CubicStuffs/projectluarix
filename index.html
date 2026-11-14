@@ -1024,11 +1024,9 @@ async function generateKeyFromModal() {
 async function updateCodeFromModal() {
     const id = document.getElementById('manage-script-id').value; const code = document.getElementById('update-script-code').value.trim();
     if (!code) return showToast("Please paste the new code first.");
-    const key = Math.floor(Math.random() * 200) + 10; const bytes = new TextEncoder().encode(code); let hex = ""; 
-    for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
-    const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
     
-    const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
+    // ✅ Send raw code to backend (No client-side XOR)
+    const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(code)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
     const data = await res.json();
     if(!res.ok) return showToast(data.error || "Failed to update code");
     
@@ -1039,14 +1037,19 @@ async function updateCodeFromModal() {
 }
 
 async function createScript() {
-    const name = document.getElementById('new-script-name').value.trim(); const code = document.getElementById('new-script-code').value.trim(); const keyless = document.getElementById('new-script-keyless').checked;
+    const name = document.getElementById('new-script-name').value.trim(); 
+    const code = document.getElementById('new-script-code').value.trim(); 
+    const keyless = document.getElementById('new-script-keyless').checked;
+    
     if (!name || !code) return showToast("Name and code are required.");
-    const btn = document.getElementById('create-btn'); btn.textContent = "Encrypting..."; btn.disabled = true;
+    const btn = document.getElementById('create-btn'); btn.textContent = "Obfuscating..."; btn.disabled = true;
     try {
-        const key = Math.floor(Math.random() * 200) + 10; const bytes = new TextEncoder().encode(code); let hex = ""; 
-        for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
-        const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
-        const res = await fetch('/api/create_script', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, code: encrypted, original_code: code, api_key: currentAuth.api_key, keyless }) });
+        // ✅ Send raw code to backend (No client-side XOR)
+        const res = await fetch('/api/create_script', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ name, code: code, original_code: code, api_key: currentAuth.api_key, keyless }) 
+        });
         const data = await res.json(); 
         if (!res.ok) throw new Error(data.error || "Failed to create script");
         
