@@ -1022,18 +1022,42 @@ async function generateKeyFromModal() {
 }
 
 async function updateCodeFromModal() {
-    const id = document.getElementById('manage-script-id').value; const code = document.getElementById('update-script-code').value.trim();
+    const id = document.getElementById('manage-script-id').value; 
+    const code = document.getElementById('update-script-code').value.trim();
     if (!code) return showToast("Please paste the new code first.");
     
-    // ✅ Send raw code to backend (No client-side XOR)
-    const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(code)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
-    const data = await res.json();
-    if(!res.ok) return showToast(data.error || "Failed to update code");
-    
-    document.getElementById('update-script-code').value = ''; 
-    document.getElementById('manage-modal').classList.remove('show'); 
-    showToast("Script code updated successfully!");
-    loadDashboard();
+    const btn = document.querySelector('#manage-modal button[onclick="updateCodeFromModal()"]');
+    const originalText = btn.innerText;
+    btn.innerText = "Updating..."; btn.disabled = true;
+
+    try {
+        // ✅ Code ko URL ki jagah Body (JSON) mein bhej rahe hain
+        const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                code: code, 
+                original_code: code 
+            })
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || "Failed to update code");
+        
+        document.getElementById('update-script-code').value = ''; 
+        document.getElementById('manage-modal').classList.remove('show'); 
+        
+        // ✅ Success Notification
+        showToast("✅ Script code updated successfully!");
+        loadDashboard();
+        
+    } catch (err) { 
+        // ✅ Error Notification
+        showToast("❌ " + err.message); 
+    } finally { 
+        btn.innerText = originalText; 
+        btn.disabled = false; 
+    }
 }
 
 async function createScript() {
