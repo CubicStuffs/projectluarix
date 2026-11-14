@@ -10,33 +10,41 @@ function genScriptKey() {
   return key;
 }
 
-// 🚀 LUARIX V6 ENGINE (In-House VM / Anti-AI)
-function luarixV6Obfuscate(luaCode) {
-    const salt = Math.floor(Math.random() * 50) + 10;
+// 🚀 LUARIX V8 ENGINE (Context Killer / Anti-AI)
+function luarixV8Obfuscate(luaCode) {
+    const salt1 = Math.floor(Math.random() * 100) + 10;
+    const salt2 = Math.floor(Math.random() * 50) + 5;
     const bytes = new TextEncoder().encode(luaCode);
-    let bytecode = [];
     
+    let hexArray = [];
     for (let i = 0; i < bytes.length; i++) {
-        let op = ((bytes[i] + salt) * ((i % 5) + 1)) % 256;
-        bytecode.push(op);
+        let enc = ((bytes[i] ^ (salt1 + i)) + salt2) % 256;
+        hexArray.push(enc.toString(16).padStart(2, "0"));
     }
 
-    const v1 = "_" + crypto.randomBytes(5).toString('hex');
-    const v2 = "_" + crypto.randomBytes(5).toString('hex');
-    const v3 = "_" + crypto.randomBytes(5).toString('hex');
-    const v4 = "_" + crypto.randomBytes(5).toString('hex');
+    const shuffled = [...hexArray].sort(() => Math.random() - 0.5);
+    const indexMap = hexArray.map(h => shuffled.indexOf(h));
+
+    let junk = "";
+    for (let i = 0; i < 30; i++) {
+        junk += `local _junk${i} = (${Math.random() * 1000} * ${Math.random() * 1000}) % 255\n`;
+    }
+
+    const v1 = "_" + crypto.randomBytes(4).toString('hex');
+    const v2 = "_" + crypto.randomBytes(4).toString('hex');
+    const v3 = "_" + crypto.randomBytes(4).toString('hex');
+    const v4 = "_" + crypto.randomBytes(4).toString('hex');
+    const v5 = "_" + crypto.randomBytes(4).toString('hex');
 
     return `
 local _e = getfenv(0)
-local ${v1} = { ${bytecode.join(",")} }
-local ${v2} = ${salt}
-local ${v3} = ""
-local ${v4} = 0
+local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
+local ${v2} = { ${indexMap.join(",")} }
+local ${v3} = ${salt1}
+local ${v4} = ${salt2}
+local ${v5} = ""
 
-for _j = 1, 20 do
-    local _m = (_j * ${salt}) % 255
-    if _m > 100 then _m = _m - 1 end
-end
+${junk}
 
 pcall(function()
     local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -47,17 +55,18 @@ pcall(function()
     end
 end)
 
-for _i = 1, #${v1} do
-    local _op = ${v1}[_i]
-    local _mod = (_i % 5) + 1
-    local _b = math.floor(_op / _mod) - ${v2}
-    if _b < 0 then _b = _b + 256 end
-    ${v3} = ${v3} .. string.char(_b)
+for _i = 1, #${v2} do
+    local _idx = ${v2}[_i] + 1
+    local _h = ${v1}[_idx]
+    local _b = tonumber(_h, 16)
+    _b = (_b - ${v4}) % 256
+    _b = bit32.bxor(_b, (${v3} + _i) % 256)
+    ${v5} = ${v5} .. string.char(_b)
 end
 
 local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
 if _ls then
-    local _func = _ls(${v3})
+    local _func = _ls(${v5})
     if _func then
         local _env = _e
         setfenv(_func, _env)
@@ -142,8 +151,6 @@ export default async function handler(req, res) {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
-        
-        // ✅ Fixed Remove Blacklist with Error Handling
         if (req.method === 'POST' && action === 'remove_blacklist') {
             if (!discord_id || !script_id) return res.status(400).json({ error: 'Missing discord_id or script_id' });
             const { data, error } = await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id).select();
@@ -151,7 +158,6 @@ export default async function handler(req, res) {
             if (!data || data.length === 0) return res.status(404).json({ error: 'Blacklist entry not found in database' });
             return res.status(200).json({ success: true });
         }
-        
         if (req.method === 'POST' && action === 'delete_script') {
             await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -184,7 +190,7 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            const finalObfuscatedCode = luarixV6Obfuscate(rawCode); // V6 ENGINE APPLIED
+            const finalObfuscatedCode = luarixV8Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
