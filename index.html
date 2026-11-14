@@ -281,7 +281,7 @@
       <div class="price-card">
         <h3>Basic</h3>
         <p class="desc">If you just started developing scripts, this plan is ideal for you.</p>
-        <div class="price-amount">$15<span>/month</span></div>
+        <div class="price-amount">$5<span>/month</span></div>
         <ul class="price-features">
           <li>Unlimited Obfuscations</li>
           <li>Standard Loaders</li>
@@ -296,7 +296,7 @@
       <div class="price-card popular">
         <h3>Premium</h3>
         <p class="desc">Best plan for most users. If your script hub growing fast, this plan is recommended.</p>
-        <div class="price-amount">$25<span>/month</span></div>
+        <div class="price-amount">$10<span>/month</span></div>
         <ul class="price-features">
           <li>Unlimited Obfuscations</li>
           <li>Fast HttpGet Loaders</li>
@@ -311,7 +311,7 @@
       <div class="price-card">
         <h3>Pro</h3>
         <p class="desc">Everything in premium with higher usage limits.</p>
-        <div class="price-amount">$40<span>/month</span></div>
+        <div class="price-amount">$15<span>/month</span></div>
         <ul class="price-features">
           <li>API & Bot access</li>
           <li>Webhook logs</li>
@@ -513,20 +513,18 @@
         </div>
       </div>
 
-      <!-- ADMIN KEYS TAB -->
+       <!-- ADMIN KEYS TAB -->
       <div id="content-admin-keys" style="display: none;">
         <div class="top-bar"><div><h1 style="color: var(--primary);">Admin API Key Generator</h1></div></div>
-        <div class="table-box" style="padding: 2rem; max-width: 800px;">
+        <div class="table-box" style="padding: 2rem; max-width: 900px;">
           <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-            <button class="btn-gold" style="flex: 1;" onclick="generateAdminKey('basic')">Generate Basic Key ($5/mo)</button>
-            <button class="btn-gold" style="flex: 1; background: var(--primary); color: #fff;" onclick="generateAdminKey('premium')">Generate Premium Key ($10/yr)</button>
+            <button class="btn-gold" style="flex: 1;" onclick="generateAdminKey('basic')">Basic Key ($5/mo)</button>
+            <button class="btn-gold" style="flex: 1; background: var(--primary); color: #fff;" onclick="generateAdminKey('premium')">Premium Key ($10/mo)</button>
+            <button class="btn-gold" style="flex: 1; background: var(--success); color: #fff;" onclick="generateAdminKey('pro')">Pro Key ($15/mo)</button>
           </div>
           <div id="admin-key-result" style="display: none; background: var(--bg-sidebar); padding: 2rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;"></div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
 <!-- MODALS -->
 <div class="modal-bg" id="create-modal">
@@ -784,6 +782,7 @@ function loadDashboard() {
     if (!plan) {
         if (currentAuth.api_key.startsWith('LXR-BASIC-')) plan = 'basic';
         else if (currentAuth.api_key.startsWith('LXR-PREMIUM-')) plan = 'premium';
+        else if (currentAuth.api_key.startsWith('LXR-PRO-')) plan = 'pro'; // ✅ Pro add kiya
         else if (currentAuth.api_key.startsWith('LXR-ADMIN-') || currentAuth.api_key === 'ADMIN') plan = 'admin';
         else plan = 'free';
     }
@@ -1028,9 +1027,18 @@ async function saveMonetization() {
 }
 
 function generateAdminKey(type) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; const randomValues = new Uint8Array(8); crypto.getRandomValues(randomValues); let rand = '';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; 
+    const randomValues = new Uint8Array(8); 
+    crypto.getRandomValues(randomValues); 
+    let rand = '';
     for (let i = 0; i < 8; i++) rand += chars[randomValues[i] % chars.length];
-    const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREMIUM-'; const key = prefix + rand;
+    
+    // ✅ Ab Basic, Premium aur Pro teeno keys banengi
+    let prefix = 'LXR-BASIC-';
+    if (type === 'premium') prefix = 'LXR-PREMIUM-';
+    else if (type === 'pro') prefix = 'LXR-PRO-';
+    
+    const key = prefix + rand;
     const resBox = document.getElementById('admin-key-result'); resBox.style.display = 'block';
     resBox.innerHTML = `<h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4><div style="font-family: monospace; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
 }
