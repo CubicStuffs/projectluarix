@@ -105,7 +105,6 @@ export default async function handler(req, res) {
 
         // ✅ Fetch Encrypted Code for Download
         if (action === 'get_script_details') {
-            // Original_code ki jagah lua_code select kiya
             const { data: script, error } = await supabase.from('scripts').select('lua_code').eq('id', script_id).eq('api_key', api_key).single();
             if (error || !script) return res.status(404).json({ error: 'Not found' });
             return res.status(200).json({ code: script.lua_code });
@@ -156,7 +155,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // ✅ Update Script Code (WITH OBFUSCATION LIMIT CHECK)
+        // ✅ Update Script Code (WITH STRONG SERVER-SIDE OBFUSCATION)
         if (req.method === 'POST' && action === 'update_script_code') {
             // 1. Fetch user details
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
@@ -183,10 +182,36 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            // 3. Update the code
+            // 3. Apply Strong Obfuscation on Update (Backend)
+            const rawCode = req.query.original_code || req.query.code;
+            const key = Math.floor(Math.random() * 200) + 10;
+            const bytes = new TextEncoder().encode(rawCode);
+            let hex = ""; 
+            for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
+            
+            const chunkSize = 500;
+            let chunks = [];
+            for (let i = 0; i < hex.length; i += chunkSize) chunks.push(hex.substring(i, i + chunkSize));
+            
+            const randVar = "v_" + crypto.randomBytes(4).toString('hex');
+            
+            const finalObfuscatedCode = `
+local ${randVar} = { ${chunks.map((c) => `"${c}"`).join(',\n    ')} }
+pcall(function()
+    local env = getfenv(0)
+    if env.hookfunction or env.getrawmetatable then while true do end end
+end)
+local function ${randVar}_decrypt()
+    return table.concat(${randVar}, ""):gsub("%x%x", function(c) return string.char(bit32.bxor(tonumber(c, 16), ${key})) end)
+end
+local s, code = pcall(${randVar}_decrypt)
+if s then loadstring(code)() end
+            `.trim();
+            
+            // 4. Update the database
             await supabase.from('scripts').update({ 
-                lua_code: req.query.code,
-                original_code: req.query.original_code
+                lua_code: finalObfuscatedCode,
+                original_code: rawCode
             }).eq('id', script_id).eq('api_key', api_key);
             
             return res.status(200).json({ success: true });
