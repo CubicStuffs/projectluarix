@@ -1,15 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
-function genScriptKey() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let key = '';
-  for (let i = 0; i < 32; i++) key += chars[crypto.randomInt(0, chars.length)];
-  return key;
-}
-
 // 🚀 LUARIX V10 ENGINE (Mini-Virtual Machine)
 function luarixV10Obfuscate(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
@@ -71,13 +62,90 @@ end
     `.trim();
 }
 
+function genScriptKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let key = '';
+  for (let i = 0; i < 32; i++) key += chars[crypto.randomInt(0, chars.length)];
+  return key;
+}
+
 export default async function handler(req, res) {
+    // ✅ FIX: Supabase client ko handler ke andar rakha hai (Vercel Cold Start Fix)
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+        return res.status(500).json({ error: 'Supabase env variables are missing in Vercel!' });
+    }
+    
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
     const { api_key, action, key_id, script_id, discord_id, provider, link, keyless } = req.query;
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ... (get_chart_data, get_stats, get_keys, get_blacklists, get_script_details - SAME RAHE GA)
+        // ==========================================
+        // ✅ GET REQUESTS
+        // ==========================================
+        if (action === 'get_chart_data') {
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
+            if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
+            const scriptIds = scripts.map(s => s.id);
+            const { data: keys } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
+            
+            const dailyKeys = {}, dailyExecs = {}, today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today); d.setDate(d.getDate() - i);
+                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                dailyKeys[dateStr] = 0; dailyExecs[dateStr] = 0;
+            }
+            let totalExecs = 0;
+            (keys || []).forEach(k => {
+                totalExecs += (k.executions || 0);
+                const dateStr = new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                if (dailyKeys[dateStr] !== undefined) dailyKeys[dateStr]++;
+            });
+            let remainingExecs = totalExecs;
+            const dateLabels = Object.keys(dailyExecs);
+            dateLabels.forEach((date, idx) => {
+                if (idx === dateLabels.length - 1) dailyExecs[date] = remainingExecs; 
+                else { const take = Math.floor(Math.random() * (remainingExecs / (dateLabels.length - idx))); dailyExecs[date] = take; remainingExecs -= take; }
+            });
+            const labels = Object.keys(dailyKeys);
+            return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
+        }
 
+        if (action === 'get_stats') {
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
+            if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
+            const scriptIds = scripts.map(s => s.id);
+            const { data: keys } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
+            const totalExecutions = (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
+            return res.status(200).json({ totalExecutions, totalKeys: (keys || []).length, totalProjects: scripts.length });
+        }
+
+        if (action === 'get_keys') {
+            const { data: scripts } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
+            if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
+            const scriptIds = scripts.map(s => s.id);
+            const { data: keys } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
+            return res.status(200).json({ keys: keys || [], scripts });
+        }
+
+        if (action === 'get_blacklists') {
+            const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
+            if (!scripts) return res.status(200).json({ blacklists: [] });
+            const scriptIds = scripts.map(s => s.id);
+            const { data: blacklists } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
+            return res.status(200).json({ blacklists: blacklists || [] });
+        }
+
+        if (action === 'get_script_details') {
+            const { data: script, error } = await supabase.from('scripts').select('lua_code').eq('id', script_id).eq('api_key', api_key).single();
+            if (error || !script) return res.status(404).json({ error: 'Not found' });
+            return res.status(200).json({ code: script.lua_code });
+        }
+
+        // ==========================================
+        // ✅ POST REQUESTS
+        // ==========================================
         if (req.method === 'POST' && action === 'save_monetization') {
             await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -144,6 +212,8 @@ export default async function handler(req, res) {
 
         return res.status(400).json({ error: 'Invalid action' });
     } catch (err) {
+        // ✅ Yeh log Vercel ke dashboard mein error dikhayega agar kuch aur crash hua
+        console.error("Manage API Error:", err.message);
         return res.status(500).json({ error: err.message });
     }
 }
