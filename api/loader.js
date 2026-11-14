@@ -113,6 +113,10 @@ loadstring(game:HttpGet(url))()
     try {
         const { data: script, error: scriptErr } = await supabase.from('scripts').select('*').eq('id', id).single();
         if (scriptErr || !script) return res.status(404).send('-- Error: Script not found.');
+        // ✅ KILL SWITCH CHECK
+        if (script.is_disabled) {
+            return res.status(200).send('warn("[Luarix] This script has been temporarily disabled by the owner.")\ngame.Players.LocalPlayer:Kick("Script Disabled")');
+        }
 
         if (script.keyless) return res.status(200).send(script.lua_code);
 
