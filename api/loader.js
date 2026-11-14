@@ -4,23 +4,25 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    const { id, key, hwid } = req.query;
+    // Get ID from the clean URL, and key/hwid from the hidden second request
+    const { id, key, hwid } = req.query; 
     if (!id) return res.status(400).send('-- Error: Missing script ID.');
 
-    // THE MAGIC WRAPPER: If no key is in the URL, send a script that grabs it locally
+    // THE MAGIC WRAPPER: If no key is provided, send a tiny script that grabs it from the executor.
     if (!key) {
         const wrapper = `
-local sk = script_key or ""
-if sk == "" then
-    warn("[Luarix] Auth Error: Please define script_key='YOUR_KEY' before running the loader.")
+if not script_key or script_key == "" then
+    warn("[Luarix] Auth Error: You need a script_key to access this script.")
     return game.Players.LocalPlayer:Kick("Auth Error: Missing script_key.")
 end
 local h = gethwid and gethwid() or game:GetService("RbxAnalyticsService"):GetClientId()
-loadstring(game:HttpGet("https://${req.headers.host}/api/loader?id=${id}&key="..sk.."&hwid="..h))()
+local url = "https://${req.headers.host}/api/loader/${id}?key="..script_key.."&hwid="..h
+loadstring(game:HttpGet(url))()
 `;
         return res.status(200).send(wrapper);
     }
 
+    // IF KEY IS PRESENT, VALIDATE AND SEND SCRIPT
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
     try {
