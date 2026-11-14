@@ -86,10 +86,30 @@ export default async function handler(req, res) {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
+        
+        // ✅ FIXED: Remove Blacklist (Ab ye proper check karega)
         if (req.method === 'POST' && action === 'remove_blacklist') {
-            await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id);
+            if (!discord_id || !script_id) {
+                return res.status(400).json({ error: 'Missing discord_id or script_id' });
+            }
+
+            const { data, error } = await supabase
+                .from('blacklists')
+                .delete()
+                .eq('discord_id', discord_id)
+                .eq('script_id', script_id)
+                .select(); // Ye confirm karta hai ki delete hua ya nahi
+
+            if (error) {
+                return res.status(500).json({ error: error.message });
+            }
+            if (!data || data.length === 0) {
+                return res.status(404).json({ error: 'Blacklist entry not found in database' });
+            }
+
             return res.status(200).json({ success: true });
         }
+
         if (req.method === 'POST' && action === 'delete_script') {
             await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -135,7 +155,6 @@ export default async function handler(req, res) {
             const v1 = "_" + crypto.randomBytes(3).toString('hex');
             const v2 = "_" + crypto.randomBytes(3).toString('hex');
             
-            // ✅ SIRF ENCRYPTION, NO INFINITE LOOPS
             const finalObfuscatedCode = `
 local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
 local ${v2} = ${key}
