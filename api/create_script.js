@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// 🚀 LUARIX V15 (True State Machine / Anti-AI)
+// 🚀 LUARIX V15.1 (Fixed Scope + Enhanced Anti-AI)
 function luarixV15Obfuscate(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
     let hexData = [];
@@ -14,11 +14,10 @@ function luarixV15Obfuscate(luaCode) {
     for (let i = 0; i < bytes.length; i++) {
         let enc = (bytes[i] ^ rollingKey) % 256;
         hexData.push(enc.toString(16).padStart(2, "0"));
-        // Rolling key changes based on previous byte and index
         rollingKey = (rollingKey * 33 + bytes[i] + i) % 256;
     }
 
-    // 2. Shuffle the array (Control Flow Flattening)
+    // 2. Array Shuffling
     let indexed = hexData.map((h, i) => ({ h, i }));
     indexed.sort(() => Math.random() - 0.5);
     const shuffled = indexed.map(obj => obj.h);
@@ -30,8 +29,9 @@ function luarixV15Obfuscate(luaCode) {
     const v4 = "_" + crypto.randomBytes(4).toString('hex');
     const v5 = "_" + crypto.randomBytes(4).toString('hex');
     const v6 = "_" + crypto.randomBytes(4).toString('hex');
+    const v7 = "_" + crypto.randomBytes(4).toString('hex');
 
-    // 3. Generate Virtual Machine Logic
+    // 3. Generate VM Script (Fixed Scope)
     return `
 local _e = getfenv(0)
 local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
@@ -40,16 +40,17 @@ local ${v3} = ${initialKey}
 local ${v4} = ""
 local ${v5} = 1
 local ${v6} = 0
+local ${v7} = {} -- ✅ FIXED: Declared outside the loop
 
--- 🛑 Fake VM Execution (Wastes AI Tokens)
-while ${v6} < 50 do
+-- 🛑 Fake Math (Opaque Predicates)
+while ${v6} < 30 do
     ${v6} = ${v6} + 1
     if ${v6} % 2 == 0 then
         local _fake = (${v6} * ${initialKey}) % 255
     end
 end
 
--- 🛑 ANTI-TAMPER (Silent Crash)
+-- 🛑 ANTI-TAMPER
 pcall(function()
     local _h1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _h2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
@@ -59,34 +60,32 @@ pcall(function()
     end
 end)
 
--- 🔄 STATE MACHINE EXECUTION
+-- 🔄 STATE MACHINE
 while true do
     if ${v5} == 1 then
-        -- Opaque Predicate (Fake Math)
         local _x = (${initialKey} * 3) % 7
-        if (_x * _x) % 2 == _x % 2 then
-            ${v5} = 2
-        else
-            ${v5} = 1
-        end
+        if (_x * _x) % 2 == _x % 2 then ${v5} = 2 else ${v5} = 1 end
     elseif ${v5} == 2 then
         -- Reconstruct Array
-        local _tmpHex = {}
         for i = 1, #${v2} do
-            _tmpHex[${v2}[i] + 1] = ${v1}[i]
+            ${v7}[${v2}[i] + 1] = ${v1}[i]
         end
         ${v5} = 3
     elseif ${v5} == 3 then
-        -- Decryption Logic
+        -- Decrypt Logic
         local _rk = ${v3}
-        for i = 1, #_tmpHex do
-            local b = tonumber(_tmpHex[i], 16)
+        for i = 1, #${v7} do
+            local b = tonumber(${v7}[i], 16)
             b = bit32.bxor(b, _rk % 256)
             ${v4} = ${v4} .. string.char(b)
             _rk = (_rk * 33 + b + (i-1)) % 256
         end
         ${v5} = 4
     elseif ${v5} == 4 then
+        -- Junk State (AI Confusion)
+        local _junk = math.random(1, 100)
+        if _junk > 50 then ${v5} = 5 else ${v5} = 5 end
+    elseif ${v5} == 5 then
         -- Hidden Loadstring
         local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
         if _ls then
@@ -96,8 +95,8 @@ while true do
                 pcall(_f)
             end
         end
-        ${v5} = 5
-    elseif ${v5} == 5 then
+        ${v5} = 6
+    elseif ${v5} == 6 then
         break
     end
 end
