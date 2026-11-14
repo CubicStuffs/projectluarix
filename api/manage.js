@@ -149,18 +149,45 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // ✅ NEW: Kill Switch Toggle (Isko bahar nikal do)
+        // ✅ Kill Switch Toggle
         if (req.method === 'POST' && action === 'toggle_kill_switch') {
             await supabase.from('scripts').update({ is_disabled: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
-        // ✅ Update Script Code
+        // ✅ Update Script Code (WITH OBFUSCATION LIMIT CHECK)
         if (req.method === 'POST' && action === 'update_script_code') {
+            // 1. Fetch user details
+            const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
+            
+            // 2. Check Limit if Free Plan
+            if (user && user.plan === 'free') {
+                let used = user.obfuscations_used || 0;
+                let resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
+                let now = new Date();
+                
+                // Reset after 7 days
+                if (now > resetAt) {
+                    used = 0; 
+                    resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    await supabase.from('users').update({ obfuscations_used: used, obfuscation_reset_at: resetAt.toISOString() }).eq('api_key', api_key);
+                }
+                
+                // Block if reached 20
+                if (used >= 20) {
+                    return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
+                }
+                
+                // Increment usage
+                await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
+            }
+            
+            // 3. Update the code
             await supabase.from('scripts').update({ 
                 lua_code: req.query.code,
                 original_code: req.query.original_code
             }).eq('id', script_id).eq('api_key', api_key);
+            
             return res.status(200).json({ success: true });
         }
 
