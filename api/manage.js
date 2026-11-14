@@ -1,26 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-// 🚀 LUARIX V15.1 ENGINE (Fixed Scope + Enhanced Anti-AI)
-function luarixV15Obfuscate(luaCode) {
+// 🚀 LUARIX V16 ENGINE (Polymorphic Math / Anti-AI)
+function luarixV16Obfuscate(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
     let hexData = [];
     let rollingKey = Math.floor(Math.random() * 100) + 50;
     const initialKey = rollingKey;
+    
+    // Polymorphic Math: 1 = XOR, 2 = ADD, 3 = SUB
+    const mathType = Math.floor(Math.random() * 3) + 1; 
 
-    // 1. Dynamic Key Encryption
+    // Encryption
     for (let i = 0; i < bytes.length; i++) {
-        let enc = (bytes[i] ^ rollingKey) % 256;
+        let enc = 0;
+        if (mathType === 1) enc = (bytes[i] ^ rollingKey) % 256;
+        else if (mathType === 2) enc = (bytes[i] + rollingKey) % 256;
+        else enc = (bytes[i] - rollingKey + 256) % 256;
+        
         hexData.push(enc.toString(16).padStart(2, "0"));
         rollingKey = (rollingKey * 33 + bytes[i] + i) % 256;
     }
 
-    // 2. Array Shuffling
+    // Shuffle Array
     let indexed = hexData.map((h, i) => ({ h, i }));
     indexed.sort(() => Math.random() - 0.5);
     const shuffled = indexed.map(obj => obj.h);
     const indexMap = indexed.map(obj => obj.i);
 
+    // Random Variables
     const v1 = "_" + crypto.randomBytes(4).toString('hex');
     const v2 = "_" + crypto.randomBytes(4).toString('hex');
     const v3 = "_" + crypto.randomBytes(4).toString('hex');
@@ -28,8 +36,18 @@ function luarixV15Obfuscate(luaCode) {
     const v5 = "_" + crypto.randomBytes(4).toString('hex');
     const v6 = "_" + crypto.randomBytes(4).toString('hex');
     const v7 = "_" + crypto.randomBytes(4).toString('hex');
+    const v8 = "_" + crypto.randomBytes(4).toString('hex');
 
-    // 3. Generate VM Script (Fixed Scope Bug)
+    // Dynamic Decryption Logic based on mathType
+    let decryptLogic = "";
+    if (mathType === 1) {
+        decryptLogic = `b = bit32.bxor(b, _rk % 256)`;
+    } else if (mathType === 2) {
+        decryptLogic = `b = (b - _rk + 256) % 256`;
+    } else {
+        decryptLogic = `b = (b + _rk) % 256`;
+    }
+
     return `
 local _e = getfenv(0)
 local ${v1} = { ${shuffled.map(h => `"${h}"`).join(",")} }
@@ -39,13 +57,16 @@ local ${v4} = ""
 local ${v5} = 1
 local ${v6} = 0
 local ${v7} = {}
+local ${v8} = ${mathType}
 
--- 🛑 Fake Math (Opaque Predicates)
+-- 🛑 Dead Code (Opaque Predicates)
+if ${v8} == 99 then
+    ${v6} = 100
+end
+
 while ${v6} < 30 do
     ${v6} = ${v6} + 1
-    if ${v6} % 2 == 0 then
-        local _fake = (${v6} * ${initialKey}) % 255
-    end
+    local _fake = (${v6} * ${initialKey}) % 255
 end
 
 -- 🛑 ANTI-TAMPER
@@ -58,7 +79,7 @@ pcall(function()
     end
 end)
 
--- 🔄 STATE MACHINE
+-- 🔄 STATE MACHINE EXECUTION
 while true do
     if ${v5} == 1 then
         local _x = (${initialKey} * 3) % 7
@@ -72,14 +93,13 @@ while true do
         local _rk = ${v3}
         for i = 1, #${v7} do
             local b = tonumber(${v7}[i], 16)
-            b = bit32.bxor(b, _rk % 256)
+            ${decryptLogic} -- Dynamic Polymorphic Decryption
             ${v4} = ${v4} .. string.char(b)
             _rk = (_rk * 33 + b + (i-1)) % 256
         end
         ${v5} = 4
     elseif ${v5} == 4 then
-        local _junk = math.random(1, 100)
-        if _junk > 50 then ${v5} = 5 else ${v5} = 5 end
+        if ${v8} == 1 then ${v5} = 5 else ${v5} = 5 end
     elseif ${v5} == 5 then
         local _ls = _e[string.char(108,111,97,100,115,116,114,105,110,103)]
         if _ls then
@@ -107,7 +127,7 @@ function genScriptKey() {
 export default async function handler(req, res) {
     // ✅ Supabase client handler ke andar (Vercel 400 error / Cold start fix)
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-        return res.status(500).json({ error: 'Supabase env variables are missing in Vercel!' });
+        return res.status(500).json({ error: 'Supabase environment variables are missing in Vercel!' });
     }
     
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -255,8 +275,8 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            // ✅ V15.1 ENGINE APPLIED HERE
-            const finalObfuscatedCode = luarixV15Obfuscate(rawCode); 
+            // ✅ V16 POLYMORPHIC ENGINE APPLIED HERE
+            const finalObfuscatedCode = luarixV16Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
