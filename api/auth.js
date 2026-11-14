@@ -13,7 +13,9 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-    const { action, email, password, paid_key, discord_tag, discord_id, api_key } = req.body;
+    
+    // ✅ NEW: turnstile_token add kiya
+    const { action, email, password, paid_key, discord_tag, discord_id, api_key, turnstile_token } = req.body;
 
     try {
         if (action === 'login_apikey') {
@@ -24,6 +26,20 @@ export default async function handler(req, res) {
         }
 
         if (action === 'signup') {
+            // ✅ NEW: Verify Turnstile Token
+            if (!turnstile_token) return res.status(400).json({ error: 'Security check missing.' });
+            
+            const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `secret=${process.env.TURNSTILE_SECRET_KEY}&response=${turnstile_token}`
+            });
+            const verifyData = await verifyRes.json();
+            
+            if (!verifyData.success) {
+                return res.status(400).json({ error: 'Security check failed. Please try again.' });
+            }
+
             if (!email || !discord_id) return res.status(400).json({ error: 'Email and Discord ID required' });
             const { data: existing } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
             if (existing) return res.status(400).json({ error: 'Account with this email already exists' });
@@ -51,9 +67,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ user });
         }
         
-        // Purane functions (Discord OAuth ke liye) waise hi rahenge...
-        if (action === 'free') { /* ... */ }
-        if (action === 'link_paid') { /* ... */ }
+        // ... (baaki discord oauth ka code waise hi rahega)
     } catch (err) {
         return res.status(500).json({ error: "Server Error: " + err.message });
     }
