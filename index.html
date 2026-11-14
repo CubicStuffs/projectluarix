@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Luarix | Dashboard</title>
@@ -728,9 +729,40 @@ async function handleSignup() {
     const paid_key = document.getElementById('signup-invite').value.trim();
     const tos = document.getElementById('signup-tos').checked;
 
+    // ✅ NEW: Get Turnstile Token
+    const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+    if (!turnstileResponse) return showToast("Please complete the security check.");
+
     if (!email || !discord_id) return showToast("Email and Discord ID are required.");
     if (!tos) return showToast("You must agree to the Terms of Service.");
 
+    const btn = document.querySelector('#signup-modal .btn-gold');
+    btn.textContent = "Registering..."; btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            // ✅ NEW: Send token to backend
+            body: JSON.stringify({ action: 'signup', email, discord_id, paid_key, turnstile_token: turnstileResponse })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Signup failed");
+
+        showToast(`Registered! Your API Key is: ${data.user.api_key}`);
+        currentAuth = data.user;
+        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+        closeLogin(); loadDashboard();
+    } catch (err) {
+        showToast(err.message);
+        if(window.turnstile) window.turnstile.reset(); // Reset widget on error
+    } finally {
+        btn.textContent = "REGISTER"; btn.disabled = false;
+    }
+}
+    if (!email || !discord_id) return showToast("Email and Discord ID are required.");
+    if (!tos) return showToast("You must agree to the Terms of Service.");
+<!-- ✅ Turnstile Widget -->
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAGAxWXrid9P4VJFA" data-theme="dark" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
     const btn = document.querySelector('#signup-modal .btn-gold');
     btn.textContent = "Registering..."; btn.disabled = true;
 
