@@ -116,7 +116,7 @@
   /* MODALS */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 600px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 600px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
   
   /* TOGGLE SWITCH */
@@ -236,8 +236,8 @@
       </ol>
 
       <h2 id="script-loader">How to Use Loaders</h2>
-      <p>Once you create a script on the dashboard, you will receive a loader URL. It looks like this:</p>
-      <div class="code-block">local script_key = "YOUR_KEY_HERE"<br>local hwid = game:GetService("RbxAnalyticsService"):GetClientId()<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader?id=YOUR_SCRIPT_ID&key="..script_key.."&hwid="..hwid))()</div>
+      <p>Once you create a script on the dashboard, you will receive a clean loader URL. It looks like this:</p>
+      <div class="code-block">script_key="YOUR_KEY_HERE";<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader/YOUR_SCRIPT_ID"))()</div>
       <p>If the script is <strong>Keyless</strong>, users do not need a key. If it requires a key, users must redeem a key via your Discord panel and paste it into the <code>script_key</code> variable.</p>
 
       <h2 id="cmd-setpanel">/setpanel</h2>
@@ -455,7 +455,6 @@
     <h2 id="manage-title">Manage Project</h2>
     <input type="hidden" id="manage-script-id">
 
-    <!-- NEW: Update Code Section -->
     <div class="form-group" style="text-align: left; margin-top: 1rem;">
       <label>Update Script Code (Overwrites old code)</label>
       <textarea id="update-script-code" placeholder="-- Paste your new/updated Lua code here..."></textarea>
@@ -494,7 +493,6 @@
     <button class="btn-gold" style="width: 100%; background: var(--discord); color: white;" onclick="loginDiscord()">Login with Discord</button>
     <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);"><span id="toggle-text">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: var(--gold); text-decoration: none;" id="toggle-link">Sign Up</a></p>
 
-    <!-- SECRET ADMIN LOGO -->
     <img src="logo.png" style="position: absolute; bottom: 1rem; left: 1rem; height: 25px; cursor: pointer; opacity: 0.2; transition: 0.3s; mix-blend-mode: screen;" onclick="promptAdmin()" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.2'" alt="Admin">
   </div>
 </div>
@@ -513,6 +511,7 @@
 let isLoginMode = true;
 let currentAuth = null;
 let tempDiscordData = null;
+let allProjects = [];
 
 /* ==========================================
    1. UI & TOASTS
@@ -664,8 +663,6 @@ async function linkDiscordAccount(isPaid) {
 /* ==========================================
    3. DASHBOARD RENDERING
    ========================================== */
-let allProjects = [];
-
 function loadDashboard() {
     if (!currentAuth) {
         const saved = localStorage.getItem('luarix_auth');
@@ -745,6 +742,7 @@ function openManageModal(id) {
     document.getElementById('manage-title').textContent = "Manage: " + script.name;
     document.getElementById('manage-keyless-toggle').checked = script.keyless;
     document.getElementById('manage-key-result').style.display = 'none';
+    document.getElementById('update-script-code').value = '';
     document.getElementById('manage-modal').classList.add('show');
 }
 
@@ -771,24 +769,6 @@ async function deleteScriptFromModal() {
     showToast("Project deleted.");
 }
 
-async function updateCodeFromModal() {
-    const id = document.getElementById('manage-script-id').value;
-    const code = document.getElementById('update-script-code').value.trim();
-    if (!code) return showToast("Please paste the new code first.");
-
-    // Encrypt the new code
-    const key = Math.floor(Math.random() * 200) + 10;
-    const bytes = new TextEncoder().encode(code);
-    let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
-    const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
-
-    await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
-    
-    document.getElementById('update-script-code').value = '';
-    document.getElementById('manage-modal').classList.remove('show');
-    showToast("Script code updated successfully!");
-}
-
 async function generateKeyFromModal() {
     const id = document.getElementById('manage-script-id').value;
     const res = await fetch(`/api/manage?action=generate_key&api_key=${currentAuth.api_key}&script_id=${id}`, { method: 'POST' });
@@ -806,6 +786,24 @@ async function generateKeyFromModal() {
     } else {
         showToast("Error: " + data.error);
     }
+}
+
+async function updateCodeFromModal() {
+    const id = document.getElementById('manage-script-id').value;
+    const code = document.getElementById('update-script-code').value.trim();
+    if (!code) return showToast("Please paste the new code first.");
+
+    // Encrypt the new code
+    const key = Math.floor(Math.random() * 200) + 10;
+    const bytes = new TextEncoder().encode(code);
+    let hex = ""; for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
+    const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
+
+    await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
+    
+    document.getElementById('update-script-code').value = '';
+    document.getElementById('manage-modal').classList.remove('show');
+    showToast("Script code updated successfully!");
 }
 
 /* ==========================================
