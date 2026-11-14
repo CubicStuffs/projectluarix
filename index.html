@@ -14,7 +14,7 @@
     --success: #10b981; --danger: #ef4444; --discord: #5865F2;
   }
   
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; scroll-behavior: smooth; }
   
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
@@ -93,10 +93,36 @@
   .footer-brand p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
   .footer-links { display: flex; gap: 4rem; }
   .footer-col h4 { font-size: 1rem; margin-bottom: 1rem; }
-  .footer-col a { display: block; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.8rem; transition: 0.2s; }
+  .footer-col a { display: block; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.8rem; transition: 0.2s; cursor: pointer;}
   .footer-col a:hover { color: var(--gold); }
   .footer-bottom { max-width: 1100px; margin: 3rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
   .footer-bottom strong { color: var(--gold); }
+
+  /* ✅ DOCS PAGE & FAQ */
+  #view-docs { display: none; padding-top: 6rem; min-height: 100vh; max-width: 1400px; margin: 0 auto; }
+  .docs-layout { display: flex; gap: 2rem; padding: 0 2rem 4rem 2rem; }
+  .docs-sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 6rem; height: calc(100vh - 8rem); overflow-y: auto; border-right: 1px solid var(--border); padding-right: 1rem; }
+  .docs-sidebar h3 { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; margin-top: 1.5rem; }
+  .docs-sidebar h3:first-child { margin-top: 0; }
+  .docs-link { display: block; color: var(--text-muted); text-decoration: none; padding: 0.5rem 0; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
+  .docs-link:hover { color: var(--text); }
+  
+  .docs-content { flex: 1; max-width: 900px; }
+  .docs-content h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+  .docs-content h2 { font-size: 1.8rem; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  .docs-content h3 { font-size: 1.3rem; margin-top: 2rem; margin-bottom: 1rem; }
+  .docs-content p, .docs-content ul, .docs-content ol { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+  .docs-content ul, .docs-content ol { padding-left: 1.5rem; }
+  .docs-content strong { color: var(--text); }
+  
+  .warning-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--danger); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; margin-top: 1rem; }
+  .warning-box h4 { color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .warning-box p { color: #fca5a5; margin-bottom: 0; font-size: 0.9rem; }
+  
+  .info-box { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid var(--primary); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; margin-top: 1rem; }
+  .info-box p { color: #93c5fd; margin-bottom: 0; font-size: 0.9rem; }
+  
+  .code-block { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-family: monospace; color: var(--gold); margin-bottom: 1.5rem; overflow-x: auto; }
 
   /* 🚀 DASHBOARD UI */
   #view-dashboard { display: none; height: 100vh; width: 100vw; background: var(--bg); }
@@ -208,7 +234,7 @@
     <a onclick="showView('docs')">Docs</a>
     <a onclick="openLogin()">Dashboard</a>
     <a href="https://discord.gg/KSdDSrmaCT" target="_blank">Discord</a>
-    <a onclick="showView('docs')">F.A.Q</a>
+    <a onclick="showView('docs', 'faq')">F.A.Q</a>
   </div>
   <div id="nav-auth"><button class="btn-gold" onclick="openLogin()">Sign in</button></div>
 </nav>
@@ -223,7 +249,6 @@
       <div class="mockup-bar" style="height: 90%"></div><div class="mockup-bar" style="height: 40%"></div><div class="mockup-bar" style="height: 50%"></div>
       <div class="mockup-bar red" style="height: 70%"></div><div class="mockup-bar" style="height: 35%"></div><div class="mockup-bar" style="height: 85%"></div>
       <div class="mockup-bar" style="height: 45%"></div><div class="mockup-bar" style="height: 60%"></div><div class="mockup-bar red" style="height: 90%"></div>
-      <div class="mockup-bar" style="height: 30%"></div><div class="mockup-bar" style="height: 75%"></div><div class="mockup-bar" style="height: 55%"></div>
     </div>
   </div>
 
@@ -231,7 +256,6 @@
     <h1>Protect & Monetize your code<br>with <span class="highlight">Luarix</span></h1>
   </section>
 
-  <!-- ✅ FEATURES SECTION -->
   <section class="features-section">
     <h2>Powerful <span>Features</span> You'll Love</h2>
     <p class="subtitle">Everything you need to manage your scripts and users automatically.</p>
@@ -272,7 +296,6 @@
     </div>
   </section>
 
-  <!-- ✅ PRICING SECTION -->
   <section class="pricing-section" id="pricing">
     <h2>Simple, transparent pricing</h2>
     <div class="pricing-grid">
@@ -347,7 +370,6 @@
     </div>
   </section>
 
-  <!-- ✅ FOOTER -->
   <footer>
     <div class="footer-content">
       <div class="footer-brand">
@@ -357,8 +379,8 @@
       <div class="footer-links">
         <div class="footer-col">
           <h4>Product</h4>
-          <a onclick="showView('docs')">FAQ</a>
-          <a onclick="showView('docs')">API Documentation</a>
+          <a onclick="showView('docs', 'faq')">FAQ</a>
+          <a onclick="showView('docs')">Documentation</a>
           <a href="https://discord.gg/KSdDSrmaCT" target="_blank">Discord</a>
         </div>
         <div class="footer-col">
@@ -376,28 +398,83 @@
   </footer>
 </div>
 
-<!-- DOCS PAGE -->
+<!-- ✅ FULL DOCS & FAQ -->
 <div id="view-docs">
   <div class="docs-layout">
     <div class="docs-sidebar">
       <h3>Getting Started</h3>
       <a href="#intro" class="docs-link">Introduction</a>
-      <a href="#discord-setup" class="docs-link">Discord Bot Setup</a>
       <a href="#script-loader" class="docs-link">How to Use Loaders</a>
+      
+      <h3>Dashboard Guide</h3>
+      <a href="#create-project" class="docs-link">Creating a Project</a>
+      <a href="#manage-keys" class="docs-link">Managing Keys & HWID</a>
+      <a href="#kill-switch" class="docs-link">Kill Switch</a>
+
+      <h3>Discord Bot</h3>
+      <a href="#discord-setup" class="docs-link">Bot Setup</a>
+      <a href="#discord-cmds" class="docs-link">Commands</a>
+
+      <h3>F.A.Q</h3>
+      <a href="#faq" class="docs-link">Common Questions</a>
     </div>
+
     <div class="docs-content">
       <h1 id="intro">👑 Luarix Documentation</h1>
-      <div class="warning-box"><h4>⚠️ IMPORTANT! ⚠️</h4><p>Luarix is a premium script protection system. We never steal or view your code.</p></div>
+      
+      <div class="warning-box">
+        <h4>⚠️ IMPORTANT! ⚠️</h4>
+        <p>Luarix is a premium script protection system. We <strong>do not</strong> steal, view, or share your script sources. Your API key is tied to your account, do not share it.</p>
+      </div>
+
+      <h2 id="script-loader">How to Use Loaders</h2>
+      <p>When you create a script on the dashboard, you get a clean loader string. This loader checks the HWID, validates the key, and delivers the encrypted code safely.</p>
+      <div class="code-block">script_key="YOUR_KEY_HERE";<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader/YOUR_SCRIPT_ID"))()</div>
+      <p>If the script is set to <strong>Keyless</strong>, users do not need a key. They can just run the loadstring without the <code>script_key</code> variable.</p>
+
+      <h2 id="create-project">Creating a Project</h2>
+      <p>Click on the <strong>+ Create Project</strong> button on the dashboard. Paste your Lua code, give it a name, and choose if you want it to be Keyless. The code will be securely encrypted and saved.</p>
+
+      <h2 id="manage-keys">Managing Keys & HWID</h2>
+      <p>Inside the Manage Project modal, you can generate 32-character secure keys. Users can redeem these via your Discord panel. If a user gets a new PC, you can click <strong>Reset HWID</strong> in the Manage Keys tab to allow them to run the script on their new device.</p>
+
+      <h2 id="kill-switch">Kill Switch (Disable Script)</h2>
+      <p>If you ever need to instantly disable a script (due to bugs, exploits, or leaks), go to the Manage Project modal and toggle the <strong>Kill Switch (Disable Script)</strong>. Any user trying to execute the script will instantly be kicked with a "Script Disabled" message in the console.</p>
+
       <h2 id="discord-setup">Discord Bot Setup</h2>
-      <p>To manage your keys and panels, you must invite our official Discord bot to your server and link your account.</p>
+      <p>To manage your keys and panels, invite our official Discord bot to your server and link your account.</p>
       <ol style="color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; padding-left: 1.5rem;">
-        <li>Go to the Dashboard and click <strong>Add to Discord</strong>.</li>
-        <li>Authorize the bot and invite it to your server.</li>
-        <li>Make sure the bot has the <strong>Manage Roles</strong> permission.</li>
+        <li>Go to Dashboard and click <strong>Add to Discord</strong>.</li>
+        <li>Authorize the bot and give it <strong>Manage Roles</strong> permission.</li>
         <li>In your server, run <code>/link api_key: YOUR_API_KEY</code>.</li>
       </ol>
-      <h2 id="script-loader">How to Use Loaders</h2>
-      <div class="code-block">script_key="YOUR_KEY_HERE";<br>loadstring(game:HttpGet("https://getluarix.vercel.app/api/loader/YOUR_SCRIPT_ID"))()</div>
+
+      <h2 id="discord-cmds">Discord Commands</h2>
+      <ul>
+        <li><strong>/setpanel</strong> - Creates a key redemption panel in the channel.</li>
+        <li><strong>/createkey</strong> - Generates a new key for a specific project.</li>
+        <li><strong>/whitelist</strong> - Manually whitelist a user without a key.</li>
+        <li><strong>/blacklist</strong> - Ban a user from a specific project.</li>
+        <li><strong>/masswhitelist</strong> - Instantly whitelist everyone with a specific role.</li>
+      </ul>
+
+      <h2 id="faq">Frequently Asked Questions (F.A.Q)</h2>
+      
+      <h3>How do I get an API Key?</h3>
+      <p>Log into the Dashboard. A free API key is automatically generated for you. If you want more limits, you can purchase a Basic or Premium plan.</p>
+
+      <h3>My script says "HWID Mismatch". What do I do?</h3>
+      <p>This means your key is locked to a different device. Go to the Discord panel and click the <strong>Reset HWID</strong> button, or go to the Dashboard > Manage Keys and click <strong>Reset HWID</strong>, then run the script again.</p>
+
+      <h3>Why is my script saying "Script Disabled"?</h3>
+      <p>The owner of the script has toggled the <strong>Kill Switch</strong> in their dashboard. The script is temporarily offline. Contact the script owner for more information.</p>
+
+      <h3>How do I make my script free (Keyless)?</h3>
+      <p>When creating a project on the dashboard, toggle the <strong>Keyless Script</strong> switch to ON. Or click "Edit" on an existing project to toggle it.</p>
+
+      <h3>Does Luarix steal or view my script?</h3>
+      <p><strong>Absolutely not.</strong> We encrypt your source code the moment it touches our servers. We do not have a "view source" option, and no staff member can read your Lua code.</p>
+
     </div>
   </div>
 </div>
@@ -611,12 +688,24 @@ function showToast(msg) {
 
 function openLogin() { document.getElementById('login-modal').classList.add('show'); }
 function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
-function showView(view) { 
+function showView(view, scrollToId = null) { 
     document.getElementById('view-landing').style.display = view === 'landing' ? 'block' : 'none'; 
     document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'flex' : 'none'; 
     document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
     document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
-    if (view === 'docs') window.scrollTo(0, 0);
+    
+    if (view === 'docs') {
+        if (scrollToId) {
+            setTimeout(() => {
+                const el = document.getElementById(scrollToId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        } else {
+            window.scrollTo(0, 0);
+        }
+    } else {
+        window.scrollTo(0, 0);
+    }
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
 function toggleAuthMode() {
