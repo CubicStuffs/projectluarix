@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Luarix | Dashboard</title>
 <link rel="icon" type="image/png" href="logo.png">
-<!-- ✅ Chart.js CDN for Real Graphs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -111,11 +110,14 @@
   .exec-bar .red { background: var(--danger); }
   .last-used { font-size: 0.8rem; color: #94a3b8; }
   
-  /* Buttons */
-  .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+  /* ✅ PREMIUM BUTTONS WITH SVG ICONS */
+  .btn-action { padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .btn-edit { background: #2563eb; color: white; } .btn-edit:hover { background: #1d4ed8; }
   .btn-delete { background: #dc2626; color: white; } .btn-delete:hover { background: #b91c1c; }
-  .btn-stats { background: #334155; color: white; padding: 6px 10px; } .btn-stats:hover { background: #475569; }
+  .btn-stats { background: #334155; color: white; padding: 8px 10px; } .btn-stats:hover { background: #475569; }
+  
+  .btn-copy-icon { background: #334155; color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.8rem; transition: 0.2s; }
+  .btn-copy-icon:hover { background: #475569; }
   
   /* Forms & Modals */
   .form-group { margin-bottom: 1rem; }
@@ -127,7 +129,7 @@
   
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
   .modal-bg.show { display: flex; }
-  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 600px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 650px; text-align: center; position: relative; animation: slideDown 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
   .close-btn { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
   
   /* Toggle */
@@ -149,6 +151,10 @@
   .provider-select-wrapper { display: flex; align-items: center; gap: 10px; background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 8px; padding-left: 1rem; margin-bottom: 1rem; }
   .provider-select-wrapper img { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; background: white; padding: 2px; }
   .provider-select-wrapper select { border: none; background: transparent; margin-bottom: 0; padding-left: 0; }
+
+  /* Loader Code Box */
+  .loader-code-box { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: left; position: relative; margin-bottom: 1.5rem; }
+  .loader-code-box code { color: #10b981; font-family: monospace; font-size: 0.85rem; word-break: break-all; }
 </style>
 </head>
 <body>
@@ -226,14 +232,14 @@
 
         <div class="api-key-box" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <div><h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Your API Key</h4><code id="user-api-key" style="color: var(--primary); font-size: 1.1rem; font-weight: bold; font-family: monospace;">LXR-...</code></div>
-          <button class="action-btn" onclick="copyApiKey()">📋 Copy Key</button>
+          <!-- ✅ FIXED: Copy Button SVG -->
+          <button class="btn-copy-icon" onclick="copyApiKey()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>
         </div>
 
         <div class="stats-chart-wrapper">
           <div class="stat-card-big"><h4>Total Executions</h4><div class="val" id="stat-executions">0 <span style="font-size:1rem; color:var(--success);">↑</span></div></div>
           <div class="stat-card-big"><h4>Total Projects</h4><div class="val" id="stat-projects">0</div></div>
           
-          <!-- ✅ Real Executions Chart -->
           <div class="chart-box">
             <div class="chart-header"><h3>Executions Graph (Last 7 Days)</h3></div>
             <div class="chart-container"><canvas id="execChart"></canvas></div>
@@ -279,7 +285,6 @@
       <div id="content-monetize" style="display: none;">
         <div class="top-bar"><div><h1>Monetization</h1><p>Turn on monetization for Keyless scripts.</p></div></div>
         
-        <!-- ✅ Real Keys Chart -->
         <div class="chart-box" style="margin-bottom: 1.5rem;">
           <div class="chart-header"><h3>Daily Keys Generated (Last 7 Days)</h3></div>
           <div class="chart-container"><canvas id="keyChart"></canvas></div>
@@ -328,18 +333,50 @@
   </div>
 </div>
 
+<!-- ✅ REVAMPED: MANAGE MODAL (Loader + Download + Edit) -->
 <div class="modal-bg" id="manage-modal">
   <div class="modal">
     <span class="close-btn" onclick="document.getElementById('manage-modal').classList.remove('show')">&times;</span>
-    <h2 id="manage-title">Manage Project</h2><input type="hidden" id="manage-script-id">
-    <div class="form-group" style="text-align: left; margin-top: 1rem;">
-      <label>Update Script Code (Overwrites old code)</label>
-      <textarea id="update-script-code" placeholder="-- Paste new code..."></textarea>
-      <button class="btn-gold" style="width: 100%; background: var(--success); color: #fff; margin-bottom: 1rem;" onclick="updateCodeFromModal()">💾 Save New Code</button>
+    <h2 id="manage-title">Manage Project</h2>
+    <input type="hidden" id="manage-script-id">
+    
+    <!-- LOADER SECTION -->
+    <div style="text-align: left; margin-top: 1.5rem;">
+      <label>Loader Code (Send this to buyers)</label>
+      <div class="loader-code-box">
+        <code id="manage-loader-text">Loading...</code>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+        <button class="btn-copy-icon" style="flex: 1; justify-content: center;" onclick="copyLoader()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Loader
+        </button>
+        <button class="btn-copy-icon" style="flex: 1; justify-content: center; background: #0f172a; border: 1px solid var(--success); color: var(--success);" onclick="downloadOriginalCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download Code
+        </button>
+      </div>
     </div>
-    <div class="switch-container"><div><h4 style="font-size: 0.9rem;">Keyless Script</h4></div><label class="switch"><input type="checkbox" id="manage-keyless-toggle" onchange="toggleKeylessFromModal()"><span class="slider"></span></label></div>
-    <button class="btn-gold" style="width: 100%; margin-bottom: 1rem;" onclick="generateKeyFromModal()">🔑 Generate Key</button>
-    <button class="btn-gold" style="width: 100%; background: var(--danger); color: #fff;" onclick="deleteScriptFromModal()">🗑️ Delete Project</button>
+
+    <!-- KEYLESS TOGGLE -->
+    <div class="switch-container">
+      <div><h4 style="font-size: 0.9rem;">Keyless Script</h4><p style="font-size: 0.75rem; color: var(--text-muted);">If ON, users don't need a key.</p></div>
+      <label class="switch"><input type="checkbox" id="manage-keyless-toggle" onchange="toggleKeylessFromModal()"><span class="slider"></span></label>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+      <button class="btn-gold" style="flex: 1;" onclick="generateKeyFromModal()">🔑 Generate Key</button>
+      <button class="btn-gold" style="flex: 1; background: var(--danger); color: #fff;" onclick="deleteScriptFromModal()">🗑️ Delete</button>
+    </div>
+
+    <!-- UPDATE CODE SECTION -->
+    <div style="text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+      <label>Update Script Code</label>
+      <textarea id="update-script-code" placeholder="-- Paste new code here to overwrite..." style="min-height: 100px;"></textarea>
+      <button class="btn-gold" style="width: 100%; background: var(--success); color: #fff;" onclick="updateCodeFromModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save New Code
+      </button>
+    </div>
+
     <div id="manage-key-result" style="display:none; margin-top: 1.5rem; background:var(--bg-sidebar); padding:1rem; border-radius:8px; word-break: break-all; border: 1px solid var(--border);"></div>
   </div>
 </div>
@@ -368,6 +405,7 @@
 <script>
 let isLoginMode = true, currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
+let currentOriginalCode = ""; // Store for download
 
 function showToast(msg) {
     const oldToast = document.querySelector('.toast-notification'); if (oldToast) oldToast.remove();
@@ -472,15 +510,13 @@ function loadDashboard() {
     }
     document.getElementById('tab-admin-keys').style.display = plan === 'admin' ? 'flex' : 'none';
 
-    // Fetch Real Data
     fetch('/api/manage?action=get_stats&api_key=' + currentAuth.api_key).then(r => r.json()).then(data => {
         document.getElementById('stat-executions').innerHTML = `${data.totalExecutions || 0} <span style="font-size:1rem; color:var(--success);">↑</span>`;
         document.getElementById('stat-projects').textContent = data.totalProjects || 0;
     });
 
     fetch('/api/manage?action=get_chart_data&api_key=' + currentAuth.api_key).then(r => r.json()).then(data => {
-        window.chartData = data; // Save for charts
-        renderChart('execChart');
+        window.chartData = data; renderChart('execChart');
     });
 
     fetch('/api/manage?action=get_keys&api_key=' + currentAuth.api_key).then(r => r.json()).then(data => {
@@ -493,7 +529,6 @@ function renderChart(canvasId) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     const isExec = canvasId === 'execChart';
     
-    // Destroy old instance if exists
     if (isExec && execChartInstance) execChartInstance.destroy();
     if (!isExec && keyChartInstance) keyChartInstance.destroy();
 
@@ -505,8 +540,7 @@ function renderChart(canvasId) {
                 label: isExec ? 'Executions' : 'Keys Generated',
                 data: isExec ? window.chartData.executions : window.chartData.keys,
                 backgroundColor: isExec ? '#10b981' : '#3b82f6',
-                borderRadius: 4,
-                barPercentage: 0.6
+                borderRadius: 4, barPercentage: 0.6
             }]
         },
         options: {
@@ -551,11 +585,47 @@ async function deleteProjectFromTable(id) {
     loadDashboard(); showToast("Project deleted.");
 }
 
-function openManageModal(id) {
+// ✅ NEW: Fetch Loader and Original Code on Modal Open
+async function openManageModal(id) {
     const script = allProjects.find(s => s.id === id); if (!script) return;
-    document.getElementById('manage-script-id').value = id; document.getElementById('manage-title').textContent = "Manage: " + script.name;
-    document.getElementById('manage-keyless-toggle').checked = script.keyless; document.getElementById('manage-key-result').style.display = 'none';
-    document.getElementById('update-script-code').value = ''; document.getElementById('manage-modal').classList.add('show');
+    
+    document.getElementById('manage-script-id').value = id; 
+    document.getElementById('manage-title').textContent = "Manage: " + script.name;
+    document.getElementById('manage-keyless-toggle').checked = script.keyless; 
+    document.getElementById('manage-key-result').style.display = 'none';
+    document.getElementById('update-script-code').value = ''; 
+    
+    // Set Loader Code
+    document.getElementById('manage-loader-text').innerText = `script_key="YOUR_KEY_HERE";\nloadstring(game:HttpGet("${window.location.origin}/api/loader/${id}"))()`;
+    
+    // Fetch Original Code for Download
+    currentOriginalCode = "";
+    const res = await fetch(`/api/manage?action=get_script_details&api_key=${currentAuth.api_key}&script_id=${id}`);
+    const data = await res.json();
+    if (data.original_code) currentOriginalCode = data.original_code;
+    
+    document.getElementById('manage-modal').classList.add('show');
+}
+
+function copyLoader() {
+    const loader = document.getElementById('manage-loader-text').innerText;
+    navigator.clipboard.writeText(loader);
+    showToast("Loader copied!");
+}
+
+function downloadOriginalCode() {
+    if (!currentOriginalCode) return showToast("Original code not available.");
+    const scriptName = document.getElementById('manage-title').textContent.replace("Manage: ", "").trim();
+    const blob = new Blob([currentOriginalCode], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${scriptName}.lua`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Downloaded!");
 }
 
 async function toggleKeylessFromModal() {
@@ -576,7 +646,7 @@ async function generateKeyFromModal() {
     const data = await res.json();
     if (data.success) {
         const resBox = document.getElementById('manage-key-result'); resBox.style.display = 'block';
-        resBox.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.5rem;">New Key Generated:</p><h3 style="color:var(--primary); font-family:monospace; margin-bottom:1rem;">${data.key}</h3><button class="action-btn" onclick="navigator.clipboard.writeText('${data.key}'); showToast('Key Copied!')">📋 Copy Key</button>`;
+        resBox.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.5rem;">New Key Generated:</p><h3 style="color:var(--primary); font-family:monospace; margin-bottom:1rem;">${data.key}</h3><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${data.key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
         showToast("Key generated!");
     } else { showToast("Error: " + data.error); }
 }
@@ -588,7 +658,11 @@ async function updateCodeFromModal() {
     for (let i = 0; i < bytes.length; i++) hex += (bytes[i] ^ key).toString(16).padStart(2, '0');
     const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
     await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}&code=${encodeURIComponent(encrypted)}&original_code=${encodeURIComponent(code)}`, { method: 'POST' });
-    document.getElementById('update-script-code').value = ''; document.getElementById('manage-modal').classList.remove('show'); showToast("Script code updated successfully!");
+    
+    document.getElementById('update-script-code').value = ''; 
+    document.getElementById('manage-modal').classList.remove('show'); 
+    showToast("Script code updated successfully!");
+    loadDashboard(); // Refresh
 }
 
 async function createScript() {
@@ -601,8 +675,14 @@ async function createScript() {
         const encrypted = `\nlocal h="${hex}"\nlocal s=h:gsub("%x%x",function(c) return string.char(bit32.bxor(tonumber(c,16),${key})) end)\nloadstring(s)()\n`;
         const res = await fetch('/api/create_script', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, code: encrypted, original_code: code, api_key: currentAuth.api_key, keyless }) });
         const data = await res.json(); if (!data.success) throw new Error(data.error);
-        showToast("Project Created Successfully!"); document.getElementById('create-modal').classList.remove('show');
-        document.getElementById('new-script-name').value = ''; document.getElementById('new-script-code').value = ''; document.getElementById('new-script-keyless').checked = false; loadDashboard();
+        
+        document.getElementById('create-modal').classList.remove('show');
+        document.getElementById('new-script-name').value = ''; document.getElementById('new-script-code').value = ''; document.getElementById('new-script-keyless').checked = false; 
+        
+        // ✅ Auto open Manage Modal for the new script
+        await loadDashboard(); // Wait for projects to load
+        openManageModal(data.id);
+        
     } catch (err) { showToast(err.message); } finally { btn.textContent = "Obfuscate & Save"; btn.disabled = false; }
 }
 
@@ -654,7 +734,7 @@ function generateAdminKey(type) {
     for (let i = 0; i < 8; i++) rand += chars[randomValues[i] % chars.length];
     const prefix = type === 'basic' ? 'LXR-BASIC-' : 'LXR-PREMIUM-'; const key = prefix + rand;
     const resBox = document.getElementById('admin-key-result'); resBox.style.display = 'block';
-    resBox.innerHTML = `<h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4><div style="font-family: monospace; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div><button class="action-btn" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')">📋 Copy Key</button>`;
+    resBox.innerHTML = `<h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4><div style="font-family: monospace; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
 }
 
 async function resetKey(key) { if (!confirm('Reset HWID for this key?')) return; await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' }); showToast('HWID Reset!'); loadKeys(); }
