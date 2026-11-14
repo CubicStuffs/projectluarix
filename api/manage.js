@@ -103,11 +103,12 @@ export default async function handler(req, res) {
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
-        // ✅ NEW: Fetch Original Code for Download
+        // ✅ Fetch Encrypted Code for Download
         if (action === 'get_script_details') {
-            const { data: script, error } = await supabase.from('scripts').select('original_code').eq('id', script_id).eq('api_key', api_key).single();
+            // Original_code ki jagah lua_code select kiya
+            const { data: script, error } = await supabase.from('scripts').select('lua_code').eq('id', script_id).eq('api_key', api_key).single();
             if (error || !script) return res.status(404).json({ error: 'Not found' });
-            return res.status(200).json({ original_code: script.original_code });
+            return res.status(200).json({ code: script.lua_code });
         }
 
         // ✅ Save Monetization
