@@ -751,7 +751,7 @@ function switchTab(tab) {
     document.getElementById('content-keys').style.display = tab === 'keys' ? 'block' : 'none';
     document.getElementById('content-blacklist').style.display = tab === 'blacklist' ? 'block' : 'none';
     document.getElementById('content-monetize').style.display = tab === 'monetize' ? 'block' : 'none';
-    document.getElementById('content-discord').style.display = tab === 'discord' ? 'flex' : 'none';
+    document.getElementById('content-discord').style.display = tab === 'discord' ? 'block' : 'none';
     document.getElementById('content-admin-keys').style.display = tab === 'admin-keys' ? 'block' : 'none';
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
