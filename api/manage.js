@@ -6,9 +6,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 function genScriptKey() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let key = '';
-  for (let i = 0; i < 32; i++) {
-    key += chars[crypto.randomInt(0, chars.length)];
-  }
+  for (let i = 0; i < 32; i++) key += chars[crypto.randomInt(0, chars.length)];
   return key;
 }
 
@@ -18,7 +16,6 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ✅ GET REQUESTS
         if (action === 'get_chart_data') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
@@ -41,10 +38,7 @@ export default async function handler(req, res) {
             const dateLabels = Object.keys(dailyExecs);
             dateLabels.forEach((date, idx) => {
                 if (idx === dateLabels.length - 1) dailyExecs[date] = remainingExecs; 
-                else {
-                    const take = Math.floor(Math.random() * (remainingExecs / (dateLabels.length - idx)));
-                    dailyExecs[date] = take; remainingExecs -= take;
-                }
+                else { const take = Math.floor(Math.random() * (remainingExecs / (dateLabels.length - idx))); dailyExecs[date] = take; remainingExecs -= take; }
             });
             const labels = Object.keys(dailyKeys);
             return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
@@ -80,7 +74,6 @@ export default async function handler(req, res) {
             return res.status(200).json({ code: script.lua_code });
         }
 
-        // ✅ POST REQUESTS
         if (req.method === 'POST' && action === 'save_monetization') {
             await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -110,7 +103,6 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // ✅ Update Script Code (FIXED FOR LARGE FILES & STEALTH OBFUSCATION)
         if (req.method === 'POST' && action === 'update_script_code') {
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -125,11 +117,9 @@ export default async function handler(req, res) {
                     await supabase.from('users').update({ obfuscations_used: used, obfuscation_reset_at: resetAt.toISOString() }).eq('api_key', api_key);
                 }
                 if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
-                
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            // ✅ FIX: Reading code from req.body instead of req.query
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
@@ -144,30 +134,11 @@ export default async function handler(req, res) {
             
             const v1 = "_" + crypto.randomBytes(3).toString('hex');
             const v2 = "_" + crypto.randomBytes(3).toString('hex');
-            const v3 = "_" + crypto.randomBytes(3).toString('hex');
             
+            // ✅ SIRF ENCRYPTION, NO INFINITE LOOPS
             const finalObfuscatedCode = `
 local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
 local ${v2} = ${key}
-
-pcall(function()
-    local ${v3} = getfenv(0)
-    local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if ${v3}[_f1] or ${v3}[_f2] then 
-        local _x = 0
-        while true do _x = _x + 1 end 
-    end
-end)
-
-pcall(function()
-    local _p = string.char(112,114,105,110,116)
-    local _s = string.char(114,101,118,101,114,115,101)
-    if tostring(${v3}[_p]) == "function: 0000" or string[_s]("") ~= "" then
-        local _x = 0
-        while true do _x = _x + 1 end
-    end
-end)
 
 local function ${v1}_d()
     local _h = table.concat(${v1}, "")
@@ -179,17 +150,11 @@ end
 local _s, _c = pcall(${v1}_d)
 if _s and _c then
     local _f, _e = loadstring(_c)
-    if _f then 
-        pcall(_f) 
-    end
+    if _f then pcall(_f) end
 end
             `.trim();
             
-            await supabase.from('scripts').update({ 
-                lua_code: finalObfuscatedCode,
-                original_code: rawCode
-            }).eq('id', script_id).eq('api_key', api_key);
-            
+            await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
