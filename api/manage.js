@@ -1,6 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto'; // ✅ NEW: Crypto import add kiya
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+// ✅ NEW: 32-char secure key generator
+function genScriptKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let key = '';
+  for (let i = 0; i < 32; i++) {
+    key += chars[crypto.randomInt(0, chars.length)];
+  }
+  return key;
+}
 
 export default async function handler(req, res) {
     const { api_key, action, key_id, script_id, discord_id, provider, link, keyless } = req.query;
@@ -76,7 +87,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-                // NEW: Update Script Code
+        // NEW: Update Script Code
         if (req.method === 'POST' && action === 'update_script_code') {
             await supabase.from('scripts').update({ 
                 lua_code: req.query.code,
@@ -85,10 +96,9 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // NEW: Generate Key from Web
+        // ✅ FIXED: Generate Key from Web (Ab 32-char aayegi)
         if (req.method === 'POST' && action === 'generate_key') {
-            const randomHex = Math.random().toString(36).substring(2, 10).toUpperCase();
-            const newKey = `LXR-KEY-${randomHex}`;
+            const newKey = genScriptKey(); // ✅ Replaced old Math.random() logic
             const { error } = await supabase.from('script_keys').insert({ key: newKey, script_id: script_id });
             if (error) return res.status(500).json({ error: error.message });
             return res.status(200).json({ success: true, key: newKey });
