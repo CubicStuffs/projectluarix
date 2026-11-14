@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
             await supabase.from('users').insert({ api_key: api_key, email: `temp_${Date.now()}@luarix.com` });
         }
 
-        const id = Math.random().toString(36).substring(2, 8);
+        const id = crypto.randomBytes(16).toString('hex');
         const { error } = await supabase.from('scripts').insert({
             id: id, 
             name: name, 
