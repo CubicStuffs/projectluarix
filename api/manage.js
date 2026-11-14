@@ -18,86 +18,59 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ✅ GET REQUESTS (Dashboard Data Loading)
-        
+        // ✅ GET REQUESTS
         if (action === 'get_chart_data') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
-            if (!scripts || scripts.length === 0) {
-                return res.status(200).json({ labels: [], executions: [], keys: [] });
-            }
+            if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
             const scriptIds = scripts.map(s => s.id);
             const { data: keys } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
             
-            // Group by date (last 7 days)
-            const dailyKeys = {};
-            const dailyExecs = {};
-            const today = new Date();
+            const dailyKeys = {}, dailyExecs = {}, today = new Date();
             for (let i = 6; i >= 0; i--) {
-                const d = new Date(today);
-                d.setDate(d.getDate() - i);
+                const d = new Date(today); d.setDate(d.getDate() - i);
                 const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                dailyKeys[dateStr] = 0;
-                dailyExecs[dateStr] = 0;
+                dailyKeys[dateStr] = 0; dailyExecs[dateStr] = 0;
             }
-
             let totalExecs = 0;
             keys.forEach(k => {
                 totalExecs += (k.executions || 0);
-                const dateObj = new Date(k.created_at);
-                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const dateStr = new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 if (dailyKeys[dateStr] !== undefined) dailyKeys[dateStr]++;
             });
-
-            // Distribution logic
             let remainingExecs = totalExecs;
             const dateLabels = Object.keys(dailyExecs);
             dateLabels.forEach((date, idx) => {
-                if (idx === dateLabels.length - 1) {
-                    dailyExecs[date] = remainingExecs; 
-                } else {
+                if (idx === dateLabels.length - 1) dailyExecs[date] = remainingExecs; 
+                else {
                     const take = Math.floor(Math.random() * (remainingExecs / (dateLabels.length - idx)));
-                    dailyExecs[date] = take;
-                    remainingExecs -= take;
+                    dailyExecs[date] = take; remainingExecs -= take;
                 }
             });
-
             const labels = Object.keys(dailyKeys);
-            const keyData = labels.map(l => dailyKeys[l]);
-            const execData = labels.map(l => dailyExecs[l]);
-
-            return res.status(200).json({ labels, executions: execData, keys: keyData });
+            return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
         }
 
         if (action === 'get_stats') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
-
             const scriptIds = scripts.map(s => s.id);
             const { data: keys } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
-
-            const totalExecutions = keys.reduce((acc, curr) => acc + (curr.executions || 0), 0);
-            const totalKeys = keys.length;
-
-            return res.status(200).json({ totalExecutions, totalKeys, totalProjects: scripts.length });
+            return res.status(200).json({ totalExecutions: keys.reduce((acc, curr) => acc + (curr.executions || 0), 0), totalKeys: keys.length, totalProjects: scripts.length });
         }
 
         if (action === 'get_keys') {
             const { data: scripts } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
-
             const scriptIds = scripts.map(s => s.id);
             const { data: keys } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-
             return res.status(200).json({ keys: keys || [], scripts });
         }
 
         if (action === 'get_blacklists') {
             const { data: scripts } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (!scripts) return res.status(200).json({ blacklists: [] });
-
             const scriptIds = scripts.map(s => s.id);
             const { data: blacklists } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
-
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
@@ -107,47 +80,37 @@ export default async function handler(req, res) {
             return res.status(200).json({ code: script.lua_code });
         }
 
-        // ✅ POST REQUESTS (Mutating Data)
-
+        // ✅ POST REQUESTS
         if (req.method === 'POST' && action === 'save_monetization') {
-            await supabase.from('scripts').update({ 
-                monetization_provider: provider, 
-                monetization_link: link 
-            }).eq('id', script_id).eq('api_key', api_key);
+            await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'delete_key') {
             await supabase.from('script_keys').delete().eq('key', key_id);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'reset_hwid') {
             await supabase.from('script_keys').update({ hwid: null, resets: 0, last_reset: new Date().toISOString() }).eq('key', key_id);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'remove_blacklist') {
             await supabase.from('blacklists').delete().eq('discord_id', discord_id).eq('script_id', script_id);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'delete_script') {
             await supabase.from('scripts').delete().eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'toggle_keyless') {
             await supabase.from('scripts').update({ keyless: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
-
         if (req.method === 'POST' && action === 'toggle_kill_switch') {
             await supabase.from('scripts').update({ is_disabled: keyless === 'true' }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
-        // ✅ Update Script Code (WITH STRONG OBFUSCATION)
+        // ✅ Update Script Code (STEALTH OBFUSCATION)
         if (req.method === 'POST' && action === 'update_script_code') {
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -161,10 +124,7 @@ export default async function handler(req, res) {
                     resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                     await supabase.from('users').update({ obfuscations_used: used, obfuscation_reset_at: resetAt.toISOString() }).eq('api_key', api_key);
                 }
-                
-                if (used >= 20) {
-                    return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
-                }
+                if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
                 
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
@@ -179,21 +139,47 @@ export default async function handler(req, res) {
             let chunks = [];
             for (let i = 0; i < hex.length; i += chunkSize) chunks.push(hex.substring(i, i + chunkSize));
             
-            const randVar = "v_" + crypto.randomBytes(4).toString('hex');
+            const v1 = "_" + crypto.randomBytes(3).toString('hex');
+            const v2 = "_" + crypto.randomBytes(3).toString('hex');
+            const v3 = "_" + crypto.randomBytes(3).toString('hex');
             
             const finalObfuscatedCode = `
-local ${randVar} = { ${chunks.map((c) => `"${c}"`).join(',\n    ')} }
+local ${v1} = { ${chunks.map((c) => `"${c}"`).join(',\n')} }
+local ${v2} = ${key}
+
 pcall(function()
-    local env = getfenv(0)
+    local ${v3} = getfenv(0)
     local _f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
     local _f2 = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if env[_f1] or env[_f2] then while true do end end
+    if ${v3}[_f1] or ${v3}[_f2] then 
+        local _x = 0
+        while true do _x = _x + 1 end 
+    end
 end)
-local function ${randVar}_d()
-    return table.concat(${randVar}, ""):gsub("%x%x", function(c) return string.char(bit32.bxor(tonumber(c, 16), ${key})) end)
+
+pcall(function()
+    local _p = string.char(112,114,105,110,116)
+    local _s = string.char(114,101,118,101,114,115,101)
+    if tostring(${v3}[_p]) == "function: 0000" or string[_s]("") ~= "" then
+        local _x = 0
+        while true do _x = _x + 1 end
+    end
+end)
+
+local function ${v1}_d()
+    local _h = table.concat(${v1}, "")
+    return _h:gsub("%x%x", function(c) 
+        return string.char(bit32.bxor(tonumber(c, 16), ${v2})) 
+    end)
 end
-local s, code = pcall(${randVar}_d)
-if s then loadstring(code)() end
+
+local _s, _c = pcall(${v1}_d)
+if _s and _c then
+    local _f, _e = loadstring(_c)
+    if _f then 
+        pcall(_f) 
+    end
+end
             `.trim();
             
             await supabase.from('scripts').update({ 
