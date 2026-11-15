@@ -13,9 +13,23 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+    
+    // 👇 Maine yahan 'password' add kar diya hai 👇
     const { action, email, password, paid_key, discord_tag, discord_id, api_key, turnstile_token } = req.body;
 
     try {
+        // ✅ NAYA ADMIN LOGIN CHECK (Secure)
+        if (action === 'admin_login') {
+            if (!password) return res.status(400).json({ error: 'Password required' });
+            
+            // Vercel Environment Variable se password check kar raha hai
+            if (password === process.env.ADMIN_PASSWORD) {
+                return res.status(200).json({ success: true });
+            } else {
+                return res.status(401).json({ error: 'Incorrect Admin Password' });
+            }
+        }
+
         if (action === 'login_apikey') {
             if (!api_key) return res.status(400).json({ error: 'API Key required' });
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).maybeSingle();
