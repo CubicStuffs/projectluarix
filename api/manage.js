@@ -130,11 +130,9 @@ export default async function handler(req, res) {
     }
     
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    
-    // Grab action and api_key safely from either GET (query) or POST (body)
-    const { api_key, action, key_id, script_id, discord_id, provider, link, keyless } = req.method === 'POST' && req.body ? req.body : req.query;
+    const { api_key, action, key_id, script_id, discord_id, provider, link, keyless } = req.query;
 
-    if (!api_key) return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
+    if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
         // ==========================================
@@ -163,7 +161,7 @@ export default async function handler(req, res) {
                 if (dailyKeys[dateStr] !== undefined) dailyKeys[dateStr]++;
             });
             
-            // Safely distribute executions (No random math crashes)
+            // Fixed Graph Math (No random crashes)
             let remainingExecs = totalExecs;
             const dateLabels = Object.keys(dailyExecs);
             dateLabels.forEach((date, idx) => {
@@ -181,7 +179,7 @@ export default async function handler(req, res) {
         }
 
         if (action === 'get_stats') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
+            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, executions').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
             
@@ -189,21 +187,28 @@ export default async function handler(req, res) {
             const { data: keys, error: keyErr } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
             if (keyErr) throw keyErr;
             
-            const totalExecutions = (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
+            // Calculate total executions from both scripts table and script_keys table
+            const keyExecs = (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
+            const scriptExecs = (scripts || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
+            
+            // Use scriptExecs (new loader updates this), fallback to keyExecs if 0
+            const totalExecutions = scriptExecs > 0 ? scriptExecs : keyExecs; 
+            
             return res.status(200).json({ totalExecutions, totalKeys: (keys || []).length, totalProjects: scripts.length });
         }
 
-        // 🔥 NEW: Dedicated Project Loader for your Table
+        // 🔥 NEW FIX: PROJECTS LOADER ADDED HERE 🔥
         if (action === 'get_projects') {
             const { data: scripts, error: scriptErr } = await supabase
                 .from('scripts')
-                .select('id, name, keyless, is_disabled, created_at')
+                .select('id, name, keyless, is_disabled, created_at, executions, last_used')
                 .eq('api_key', api_key)
                 .order('created_at', { ascending: false });
             
             if (scriptErr) throw scriptErr;
             return res.status(200).json({ projects: scripts || [] });
         }
+        // 🔥 END OF NEW FIX 🔥
 
         if (action === 'get_keys') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
