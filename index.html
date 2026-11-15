@@ -773,7 +773,7 @@ async function promptAdmin() {
     if (!pass) return;
 
     try {
-        // Backend ko password bhej kar verify karo
+        // Backend (api/auth.js) par password check karne bhej raha hai
         const res = await fetch('/api/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -783,7 +783,7 @@ async function promptAdmin() {
         const data = await res.json();
 
         if (data.success) {
-            // Agar password sahi hai, toh temporary Admin API key generate karo
+            // Agar password sahi hai, toh temporary Admin session banega
             const randomValues = new Uint8Array(8); crypto.getRandomValues(randomValues);
             const adminChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let adminRand = '';
             for (let i = 0; i < 8; i++) adminRand += adminChars[randomValues[i] % adminChars.length];
