@@ -768,17 +768,36 @@ function switchTab(tab) {
     }
 }
 
-function promptAdmin() {
+async function promptAdmin() {
     const pass = prompt("Enter Admin Password:");
-    if (pass === "cubic%is@luarix^owner") {
-        const randomValues = new Uint8Array(8); crypto.getRandomValues(randomValues);
-        const adminChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let adminRand = '';
-        for (let i = 0; i < 8; i++) adminRand += adminChars[randomValues[i] % adminChars.length];
-        const secureAdminKey = `LXR-ADMIN-${adminRand}`;
-        currentAuth = { email: 'admin@luarix.com', api_key: secureAdminKey, plan: 'admin', usage: 0, expires: null };
-        localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
-        closeLogin(); loadDashboard(); showToast("Admin Access Granted.");
-    } else if (pass !== null) { alert("Incorrect password."); }
+    if (!pass) return;
+
+    try {
+        // Backend ko password bhej kar verify karo
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'admin_login', password: pass })
+        });
+        
+        const data = await res.json();
+
+        if (data.success) {
+            // Agar password sahi hai, toh temporary Admin API key generate karo
+            const randomValues = new Uint8Array(8); crypto.getRandomValues(randomValues);
+            const adminChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let adminRand = '';
+            for (let i = 0; i < 8; i++) adminRand += adminChars[randomValues[i] % adminChars.length];
+            
+            const secureAdminKey = `LXR-ADMIN-${adminRand}`;
+            currentAuth = { email: 'admin@luarix.com', api_key: secureAdminKey, plan: 'admin', usage: 0, expires: null };
+            localStorage.setItem('luarix_auth', JSON.stringify(currentAuth));
+            closeLogin(); loadDashboard(); showToast("Admin Access Granted.");
+        } else {
+            alert("Incorrect password.");
+        }
+    } catch (err) {
+        alert("Server error. Please try again.");
+    }
 }
 
 async function handleApiLogin() {
