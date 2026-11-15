@@ -70,14 +70,6 @@ local _bxor = (bit32 and bit32.bxor) or function(a, b)
     return r
 end
 
-local function ${v2}_check()
-    local f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    if rawget(${v1}, f1) then
-        ${v4} = ${v4} + 1
-    end
-end
-pcall(${v2}_check)
-
 while true do
     if ${v6} == 1 then
         for ${v10} = 1, #${v3} do
@@ -130,10 +122,6 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ==========================================
-        // ✅ GET REQUESTS
-        // ==========================================
-        
         if (action === 'get_chart_data') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
@@ -222,10 +210,6 @@ export default async function handler(req, res) {
             return res.status(200).json({ code: script.lua_code });
         }
 
-        // ==========================================
-        // ✅ POST REQUESTS
-        // ==========================================
-
         if (req.method === 'POST' && action === 'save_monetization') {
             await supabase.from('scripts').update({ monetization_provider: provider, monetization_link: link }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
@@ -283,7 +267,6 @@ export default async function handler(req, res) {
             const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            // ✅ V17 ENGINE APPLIED HERE
             const finalObfuscatedCode = luarixV17Obfuscate(rawCode); 
             
             await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
