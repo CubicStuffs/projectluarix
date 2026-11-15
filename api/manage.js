@@ -60,7 +60,6 @@ local ${v8} = {}
 local ${v9} = ${v4}
 local ${v10} = 0
 
--- Safe bit32 fallback for mobile executors
 local _bxor = (bit32 and bit32.bxor) or function(a, b)
     local r, p = 0, 1
     while a > 0 or b > 0 do
@@ -101,7 +100,6 @@ while true do
         if _l then
             local _f = _l(${v5})
             if _f then
-                -- Safe setfenv for executors that block it
                 pcall(function() setfenv(_f, ${v1}) end)
                 pcall(_f)
             end
