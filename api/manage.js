@@ -8,10 +8,8 @@ function luarixV17Obfuscate(luaCode) {
     let rollingKey = crypto.randomInt(50, 200);
     const initialKey = rollingKey;
     
-    // Randomize math type
     const mathType = crypto.randomInt(1, 4); 
 
-    // Stronger Encryption Loop
     for (let i = 0; i < bytes.length; i++) {
         let enc = 0;
         if (mathType === 1) {
@@ -28,7 +26,6 @@ function luarixV17Obfuscate(luaCode) {
         hexData.push(enc.toString(16).padStart(2, "0"));
     }
 
-    // Shuffle Array Completely
     let indexed = hexData.map((h, i) => ({ h, i }));
     for (let i = indexed.length - 1; i > 0; i--) {
         const j = crypto.randomInt(0, i + 1);
@@ -37,20 +34,18 @@ function luarixV17Obfuscate(luaCode) {
     const shuffled = indexed.map(obj => obj.h);
     const indexMap = indexed.map(obj => obj.i);
 
-    // Random Variables (No context clues)
     const vars = Array.from({ length: 10 }, () => "_" + crypto.randomBytes(3).toString('hex'));
     const [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] = vars;
 
     let decryptLogic = "";
     if (mathType === 1) {
-        decryptLogic = `${v9} = ((${v9} * 33) ^ (${v7} + ${v10})) % 256; ${v7} = bit32.bxor(${v7}, ${v9} % 256)`;
+        decryptLogic = `${v9} = ((${v9} * 33) ^ (${v7} + ${v10})) % 256; ${v7} = _bxor(${v7}, ${v9} % 256)`;
     } else if (mathType === 2) {
         decryptLogic = `${v9} = ((${v9} + 77) ^ (${v7} - ${v10})) % 256; ${v7} = (${v7} - ${v9} + 256) % 256`;
     } else {
         decryptLogic = `${v9} = ((${v9} * 13) - (${v7} + ${v10})) % 256; if ${v9} < 0 then ${v9} = ${v9} + 256 end; ${v7} = (${v7} + ${v9}) % 256`;
     }
 
-    // Randomized State Order (e.g., 1 -> 3 -> 4 -> 2)
     const states = [1, 2, 3, 4, 5].sort(() => Math.random() - 0.5);
 
     return `
@@ -64,6 +59,17 @@ local ${v7} = 0
 local ${v8} = {}
 local ${v9} = ${v4}
 local ${v10} = 0
+
+-- Safe bit32 fallback for mobile executors
+local _bxor = (bit32 and bit32.bxor) or function(a, b)
+    local r, p = 0, 1
+    while a > 0 or b > 0 do
+        local aa, bb = a % 2, b % 2
+        if aa ~= bb then r = r + p end
+        a = math.floor(a / 2); b = math.floor(b / 2); p = p * 2
+    end
+    return r
+end
 
 local function ${v2}_check()
     local f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -95,7 +101,8 @@ while true do
         if _l then
             local _f = _l(${v5})
             if _f then
-                setfenv(_f, ${v1})
+                -- Safe setfenv for executors that block it
+                pcall(function() setfenv(_f, ${v1}) end)
                 pcall(_f)
             end
         end
