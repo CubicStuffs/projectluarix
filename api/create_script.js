@@ -70,14 +70,6 @@ local _bxor = (bit32 and bit32.bxor) or function(a, b)
     return r
 end
 
-local function ${v2}_check()
-    local f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    if rawget(${v1}, f1) then
-        ${v4} = ${v4} + 1
-    end
-end
-pcall(${v2}_check)
-
 while true do
     if ${v6} == 1 then
         for ${v10} = 1, #${v3} do
@@ -136,7 +128,6 @@ export default async function handler(req, res) {
 
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
-            // Check limits for free users
             if (user && user.plan === 'free') {
                 let used = user.obfuscations_used || 0;
                 let resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
@@ -150,10 +141,8 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
 
-            // ✅ V17 ENGINE APPLIED HERE
             const finalObfuscatedCode = luarixV17Obfuscate(rawCode);
             
-            // Insert new script into database
             const { data: newScript, error: insertErr } = await supabase.from('scripts').insert({
                 api_key: api_key,
                 name: name || 'Untitled Script',
