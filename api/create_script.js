@@ -39,7 +39,7 @@ function luarixV17Obfuscate(luaCode) {
 
     let decryptLogic = "";
     if (mathType === 1) {
-        decryptLogic = `${v9} = ((${v9} * 33) ^ (${v7} + ${v10})) % 256; ${v7} = bit32.bxor(${v7}, ${v9} % 256)`;
+        decryptLogic = `${v9} = ((${v9} * 33) ^ (${v7} + ${v10})) % 256; ${v7} = _bxor(${v7}, ${v9} % 256)`;
     } else if (mathType === 2) {
         decryptLogic = `${v9} = ((${v9} + 77) ^ (${v7} - ${v10})) % 256; ${v7} = (${v7} - ${v9} + 256) % 256`;
     } else {
@@ -59,6 +59,17 @@ local ${v7} = 0
 local ${v8} = {}
 local ${v9} = ${v4}
 local ${v10} = 0
+
+-- Safe bit32 fallback for mobile executors
+local _bxor = (bit32 and bit32.bxor) or function(a, b)
+    local r, p = 0, 1
+    while a > 0 or b > 0 do
+        local aa, bb = a % 2, b % 2
+        if aa ~= bb then r = r + p end
+        a = math.floor(a / 2); b = math.floor(b / 2); p = p * 2
+    end
+    return r
+end
 
 local function ${v2}_check()
     local f1 = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
@@ -90,7 +101,8 @@ while true do
         if _l then
             local _f = _l(${v5})
             if _f then
-                setfenv(_f, ${v1})
+                -- Safe setfenv for executors that block it
+                pcall(function() setfenv(_f, ${v1}) end)
                 pcall(_f)
             end
         end
