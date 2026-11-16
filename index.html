@@ -204,6 +204,31 @@
   .loader-code-box { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: left; position: relative; margin-bottom: 1.5rem; }
   .loader-code-box code { color: #10b981; font-family: monospace; font-size: 0.85rem; word-break: break-all; }
 
+  /* ✅ NEW FILE UPLOAD ZONE */
+  .file-upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: 0.2s;
+      margin-bottom: 1rem;
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+  }
+  .file-upload-zone:hover, .file-upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+      color: var(--text);
+  }
+  .file-upload-zone svg { width: 28px; height: 28px; opacity: 0.7; }
+  .file-upload-zone p { font-size: 0.85rem; margin: 0; }
+
   /* ✅ FIXED DISCORD TAB CSS */
   .discord-invite-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; }
   .discord-logo { width: 80px; height: 80px; color: var(--discord); margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(88, 101, 242, 0.4)); }
@@ -611,7 +636,16 @@
     <span class="close-btn" onclick="document.getElementById('create-modal').classList.remove('show')">&times;</span>
     <h2>Create New Project</h2><p style="color: var(--text-muted); margin-bottom: 1.5rem;">Upload your Lua code to protect it.</p>
     <input type="text" id="new-script-name" placeholder="Project Name" />
+    
     <textarea id="new-script-code" placeholder="-- Paste your Lua code here..."></textarea>
+    
+    <!-- ✅ FILE UPLOAD ZONE (CREATE) -->
+    <div class="file-upload-zone" id="create-upload-zone" onclick="document.getElementById('create-file-input').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path><polyline points="12 11 12 17"></polyline><polyline points="9 14 12 11 15 14"></polyline></svg>
+        <p>Drop a .lua / .luau / .txt file, or click to browse</p>
+        <input type="file" id="create-file-input" accept=".lua,.luau,.txt" style="display: none;" onchange="handleFileUpload(event, 'new-script-code')">
+    </div>
+
     <div class="switch-container"><div><h4 style="font-size: 0.9rem;">Keyless Script</h4><p style="font-size: 0.75rem; color: var(--text-muted);">If enabled, users don't need a key.</p></div><label class="switch"><input type="checkbox" id="new-script-keyless"><span class="slider"></span></label></div>
     <button class="btn-gold" id="create-btn" style="width: 100%;" onclick="createScript()">Obfuscate & Save</button>
   </div>
@@ -656,6 +690,14 @@
     <div style="text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem;">
       <label>Update Script Code</label>
       <textarea id="update-script-code" placeholder="-- Paste new code here to overwrite..." style="min-height: 100px;"></textarea>
+      
+      <!-- ✅ FILE UPLOAD ZONE (UPDATE) -->
+      <div class="file-upload-zone" id="update-upload-zone" onclick="document.getElementById('update-file-input').click()" style="margin-bottom: 1rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path><polyline points="12 11 12 17"></polyline><polyline points="9 14 12 11 15 14"></polyline></svg>
+          <p>Drop a .lua / .luau / .txt file, or click to browse</p>
+          <input type="file" id="update-file-input" accept=".lua,.luau,.txt" style="display: none;" onchange="handleFileUpload(event, 'update-script-code')">
+      </div>
+
       <button class="btn-gold" style="width: 100%; background: var(--success); color: #fff;" onclick="updateCodeFromModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save New Code
       </button>
@@ -746,7 +788,6 @@ function showView(view, scrollToId = null) {
     document.getElementById('view-docs').style.display = view === 'docs' ? 'block' : 'none';
     document.getElementById('main-nav').style.display = view === 'dashboard' ? 'none' : 'flex';
     
-    // Auto-close sidebar on mobile when navigating
     if(window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('active');
         document.getElementById('mobile-overlay').classList.remove('active');
@@ -783,7 +824,6 @@ function switchTab(tab) {
     if (tab === 'blacklist') loadBlacklists();
     if (tab === 'monetize') { loadMonetizationSelect(); renderChart('keyChart'); }
     
-    // Auto-close sidebar on mobile when tab changes
     if(window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('active');
         document.getElementById('mobile-overlay').classList.remove('active');
@@ -795,7 +835,6 @@ async function promptAdmin() {
     if (!pass) return;
 
     try {
-        // Backend (api/auth.js) par password check karne bhej raha hai
         const res = await fetch('/api/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -805,7 +844,6 @@ async function promptAdmin() {
         const data = await res.json();
 
         if (data.success) {
-            // Agar password sahi hai, toh temporary Admin session banega
             const randomValues = new Uint8Array(8); crypto.getRandomValues(randomValues);
             const adminChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let adminRand = '';
             for (let i = 0; i < 8; i++) adminRand += adminChars[randomValues[i] % adminChars.length];
@@ -1075,7 +1113,6 @@ async function updateCodeFromModal() {
     btn.innerText = "Updating..."; btn.disabled = true;
 
     try {
-        // ✅ Code ko URL ki jagah Body (JSON) mein bhej rahe hain
         const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}`, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1091,12 +1128,10 @@ async function updateCodeFromModal() {
         document.getElementById('update-script-code').value = ''; 
         document.getElementById('manage-modal').classList.remove('show'); 
         
-        // ✅ Success Notification
         showToast("✅ Script code updated successfully!");
         loadDashboard();
         
     } catch (err) { 
-        // ✅ Error Notification
         showToast("❌ " + err.message); 
     } finally { 
         btn.innerText = originalText; 
@@ -1112,7 +1147,6 @@ async function createScript() {
     if (!name || !code) return showToast("Name and code are required.");
     const btn = document.getElementById('create-btn'); btn.textContent = "Obfuscating..."; btn.disabled = true;
     try {
-        // ✅ Send raw code to backend (No client-side XOR)
         const res = await fetch('/api/create_script', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
@@ -1192,7 +1226,6 @@ function generateAdminKey(type) {
 async function resetKey(key) { if (!confirm('Reset HWID for this key?')) return; await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' }); showToast('HWID Reset!'); loadKeys(); }
 async function deleteKey(key) { if (!confirm('Delete this key permanently?')) return; await fetch(`/api/manage?action=delete_key&key_id=${key}`, { method: 'POST' }); showToast('Key Deleted!'); loadKeys(); }
 
-// ✅ FIXED: removeBlacklist now sends api_key & handles errors
 async function removeBlacklist(discord_id, script_id) { 
     if (!confirm('Remove blacklist?')) return; 
     
@@ -1208,6 +1241,58 @@ async function removeBlacklist(discord_id, script_id) {
         showToast('❌ Error: ' + err.message);
     }
 }
+
+// ✅ NEW FILE UPLOAD LOGIC
+function handleFileUpload(event, textareaId) {
+    const file = event.target.files[0] || event.dataTransfer.files[0];
+    if (!file) return;
+
+    const validExtensions = ['.lua', '.luau', '.txt'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension)) {
+        return showToast("Please upload a valid file (.lua, .luau, .txt)");
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById(textareaId).value = e.target.result;
+        showToast(`${file.name} loaded successfully!`);
+    };
+    reader.readAsText(file);
+}
+
+// Setup Drag and Drop for both zones
+function setupDragAndDrop(zoneId, inputId, textareaId) {
+    const zone = document.getElementById(zoneId);
+    const input = document.getElementById(inputId);
+
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+    });
+
+    zone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+    });
+
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleFileUpload(e, textareaId);
+        }
+    });
+    
+    // Prevent clicking the input from triggering the zone's onclick twice
+    input.addEventListener('click', (e) => e.stopPropagation());
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupDragAndDrop('create-upload-zone', 'create-file-input', 'new-script-code');
+    setupDragAndDrop('update-upload-zone', 'update-file-input', 'update-script-code');
+});
 
 if (localStorage.getItem('luarix_auth')) loadDashboard(); else showView('landing');
 </script>
