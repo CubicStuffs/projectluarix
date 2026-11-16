@@ -1,109 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
-// 🚀 LUARIX V17 ENGINE (Anti-AI / No Comments / Non-Linear)
-function luarixV17Obfuscate(luaCode) {
-    const bytes = new TextEncoder().encode(luaCode);
-    let hexData = [];
-    let rollingKey = crypto.randomInt(50, 200);
-    const initialKey = rollingKey;
-    
-    const mathType = crypto.randomInt(1, 4); 
-
-    for (let i = 0; i < bytes.length; i++) {
-        let enc = 0;
-        if (mathType === 1) {
-            rollingKey = ((rollingKey * 33) ^ (bytes[i] + i)) % 256;
-            enc = (bytes[i] ^ rollingKey) % 256;
-        } else if (mathType === 2) {
-            rollingKey = ((rollingKey + 77) ^ (bytes[i] - i)) % 256;
-            enc = (bytes[i] + rollingKey) % 256;
-        } else {
-            rollingKey = ((rollingKey * 13) - (bytes[i] + i)) % 256;
-            if (rollingKey < 0) rollingKey += 256;
-            enc = (bytes[i] - rollingKey + 256) % 256;
-        }
-        hexData.push(enc.toString(16).padStart(2, "0"));
-    }
-
-    let indexed = hexData.map((h, i) => ({ h, i }));
-    for (let i = indexed.length - 1; i > 0; i--) {
-        const j = crypto.randomInt(0, i + 1);
-        [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
-    }
-    const shuffled = indexed.map(obj => obj.h);
-    const indexMap = indexed.map(obj => obj.i);
-
-    const vars = Array.from({ length: 10 }, () => "_" + crypto.randomBytes(3).toString('hex'));
-    const [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] = vars;
-
-    let decryptLogic = "";
-    if (mathType === 1) {
-        decryptLogic = `${v9} = ((${v9} * 33) ^ (${v7} + ${v10})) % 256; ${v7} = _bxor(${v7}, ${v9} % 256)`;
-    } else if (mathType === 2) {
-        decryptLogic = `${v9} = ((${v9} + 77) ^ (${v7} - ${v10})) % 256; ${v7} = (${v7} - ${v9} + 256) % 256`;
-    } else {
-        decryptLogic = `${v9} = ((${v9} * 13) - (${v7} + ${v10})) % 256; if ${v9} < 0 then ${v9} = ${v9} + 256 end; ${v7} = (${v7} + ${v9}) % 256`;
-    }
-
-    const states = [1, 2, 3, 4, 5].sort(() => Math.random() - 0.5);
-
-    return `
-local ${v1} = (getgenv and getgenv()) or getfenv(0)
-local ${v2} = { ${shuffled.map(h => `"${h}"`).join(",")} }
-local ${v3} = { ${indexMap.join(",")} }
-local ${v4} = ${initialKey}
-local ${v5} = ""
-local ${v6} = ${states[0]}
-local ${v7} = 0
-local ${v8} = {}
-local ${v9} = ${v4}
-local ${v10} = 0
-
-local _bxor = (bit32 and bit32.bxor) or function(a, b)
-    local r, p = 0, 1
-    while a > 0 or b > 0 do
-        local aa, bb = a % 2, b % 2
-        if aa ~= bb then r = r + p end
-        a = math.floor(a / 2); b = math.floor(b / 2); p = p * 2
-    end
-    return r
-end
-
-while true do
-    if ${v6} == 1 then
-        for ${v10} = 1, #${v3} do
-            ${v8}[${v3}[${v10}] + 1] = ${v2}[${v10}]
-        end
-        ${v6} = 4
-    elseif ${v6} == 4 then
-        for ${v10} = 1, #${v8} do
-            ${v7} = tonumber(${v8}[${v10}], 16)
-            ${decryptLogic}
-            ${v5} = ${v5} .. string.char(${v7})
-        end
-        ${v6} = 2
-    elseif ${v6} == 2 then
-        local ${v9} = 0
-        for i=1, 50 do ${v9} = (${v9} + i * 13) % 255 end
-        ${v6} = 5
-    elseif ${v6} == 5 then
-        local _l = rawget(${v1}, string.char(108,111,97,100,115,116,114,105,110,103)) or loadstring or load
-        if _l then
-            local _f = _l(${v5})
-            if _f then
-                pcall(function() setfenv(_f, ${v1}) end)
-                pcall(_f)
-            end
-        end
-        ${v6} = 3
-    elseif ${v6} == 3 then
-        break
-    end
-end
-    `.trim();
-}
-
 function genScriptKey() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let key = '';
@@ -129,7 +26,6 @@ export default async function handler(req, res) {
             if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
             
             const scriptIds = scripts.map(s => s.id);
-            // Fetch only necessary columns, max 5000 recent keys for graph logic
             const { data: keys, error: keyErr } = await supabase.from('script_keys')
                 .select('created_at, executions')
                 .in('script_id', scriptIds)
@@ -168,7 +64,7 @@ export default async function handler(req, res) {
             
             const scriptIds = scripts.map(s => s.id);
             
-            // 👇 CHANGED 'exact' TO 'estimated' HERE TO FIX TIMEOUT 👇
+            // Using 'estimated' to prevent timeout on Pro accounts
             const { count, error: keyErr } = await supabase.from('script_keys')
                 .select('*', { count: 'estimated', head: true })
                 .in('script_id', scriptIds);
@@ -191,7 +87,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ projects: scripts || [] });
         }
 
-        // ✅ OPTIMIZED GET_KEYS (Limit to 1000 to prevent timeout)
+        // ✅ OPTIMIZED GET_KEYS (Limit to 1000)
         if (action === 'get_keys') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
@@ -203,7 +99,7 @@ export default async function handler(req, res) {
                 .select('*')
                 .in('script_id', scriptIds)
                 .order('created_at', { ascending: false })
-                .limit(1000); // 👈 LIMIT ADD KIYA HAI
+                .limit(1000);
                 
             if (keyErr) throw keyErr;
             
@@ -266,6 +162,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
+        // ✅ UPDATED: Directly accepts obfuscated_code from client
         if (req.method === 'POST' && action === 'update_script_code') {
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -282,12 +179,11 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            const rawCode = req.body?.original_code || req.body?.code || req.query.original_code || req.query.code;
-            if (!rawCode) return res.status(400).json({ error: 'No code provided' });
+            const obfuscatedCode = req.body?.obfuscated_code;
+            const originalCode = req.body?.original_code;
+            if (!obfuscatedCode) return res.status(400).json({ error: 'No obfuscated code provided' });
 
-            const finalObfuscatedCode = luarixV17Obfuscate(rawCode); 
-            
-            await supabase.from('scripts').update({ lua_code: finalObfuscatedCode, original_code: rawCode }).eq('id', script_id).eq('api_key', api_key);
+            await supabase.from('scripts').update({ lua_code: obfuscatedCode, original_code: originalCode }).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
