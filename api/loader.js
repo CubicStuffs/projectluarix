@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     if (!id) return res.status(400).send('-- Error: Missing script ID.');
 
     const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-    const isExecutor = userAgent.includes('roblox') || userAgent.includes('delta') || userAgent.includes('arceus') || userAgent.includes('fluxus') || userAgent.includes('codex') || userAgent.includes('solara');
+    const isExecutor = userAgent.includes('roblox') || userAgent.includes('delta') || userAgent.includes('arceus') || userAgent.includes('fluxus') || userAgent.includes('codex') || userAgent.includes('solara') || userAgent.includes('synapse') || userAgent.includes('script-ware');
     const isBrowser = (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari') || userAgent.includes('edge')) && !isExecutor;
 
     if (isBrowser) {
@@ -147,7 +147,6 @@ end
         }
 
         if (script.keyless) {
-            // 🛡️ Safe Execution Increment
             try { await supabase.rpc('increment_executions', { script_id: id }); } catch(e) {}
             return res.status(200).send(script.lua_code);
         }
@@ -157,16 +156,20 @@ end
         if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) return sendAuthError(res, "This script_key has expired.");
         if (keyData.banned) return sendAuthError(res, "This key has been banned.");
 
-        if (!keyData.hwid || keyData.hwid === "unknown" || keyData.hwid === "" || keyData.hwid.includes("_mobile") || keyData.hwid.includes("unknown_mobile")) {
-            await supabase.from('script_keys').update({ hwid: hwid }).eq('key', key);
-        } else if (keyData.hwid !== hwid && !hwid.includes("_mobile") && !hwid.includes("unknown_mobile")) {
+        // ✅ FIXED: Safe HWID check
+        const incomingHwid = (hwid || "").toString();
+        const storedHwid = (keyData.hwid || "").toString();
+
+        if (!storedHwid || storedHwid === "unknown" || storedHwid === "" || storedHwid.includes("_mobile") || storedHwid.includes("unknown_mobile")) {
+            // First time or mobile → lock it
+            await supabase.from('script_keys').update({ hwid: incomingHwid }).eq('key', key);
+        } else if (storedHwid !== incomingHwid && !incomingHwid.includes("_mobile") && !incomingHwid.includes("unknown_mobile")) {
             return sendAuthError(res, "HWID Mismatch. This key is locked to another device.");
         }
 
         const newExecs = (keyData.executions || 0) + 1;
         await supabase.from('script_keys').update({ executions: newExecs }).eq('key', key);
         
-        // 🛡️ Safe Execution Increment
         try { await supabase.rpc('increment_executions', { script_id: id }); } catch(e) {}
 
         return res.status(200).send(script.lua_code);
