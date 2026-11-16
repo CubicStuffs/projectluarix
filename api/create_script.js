@@ -13,6 +13,7 @@ export default async function handler(req, res) {
     const keyless = req.body?.keyless === true || req.query?.keyless === 'true';
     const obfuscatedCode = req.body?.obfuscated_code; 
     const originalCode = req.body?.original_code;
+    const obf_version = req.body?.obf_version || 'v17'; // ✅ Default version
 
     if (!api_key) return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
 
@@ -36,14 +37,17 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            // ✅ DIRECT INSERT (No server-side obfuscation, prevents Vercel timeout)
+            // ✅ Bina hyphen wali ID
+            const cleanId = crypto.randomBytes(16).toString('hex');
+
             const { data: newScript, error: insertErr } = await supabase.from('scripts').insert({
-                id: crypto.randomUUID(),
+                id: cleanId,
                 api_key: api_key,
                 name: name || 'Untitled Script',
                 lua_code: obfuscatedCode, 
                 original_code: originalCode,
                 keyless: keyless,
+                obf_version: obf_version, // ✅ Save Version
                 created_at: new Date().toISOString()
             }).select().single();
 
