@@ -150,6 +150,7 @@ export default async function handler(req, res) {
             const finalObfuscatedCode = luarixV17Obfuscate(rawCode);
             
             const { data: newScript, error: insertErr } = await supabase.from('scripts').insert({
+                id: crypto.randomUUID(),
                 api_key: api_key,
                 name: name || 'Untitled Script',
                 lua_code: finalObfuscatedCode,
