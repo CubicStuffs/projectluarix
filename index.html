@@ -1459,8 +1459,13 @@ function generateAdminKey(type) {
     resBox.innerHTML = `<h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4><div style="font-family: monospace; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
 }
 
-async function resetKey(key) { if (!confirm('Reset HWID for this key?')) return; await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' }); showToast('HWID Reset!'); loadKeys(); }
-async function deleteKey(key) { if (!confirm('Delete this key permanently?')) return; await fetch(`/api/manage?action=delete_key&key_id=${key}`, { method: 'POST' }); showToast('Key Deleted!'); loadKeys(); }
+ async function resetKey(key) {
+    if (!confirm('Reset HWID for this key?')) return;
+    await fetch(`/api/manage?action=reset_hwid&api_key=${currentAuth.api_key}&key_id=${key}`, { method: 'POST' });
+    showToast('HWID Reset!');
+    loadKeys();
+}
+ async function deleteKey(key) { if (!confirm('Delete this key permanently?')) return; await fetch(`/api/manage?action=delete_key&key_id=${key}`, { method: 'POST' }); showToast('Key Deleted!'); loadKeys(); }
 
 async function removeBlacklist(discord_id, script_id) { 
     if (!confirm('Remove blacklist?')) return; 
