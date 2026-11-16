@@ -160,7 +160,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
         }
 
-        // ✅ OPTIMIZED STATS (No longer downloads all keys)
+        // ✅ OPTIMIZED STATS (Prevents Timeout)
         if (action === 'get_stats') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, executions').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
@@ -168,9 +168,9 @@ export default async function handler(req, res) {
             
             const scriptIds = scripts.map(s => s.id);
             
-            // Use count: 'exact' to get ONLY the number of keys without downloading them
+            // 👇 CHANGED 'exact' TO 'estimated' HERE TO FIX TIMEOUT 👇
             const { count, error: keyErr } = await supabase.from('script_keys')
-                .select('*', { count: 'exact', head: true })
+                .select('*', { count: 'estimated', head: true })
                 .in('script_id', scriptIds);
                 
             if (keyErr) throw keyErr;
