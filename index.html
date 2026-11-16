@@ -776,7 +776,7 @@
 
 <script>
 // 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
-const CURRENT_OBF_VERSION = "v17"; 
+const CURRENT_OBF_VERSION = "v17.1"; 
 
 // 🚀 CLIENT-SIDE OBFUSCATOR (No Limits / No Timeout)
 function luarixV17ObfuscateClient(luaCode) {
@@ -810,7 +810,8 @@ function luarixV17ObfuscateClient(luaCode) {
     const shuffled = indexed.map(obj => obj.h);
     const indexMap = indexed.map(obj => obj.i);
 
-    const randHex = () => Math.random().toString(16).substring(2, 8);
+    // ✅ CRITICAL FIX: Always start with underscore so Lua accepts it
+    const randHex = () => "_" + Math.random().toString(16).substring(2, 8);
     const vars = Array.from({ length: 10 }, randHex);
     const [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] = vars;
 
@@ -1090,10 +1091,10 @@ function loadDashboard() {
 
 // ✅ Update Checker Logic
 function checkForUpdates() {
-    // Agar user pehle hi is version ke liye decline kar chuka hai, toh modal mat dikhao
+    // If user already dismissed this exact version, don't show again
     if (localStorage.getItem('luarix_dismissed_update') === CURRENT_OBF_VERSION) return;
 
-    const needsUpdate = allProjects.some(p => p.obf_version !== CURRENT_OBF_VERSION);
+    const needsUpdate = allProjects.some(p => !p.obf_version || p.obf_version !== CURRENT_OBF_VERSION);
     if (needsUpdate) {
         document.getElementById('update-modal').classList.add('show');
     }
