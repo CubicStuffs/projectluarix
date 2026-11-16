@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
@@ -80,7 +81,7 @@ export default async function handler(req, res) {
         }
 
         if (action === 'get_keys') {
-            // ✅ FIXED: Added all required fields including obf_version
+            // ✅ Included obf_version here
             const { data: scripts, error: scriptErr } = await supabase
                 .from('scripts')
                 .select('id, name, keyless, is_disabled, created_at, executions, last_used, obf_version')
