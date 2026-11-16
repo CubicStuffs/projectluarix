@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto'; 
 
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
     const keyless = req.body?.keyless === true || req.query?.keyless === 'true';
     const obfuscatedCode = req.body?.obfuscated_code; 
     const originalCode = req.body?.original_code;
-    const obf_version = req.body?.obf_version || 'v17'; // ✅ Default version
+    const obf_version = req.body?.obf_version || 'v17.1'; 
 
     if (!api_key) return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
 
@@ -33,11 +34,10 @@ export default async function handler(req, res) {
                     resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                     await supabase.from('users').update({ obfuscations_used: used, obfuscation_reset_at: resetAt.toISOString() }).eq('api_key', api_key);
                 }
-                if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
+                if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20).' });
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            // ✅ Bina hyphen wali ID
             const cleanId = crypto.randomBytes(16).toString('hex');
 
             const { data: newScript, error: insertErr } = await supabase.from('scripts').insert({
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
                 lua_code: obfuscatedCode, 
                 original_code: originalCode,
                 keyless: keyless,
-                obf_version: obf_version, // ✅ Save Version
+                obf_version: obf_version,
                 created_at: new Date().toISOString()
             }).select().single();
 
