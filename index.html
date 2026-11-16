@@ -828,7 +828,8 @@ function luarixV17ObfuscateClient(luaCode) {
     for (let i = 0; i < hex.length; i += CHUNK) {
         chunks.push(hex.slice(i, i + CHUNK));
     }
-    const hexExpr = chunks.map(c => `"${c}"`).join(" ..\n    ");
+    // Build as a Lua table so we avoid deep .. chains (Luau recursion limit)
+    const hexTable = "{ " + chunks.map(c => `"${c}"`).join(", ") + " }";
 
     // ---------- 6. Random variable names (always start with _) ----------
     const V = {
@@ -854,7 +855,8 @@ function luarixV17ObfuscateClient(luaCode) {
     const lua = `-- Luarix NG ${rnd(8)}
 local ${V.env} = (getgenv and getgenv()) or (getfenv and getfenv(0)) or _G
 
-local ${V.hex} = ${hexExpr}
+local ${V.tmp}_t = ${hexTable}
+local ${V.hex} = table.concat(${V.tmp}_t)
 local ${V.len} = math.floor(#${V.hex} / 2)
 local ${V.bytes} = {}
 
