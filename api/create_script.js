@@ -117,18 +117,24 @@ export default async function handler(req, res) {
     }
 
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    const { api_key, action, name, lua_code, keyless } = req.query;
+    
+    // ✅ FIX: Ab data Body aur Query dono se aayega
+    const api_key = req.body?.api_key || req.query?.api_key;
+    const name = req.body?.name || req.query?.name;
+    const keyless = req.body?.keyless === true || req.query?.keyless === 'true';
+    const rawCode = req.body?.code || req.body?.lua_code || req.query?.code || req.query?.lua_code;
 
-    if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
+    if (!api_key) return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
 
     try {
-        if (req.method === 'POST' && action === 'create_script') {
-            const rawCode = req.body?.lua_code || req.query?.lua_code;
+        // Action check hata diya hai taaki direct POST request accept ho sake
+        if (req.method === 'POST') {
             if (!rawCode) return res.status(400).json({ error: 'No code provided' });
 
-            const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
+            const { data: user, error: userErr } = await supabase.from('users').select('*').eq('api_key', api_key).single();
+            if (userErr || !user) return res.status(401).json({ error: 'Invalid API key' });
             
-            if (user && user.plan === 'free') {
+            if (user.plan === 'free') {
                 let used = user.obfuscations_used || 0;
                 let resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
                 let now = new Date();
@@ -148,16 +154,16 @@ export default async function handler(req, res) {
                 name: name || 'Untitled Script',
                 lua_code: finalObfuscatedCode,
                 original_code: rawCode,
-                keyless: keyless === 'true',
+                keyless: keyless,
                 created_at: new Date().toISOString()
             }).select().single();
 
             if (insertErr) throw insertErr;
 
-            return res.status(200).json({ success: true, script: newScript });
+            return res.status(200).json({ success: true, script: newScript, id: newScript.id });
         }
 
-        return res.status(400).json({ error: 'Invalid action' });
+        return res.status(400).json({ error: 'Invalid method' });
     } catch (err) {
         console.error("Create Script Error:", err.message);
         return res.status(500).json({ error: err.message });
