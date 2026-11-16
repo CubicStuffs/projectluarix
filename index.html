@@ -810,7 +810,7 @@ function luarixV17ObfuscateClient(luaCode) {
     const shuffled = indexed.map(obj => obj.h);
     const indexMap = indexed.map(obj => obj.i);
 
-    const randHex = () => Math.random().toString(16).substring(2, 8);
+    const randHex = () => "_" + Math.random().toString(16).substring(2, 8);
     const vars = Array.from({ length: 10 }, randHex);
     const [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] = vars;
 
