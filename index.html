@@ -775,10 +775,10 @@
 </div>
 
 <script>
-// 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
-const CURRENT_OBF_VERSION = "v17"; 
+// 👇 CHANGED VERSION TO v17.1 TO FORCE UPDATE MODAL 👇
+const CURRENT_OBF_VERSION = "v17.1"; 
 
-// 🚀 CLIENT-SIDE OBFUSCATOR (No Limits / No Timeout)
+// 🚀 CLIENT-SIDE OBFUSCATOR (Fixed Variable Names)
 function luarixV17ObfuscateClient(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
     let hexData = [];
@@ -810,6 +810,7 @@ function luarixV17ObfuscateClient(luaCode) {
     const shuffled = indexed.map(obj => obj.h);
     const indexMap = indexed.map(obj => obj.i);
 
+    // ✅ FIXED: Added underscore "_" before random hex so it doesn't crash Lua
     const randHex = () => "_" + Math.random().toString(16).substring(2, 8);
     const vars = Array.from({ length: 10 }, randHex);
     const [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] = vars;
@@ -1083,7 +1084,7 @@ function loadDashboard() {
         allProjects = data.scripts || []; 
         renderProjects(allProjects);
         
-        // ✅ Check for Update Notification
+        // ✅ Force show check
         checkForUpdates();
     });
 }
@@ -1320,8 +1321,7 @@ async function generateKeyFromModal() {
     const data = await res.json();
     if (data.success) {
         const resBox = document.getElementById('manage-key-result'); resBox.style.display = 'block';
-        resBox.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.5rem;">New Key Generated:</p><h3 style="color:var(--primary); font-family:monospace; margin-bottom:1rem;">${data.key}</h3><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${data.key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
-        showToast("Key generated!");
+        resBox.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.5rem;">New Key Generated!");
     } else { showToast("Error: " + data.error); }
 }
 
