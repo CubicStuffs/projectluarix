@@ -766,13 +766,20 @@
     </p>
     <div style="display: flex; gap: 10px; justify-content: center;">
       <button class="btn-gold" style="flex: 1;" onclick="startAutoUpdate()">Accept & Update</button>
-      <button class="btn-copy-icon" style="flex: 1; justify-content: center; background: var(--bg-sidebar); border: 1px solid var(--border);" onclick="document.getElementById('update-modal').classList.remove('show')">Decline</button>
+      <button class="btn-copy-icon" style="flex: 1; justify-content: center; background: var(--bg-sidebar); border: 1px solid var(--border);" onclick="declineUpdate()">Decline</button>
     </div>
     <div id="update-progress" style="display: none; margin-top: 1rem; font-size: 0.85rem; color: var(--primary);">
         Updating Projects... <span id="update-count">0/0</span>
     </div>
   </div>
 </div>
+ 
+// ✅ Decline Function (Taki dobara modal na aaye)
+function declineUpdate() {
+    // Browser memory mein save kar rahe hain ki user ne is version ko decline kiya hai
+    localStorage.setItem('luarix_dismissed_update', CURRENT_OBF_VERSION);
+    document.getElementById('update-modal').classList.remove('show');
+} 
 
 <script>
 // 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
@@ -1090,6 +1097,9 @@ function loadDashboard() {
 
 // ✅ Update Checker Logic
 function checkForUpdates() {
+    // Agar user pehle hi is version ke liye decline kar chuka hai, toh modal mat dikhao
+    if (localStorage.getItem('luarix_dismissed_update') === CURRENT_OBF_VERSION) return;
+
     const needsUpdate = allProjects.some(p => p.obf_version !== CURRENT_OBF_VERSION);
     if (needsUpdate) {
         document.getElementById('update-modal').classList.add('show');
@@ -1114,13 +1124,18 @@ async function startAutoUpdate() {
             // 1. Fetch original code
             const res = await fetch(`/api/manage?action=get_script_details&api_key=${currentAuth.api_key}&script_id=${project.id}`);
             const data = await res.json();
-            if (!data.original_code) continue;
+            
+            // Agar original code nahi hai, toh update skip karo
+            if (!data.original_code) {
+                console.warn(`Skipping ${project.name}: No original code found.`);
+                continue; 
+            }
 
             // 2. Obfuscate in browser
             const newObfuscatedCode = luarixV17ObfuscateClient(data.original_code);
 
             // 3. Save to database
-            await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${project.id}`, {
+            const updateRes = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${project.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -1130,15 +1145,30 @@ async function startAutoUpdate() {
                 })
             });
 
-            updatedCount++;
+            // ✅ Check if API actually succeeded
+            if (updateRes.ok) {
+                updatedCount++;
+            } else {
+                console.error(`Failed to update ${project.name} in DB`);
+            }
+            
             countSpan.textContent = `${updatedCount}/${outdated.length}`;
         } catch (e) {
             console.error("Failed to update project", project.id, e);
         }
     }
 
-    showToast(`Successfully updated ${updatedCount} projects!`);
+    if (updatedCount === outdated.length) {
+        showToast(`Successfully updated all ${updatedCount} projects!`);
+    } else {
+        showToast(`Updated ${updatedCount} out of ${outdated.length} projects. (Some failed due to missing original code)`);
+    }
+    
     document.getElementById('update-modal').classList.remove('show');
+    
+    // ✅ FORCE LOCAL STORAGE SO IT DOESN'T SHOW AGAIN AND AGAIN
+    localStorage.setItem('luarix_obf_version', CURRENT_OBF_VERSION);
+    
     loadDashboard(); // Reload
 }
 
