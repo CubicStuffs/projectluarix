@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     if (!key) {
         const wrapper = `
--- Luarix Universal Loader (Mobile Supported)
+-- Luarix Universal Loader (Mobile Fixed)
 local function getHWID()
     local hwid = "unknown_mobile"
     pcall(function()
@@ -85,7 +85,11 @@ local function getHWID()
         end
     end)
     if not hwid or hwid == "" or hwid == "unknown_mobile" then
-        pcall(function() hwid = tostring(game.Players.LocalPlayer.UserId) .. "_mobile" end)
+        pcall(function() 
+            if game and game.Players and game.Players.LocalPlayer then
+                hwid = tostring(game.Players.LocalPlayer.UserId) .. "_mobile" 
+            end
+        end)
     end
     return tostring(hwid)
 end
@@ -104,7 +108,10 @@ local function universalHttpGet(url)
         local ok, res = pcall(reqFunc, {Url = url, Method = "GET"})
         if ok and res and res.Body then return res.Body end
     end
-    return game:HttpGet(url)
+    
+    local ok, res = pcall(function() return game:HttpGet(url) end)
+    if ok then return res end
+    return ""
 end
 
 if not script_key or script_key == "" then
@@ -117,6 +124,7 @@ local url = "https://${req.headers.host}/api/loader/${id}?key="..script_key.."&h
 
 local success, err = pcall(function()
     local code = universalHttpGet(url)
+    if not code or code == "" then return end
     local func, loadErr = loadstring(code)
     if func then func() else warn("[Luarix] Load error: "..tostring(loadErr)) end
 end)
@@ -138,9 +146,7 @@ end
             return res.status(200).send('warn("[Luarix] This script has been temporarily disabled by the owner.")\ngame.Players.LocalPlayer:Kick("Script Disabled")');
         }
 
-        // ✅ FIX 1: Keyless scripts ka bhi execution count badhao
         if (script.keyless) {
-            // Naya SQL function call karo script ID ke sath
             await supabase.rpc('increment_executions', { script_id: id });
             return res.status(200).send(script.lua_code);
         }
@@ -150,17 +156,14 @@ end
         if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) return sendAuthError(res, "This script_key has expired.");
         if (keyData.banned) return sendAuthError(res, "This key has been banned.");
 
-        if (!keyData.hwid || keyData.hwid === "unknown" || keyData.hwid === "" || keyData.hwid.includes("_mobile")) {
+        if (!keyData.hwid || keyData.hwid === "unknown" || keyData.hwid === "" || keyData.hwid.includes("_mobile") || keyData.hwid.includes("unknown_mobile")) {
             await supabase.from('script_keys').update({ hwid: hwid }).eq('key', key);
-        } else if (keyData.hwid !== hwid && !hwid.includes("_mobile")) {
+        } else if (keyData.hwid !== hwid && !hwid.includes("_mobile") && !hwid.includes("unknown_mobile")) {
             return sendAuthError(res, "HWID Mismatch. This key is locked to another device.");
         }
 
-        // Key executions update
         const newExecs = (keyData.executions || 0) + 1;
         await supabase.from('script_keys').update({ executions: newExecs }).eq('key', key);
-
-        // ✅ FIX 2: Scripts table mein executions aur last_used update karo
         await supabase.rpc('increment_executions', { script_id: id });
 
         return res.status(200).send(script.lua_code);
