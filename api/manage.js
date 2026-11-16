@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         if (action === 'get_projects') {
             const { data: scripts, error: scriptErr } = await supabase
                 .from('scripts')
-                .select('id, name, keyless, is_disabled, created_at, executions, last_used, obf_version') // ✅ Added obf_version
+                .select('id, name, keyless, is_disabled, created_at, executions, last_used, obf_version')
                 .eq('api_key', api_key)
                 .order('created_at', { ascending: false });
             
@@ -80,7 +80,12 @@ export default async function handler(req, res) {
         }
 
         if (action === 'get_keys') {
-            const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
+            // ✅ FIXED: Added all required fields including obf_version
+            const { data: scripts, error: scriptErr } = await supabase
+                .from('scripts')
+                .select('id, name, keyless, is_disabled, created_at, executions, last_used, obf_version')
+                .eq('api_key', api_key);
+                
             if (scriptErr) throw scriptErr;
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
             
@@ -104,7 +109,6 @@ export default async function handler(req, res) {
         }
 
         if (action === 'get_script_details') {
-            // ✅ Added original_code so frontend can re-obfuscate
             const { data: script, error } = await supabase.from('scripts').select('lua_code, original_code').eq('id', script_id).eq('api_key', api_key).single();
             if (error || !script) return res.status(404).json({ error: 'Not found' });
             return res.status(200).json({ code: script.lua_code, original_code: script.original_code });
@@ -168,12 +172,12 @@ export default async function handler(req, res) {
             
             const obfuscatedCode = req.body.obfuscated_code;
             const originalCode = req.body.original_code;
-            const obf_version = req.body.obf_version; // ✅ Get Version
+            const obf_version = req.body.obf_version;
             
             if (!obfuscatedCode) return res.status(400).json({ error: 'No obfuscated code provided' });
 
             const updateData = { lua_code: obfuscatedCode, original_code: originalCode };
-            if (obf_version) updateData.obf_version = obf_version; // ✅ Save Version
+            if (obf_version) updateData.obf_version = obf_version;
 
             await supabase.from('scripts').update(updateData).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
