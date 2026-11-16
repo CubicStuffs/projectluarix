@@ -773,13 +773,6 @@
     </div>
   </div>
 </div>
- 
-// ✅ Decline Function (Taki dobara modal na aaye)
-function declineUpdate() {
-    // Browser memory mein save kar rahe hain ki user ne is version ko decline kiya hai
-    localStorage.setItem('luarix_dismissed_update', CURRENT_OBF_VERSION);
-    document.getElementById('update-modal').classList.remove('show');
-} 
 
 <script>
 // 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
@@ -1106,6 +1099,12 @@ function checkForUpdates() {
     }
 }
 
+// ✅ Decline Function (Taki dobara modal na aaye)
+function declineUpdate() {
+    localStorage.setItem('luarix_dismissed_update', CURRENT_OBF_VERSION);
+    document.getElementById('update-modal').classList.remove('show');
+}
+
 // ✅ Auto Reobfuscate Logic
 async function startAutoUpdate() {
     const btn = document.querySelector('#update-modal .btn-gold');
@@ -1167,7 +1166,7 @@ async function startAutoUpdate() {
     document.getElementById('update-modal').classList.remove('show');
     
     // ✅ FORCE LOCAL STORAGE SO IT DOESN'T SHOW AGAIN AND AGAIN
-    localStorage.setItem('luarix_obf_version', CURRENT_OBF_VERSION);
+    localStorage.setItem('luarix_dismissed_update', CURRENT_OBF_VERSION);
     
     loadDashboard(); // Reload
 }
