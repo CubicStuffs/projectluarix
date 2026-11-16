@@ -64,7 +64,6 @@ export default async function handler(req, res) {
             
             const scriptIds = scripts.map(s => s.id);
             
-            // Using 'estimated' to prevent timeout on Pro accounts
             const { count, error: keyErr } = await supabase.from('script_keys')
                 .select('*', { count: 'estimated', head: true })
                 .in('script_id', scriptIds);
@@ -164,6 +163,12 @@ export default async function handler(req, res) {
 
         // ✅ UPDATED: Directly accepts obfuscated_code from client
         if (req.method === 'POST' && action === 'update_script_code') {
+            
+            // 🚨 CHECK FOR VERCEL 4.5MB LIMIT
+            if (!req.body) {
+                return res.status(413).json({ error: 'Payload too large. Vercel limits requests to 4.5MB. Please try a smaller script.' });
+            }
+
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
             if (user && user.plan === 'free') {
@@ -179,8 +184,9 @@ export default async function handler(req, res) {
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
-            const obfuscatedCode = req.body?.obfuscated_code;
-            const originalCode = req.body?.original_code;
+            const obfuscatedCode = req.body.obfuscated_code;
+            const originalCode = req.body.original_code;
+            
             if (!obfuscatedCode) return res.status(400).json({ error: 'No obfuscated code provided' });
 
             await supabase.from('scripts').update({ lua_code: obfuscatedCode, original_code: originalCode }).eq('id', script_id).eq('api_key', api_key);
