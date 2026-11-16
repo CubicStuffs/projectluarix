@@ -122,13 +122,20 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
+        // ✅ OPTIMIZED CHART DATA
         if (action === 'get_chart_data') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts || scripts.length === 0) return res.status(200).json({ labels: [], executions: [], keys: [] });
             
             const scriptIds = scripts.map(s => s.id);
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('created_at, executions').in('script_id', scriptIds);
+            // Fetch only necessary columns, max 5000 recent keys for graph logic
+            const { data: keys, error: keyErr } = await supabase.from('script_keys')
+                .select('created_at, executions')
+                .in('script_id', scriptIds)
+                .order('created_at', { ascending: false })
+                .limit(5000); 
+                
             if (keyErr) throw keyErr;
             
             const dailyKeys = {}, dailyExecs = {}, today = new Date();
@@ -153,20 +160,24 @@ export default async function handler(req, res) {
             return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
         }
 
+        // ✅ OPTIMIZED STATS (No longer downloads all keys)
         if (action === 'get_stats') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, executions').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
             
             const scriptIds = scripts.map(s => s.id);
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('executions').in('script_id', scriptIds);
+            
+            // Use count: 'exact' to get ONLY the number of keys without downloading them
+            const { count, error: keyErr } = await supabase.from('script_keys')
+                .select('*', { count: 'exact', head: true })
+                .in('script_id', scriptIds);
+                
             if (keyErr) throw keyErr;
             
-            const keyExecs = (keys || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
             const scriptExecs = (scripts || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
-            const totalExecutions = scriptExecs > 0 ? scriptExecs : keyExecs; 
             
-            return res.status(200).json({ totalExecutions, totalKeys: (keys || []).length, totalProjects: scripts.length });
+            return res.status(200).json({ totalExecutions: scriptExecs, totalKeys: count || 0, totalProjects: scripts.length });
         }
 
         if (action === 'get_projects') {
@@ -180,13 +191,20 @@ export default async function handler(req, res) {
             return res.status(200).json({ projects: scripts || [] });
         }
 
+        // ✅ OPTIMIZED GET_KEYS (Limit to 1000 to prevent timeout)
         if (action === 'get_keys') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
             
             const scriptIds = scripts.map(s => s.id);
-            const { data: keys, error: keyErr } = await supabase.from('script_keys').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
+            
+            const { data: keys, error: keyErr } = await supabase.from('script_keys')
+                .select('*')
+                .in('script_id', scriptIds)
+                .order('created_at', { ascending: false })
+                .limit(1000); // 👈 LIMIT ADD KIYA HAI
+                
             if (keyErr) throw keyErr;
             
             return res.status(200).json({ keys: keys || [], scripts });
