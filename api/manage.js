@@ -19,7 +19,6 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-        // ✅ OPTIMIZED CHART DATA
         if (action === 'get_chart_data') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
@@ -27,10 +26,8 @@ export default async function handler(req, res) {
             
             const scriptIds = scripts.map(s => s.id);
             const { data: keys, error: keyErr } = await supabase.from('script_keys')
-                .select('created_at, executions')
-                .in('script_id', scriptIds)
-                .order('created_at', { ascending: false })
-                .limit(5000); 
+                .select('created_at, executions').in('script_id', scriptIds)
+                .order('created_at', { ascending: false }).limit(5000); 
                 
             if (keyErr) throw keyErr;
             
@@ -56,20 +53,16 @@ export default async function handler(req, res) {
             return res.status(200).json({ labels, executions: labels.map(l => dailyExecs[l]), keys: labels.map(l => dailyKeys[l]) });
         }
 
-        // ✅ OPTIMIZED STATS (Prevents Timeout)
         if (action === 'get_stats') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, executions').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts || scripts.length === 0) return res.status(200).json({ totalExecutions: 0, totalKeys: 0, totalProjects: 0 });
             
             const scriptIds = scripts.map(s => s.id);
-            
             const { count, error: keyErr } = await supabase.from('script_keys')
-                .select('*', { count: 'estimated', head: true })
-                .in('script_id', scriptIds);
+                .select('*', { count: 'estimated', head: true }).in('script_id', scriptIds);
                 
             if (keyErr) throw keyErr;
-            
             const scriptExecs = (scripts || []).reduce((acc, curr) => acc + (curr.executions || 0), 0);
             
             return res.status(200).json({ totalExecutions: scriptExecs, totalKeys: count || 0, totalProjects: scripts.length });
@@ -78,7 +71,7 @@ export default async function handler(req, res) {
         if (action === 'get_projects') {
             const { data: scripts, error: scriptErr } = await supabase
                 .from('scripts')
-                .select('id, name, keyless, is_disabled, created_at, executions, last_used')
+                .select('id, name, keyless, is_disabled, created_at, executions, last_used, obf_version') // ✅ Added obf_version
                 .eq('api_key', api_key)
                 .order('created_at', { ascending: false });
             
@@ -86,22 +79,16 @@ export default async function handler(req, res) {
             return res.status(200).json({ projects: scripts || [] });
         }
 
-        // ✅ OPTIMIZED GET_KEYS (Limit to 1000)
         if (action === 'get_keys') {
             const { data: scripts, error: scriptErr } = await supabase.from('scripts').select('id, name, keyless').eq('api_key', api_key);
             if (scriptErr) throw scriptErr;
             if (!scripts) return res.status(200).json({ keys: [], scripts: [] });
             
             const scriptIds = scripts.map(s => s.id);
-            
             const { data: keys, error: keyErr } = await supabase.from('script_keys')
-                .select('*')
-                .in('script_id', scriptIds)
-                .order('created_at', { ascending: false })
-                .limit(1000);
+                .select('*').in('script_id', scriptIds).order('created_at', { ascending: false }).limit(1000);
                 
             if (keyErr) throw keyErr;
-            
             return res.status(200).json({ keys: keys || [], scripts });
         }
 
@@ -113,14 +100,14 @@ export default async function handler(req, res) {
             const scriptIds = scripts.map(s => s.id);
             const { data: blacklists, error: blErr } = await supabase.from('blacklists').select('*').in('script_id', scriptIds).order('created_at', { ascending: false });
             if (blErr) throw blErr;
-            
             return res.status(200).json({ blacklists: blacklists || [] });
         }
 
         if (action === 'get_script_details') {
-            const { data: script, error } = await supabase.from('scripts').select('lua_code').eq('id', script_id).eq('api_key', api_key).single();
+            // ✅ Added original_code so frontend can re-obfuscate
+            const { data: script, error } = await supabase.from('scripts').select('lua_code, original_code').eq('id', script_id).eq('api_key', api_key).single();
             if (error || !script) return res.status(404).json({ error: 'Not found' });
-            return res.status(200).json({ code: script.lua_code });
+            return res.status(200).json({ code: script.lua_code, original_code: script.original_code });
         }
 
         if (req.method === 'POST' && action === 'save_monetization') {
@@ -161,13 +148,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
 
-        // ✅ UPDATED: Directly accepts obfuscated_code from client
         if (req.method === 'POST' && action === 'update_script_code') {
-            
-            // 🚨 CHECK FOR VERCEL 4.5MB LIMIT
-            if (!req.body) {
-                return res.status(413).json({ error: 'Payload too large. Vercel limits requests to 4.5MB. Please try a smaller script.' });
-            }
+            if (!req.body) return res.status(413).json({ error: 'Payload too large.' });
 
             const { data: user } = await supabase.from('users').select('*').eq('api_key', api_key).single();
             
@@ -180,16 +162,20 @@ export default async function handler(req, res) {
                     resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                     await supabase.from('users').update({ obfuscations_used: used, obfuscation_reset_at: resetAt.toISOString() }).eq('api_key', api_key);
                 }
-                if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20). Resets on ' + resetAt.toLocaleDateString() });
+                if (used >= 20) return res.status(403).json({ error: 'Limit reached (20/20).' });
                 await supabase.from('users').update({ obfuscations_used: used + 1 }).eq('api_key', api_key);
             }
             
             const obfuscatedCode = req.body.obfuscated_code;
             const originalCode = req.body.original_code;
+            const obf_version = req.body.obf_version; // ✅ Get Version
             
             if (!obfuscatedCode) return res.status(400).json({ error: 'No obfuscated code provided' });
 
-            await supabase.from('scripts').update({ lua_code: obfuscatedCode, original_code: originalCode }).eq('id', script_id).eq('api_key', api_key);
+            const updateData = { lua_code: obfuscatedCode, original_code: originalCode };
+            if (obf_version) updateData.obf_version = obf_version; // ✅ Save Version
+
+            await supabase.from('scripts').update(updateData).eq('id', script_id).eq('api_key', api_key);
             return res.status(200).json({ success: true });
         }
 
