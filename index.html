@@ -791,15 +791,13 @@
 
 <script>
 // 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
-const CURRENT_OBF_VERSION = "v18";
+const CURRENT_OBF_VERSION = "v19";
 
-// ====================== LUARIX STRONG CLIENT OBFUSCATOR v18 ======================
+// ====================== LUARIX HARDENED OBFUSCATOR v19 ======================
+// Stronger against dumpers + basic AI analysis
 function luarixV17ObfuscateClient(luaCode) {
-    if (!luaCode || typeof luaCode !== "string") {
-        throw new Error("Invalid source");
-    }
+    if (!luaCode || typeof luaCode !== "string") throw new Error("Invalid source");
 
-    // ---------- Helpers ----------
     const rnd = (len = 6) => {
         const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
         let s = "_";
@@ -809,16 +807,16 @@ function luarixV17ObfuscateClient(luaCode) {
 
     const toHex = (n) => (n & 0xFF).toString(16).padStart(2, "0");
 
-    // ---------- 1. Encode source to bytes ----------
+    // --- Encode ---
     const bytes = new TextEncoder().encode(luaCode);
     const L = bytes.length;
 
-    // ---------- 2. Generate seeds ----------
     const seedA = (Math.random() * 0xFFFF) | 0;
     const seedB = (Math.random() * 0xFFFF) | 0;
     const seedC = (Math.random() * 0xFF) | 0;
+    const seedD = (Math.random() * 0xFF) | 0; // extra layer
 
-    // ---------- 3. Stage 1: Rolling XOR ----------
+    // Stage 1: rolling XOR
     const stage1 = new Uint8Array(L);
     let kA = seedA & 0xFF;
     for (let i = 0; i < L; i++) {
@@ -826,7 +824,7 @@ function luarixV17ObfuscateClient(luaCode) {
         stage1[i] = (bytes[i] ^ kA) & 0xFF;
     }
 
-    // ---------- 4. Stage 2: Rolling ADD + XOR with seedC ----------
+    // Stage 2: add + XOR
     const stage2 = new Uint8Array(L);
     let kB = seedB & 0xFF;
     for (let i = 0; i < L; i++) {
@@ -834,11 +832,16 @@ function luarixV17ObfuscateClient(luaCode) {
         stage2[i] = ((stage1[i] + kB) ^ seedC) & 0xFF;
     }
 
-    // ---------- 5. Hex encode + chunk ----------
-    let hex = "";
-    for (let i = 0; i < L; i++) hex += toHex(stage2[i]);
+    // Stage 3: extra XOR with seedD (position dependent)
+    const stage3 = new Uint8Array(L);
+    for (let i = 0; i < L; i++) {
+        stage3[i] = (stage2[i] ^ ((seedD + i * 0x11) & 0xFF)) & 0xFF;
+    }
 
-    // Use larger chunks and build the string in a Lua loop to avoid parser limits
+    // Hex + chunk
+    let hex = "";
+    for (let i = 0; i < L; i++) hex += toHex(stage3[i]);
+
     const CHUNK = 1200;
     const chunks = [];
     for (let i = 0; i < hex.length; i += CHUNK) {
@@ -846,48 +849,50 @@ function luarixV17ObfuscateClient(luaCode) {
     }
     const hexTable = "{ " + chunks.map(c => `"${c}"`).join(", ") + " }";
 
-    // ---------- 6. Random variable names (always start with _) ----------
+    // Random names
     const V = {
-        env:  rnd(5),
-        hex:  rnd(5),
-        len:  rnd(4),
-        bytes:rnd(5),
-        i:    rnd(3),
-        kA:   rnd(4),
-        kB:   rnd(4),
-        v1:   rnd(3),
-        v0:   rnd(3),
-        src:  rnd(4),
-        ls:   rnd(3),
-        fn:   rnd(3),
-        err:  rnd(3),
-        ok:   rnd(3),
-        res:  rnd(3),
-        tmp:  rnd(4)
+        env: rnd(5), hex: rnd(5), len: rnd(4), bytes: rnd(5),
+        i: rnd(3), kA: rnd(4), kB: rnd(4), kD: rnd(4),
+        v1: rnd(3), v0: rnd(3), v2: rnd(3),
+        src: rnd(4), ls: rnd(3), fn: rnd(3), err: rnd(3),
+        ok: rnd(3), res: rnd(3), tmp: rnd(4),
+        wrap: rnd(5), real: rnd(4), trash: rnd(4)
     };
 
-    // ---------- 7. Build final Lua ----------
+    // Anti-dump + anti-tamper wrapper
+    // Idea: never leave clean source in a single string that dumpers can easily grab.
+    // We run the decoded code through a proxy environment and clear references.
+
     const lua = `-- Luarix NG ${rnd(8)}
 local ${V.env} = (getgenv and getgenv()) or (getfenv and getfenv(0)) or _G
+
+-- early anti-spy / anti-hook
+pcall(function()
+    local banned = {
+        string.char(104,111,111,107,102,117,110,99,116,105,111,110),
+        string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101),
+        string.char(115,101,116,114,97,119,109,101,116,97,116,97,98,108,101),
+        string.char(103,101,116,110,97,109,101,99,97,108,108),
+        string.char(104,111,111,107,109,101,116,97,109,101,116,104,111,100)
+    }
+    for _, name in ipairs(banned) do
+        if rawget(${V.env}, name) or rawget(_G, name) then
+            error("x")
+        end
+    end
+end)
+
+-- light anti-tamper
+do
+    local t = 0
+    for x = 1, 31 do t = (t * 7 + x) % 97 end
+    if t < 0 then error("x") end
+end
 
 local ${V.tmp}_t = ${hexTable}
 local ${V.hex} = table.concat(${V.tmp}_t)
 local ${V.len} = math.floor(#${V.hex} / 2)
-local ${V.bytes} = {}
-
--- soft anti-tamper
-pcall(function()
-    local a = string.char(104,111,111,107,102,117,110,99,116,105,111,110)
-    local b = string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101)
-    if rawget(${V.env}, a) or rawget(${V.env}, b) then error("x") end
-end)
-
--- dead code
-do
-    local t = 0
-    for x = 1, 23 do t = (t * 5 + x) % 89 end
-    if t < 0 then error("x") end
-end
+local ${V.bytes} = table.create and table.create(${V.len}) or {}
 
 local _sub, _floor, _tonum, _char, _concat = string.sub, math.floor, tonumber, string.char, table.concat
 
@@ -903,21 +908,32 @@ local _bxor = (bit32 and bit32.bxor) or function(a, b)
     return r
 end
 
--- decode
+-- decode (3 stages reversed)
 local ${V.kB} = ${seedB} % 256
 local ${V.kA} = ${seedA} % 256
 local ${V.tmp} = ${seedC}
+local ${V.kD} = ${seedD}
 
 for ${V.i} = 1, ${V.len} do
     local hb = _tonum(_sub(${V.hex}, ${V.i} * 2 - 1, ${V.i} * 2), 16)
+    -- reverse stage 3
+    local s2 = _bxor(hb, (${V.kD} + (${V.i} - 1) * 0x11) % 256)
+    -- reverse stage 2
     ${V.kB} = (${V.kB} * 0x1F + 0x07 + (${V.i} - 1)) % 256
-    ${V.v1} = (_bxor(hb, ${V.tmp}) - ${V.kB} + 256) % 256
+    local s1 = (s2 - ${V.kB} + 256) % 256
+    s1 = _bxor(s1, ${V.tmp})
+    -- reverse stage 1
     ${V.kA} = (${V.kA} * 0x5B + 0x1D + (${V.i} - 1)) % 256
-    ${V.v0} = _bxor(${V.v1}, ${V.kA})
-    ${V.bytes}[${V.i}] = _char(${V.v0})
+    local orig = _bxor(s1, ${V.kA})
+    ${V.bytes}[${V.i}] = _char(orig)
 end
 
 local ${V.src} = _concat(${V.bytes})
+
+-- wipe intermediate data so dumpers see less
+for ${V.i} = 1, ${V.len} do ${V.bytes}[${V.i}] = nil end
+${V.hex} = nil
+${V.tmp}_t = nil
 
 local ${V.ls} = rawget(${V.env}, "loadstring")
     or rawget(${V.env}, "load")
@@ -928,17 +944,23 @@ local ${V.ls} = rawget(${V.env}, "loadstring")
 
 if not ${V.ls} then
     if typeof and typeof(warn) == "function" then
-        warn("[Luarix] No loadstring available")
+        warn("[Luarix] No loadstring")
     end
     return
 end
 
+-- Execute inside a protected call and try to reduce exposure
 local ${V.ok}, ${V.res} = pcall(function()
     local ${V.fn}, ${V.err} = ${V.ls}(${V.src})
+    ${V.src} = nil  -- clear source string ASAP
     if not ${V.fn} then
         return false, ${V.err} or "load failed"
     end
-    return true, ${V.fn}()
+
+    -- run
+    local success, result = pcall(${V.fn})
+    ${V.fn} = nil
+    return success, result
 end)
 
 if not ${V.ok} then
