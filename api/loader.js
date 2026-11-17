@@ -1,224 +1,180 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const { id, key, hwid } = req.query; 
+    if (!id) return res.status(400).send('-- Error: Missing script ID.');
+
+    const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+    const isExecutor = userAgent.includes('roblox') || userAgent.includes('delta') || userAgent.includes('arceus') || userAgent.includes('fluxus') || userAgent.includes('codex') || userAgent.includes('solara');
+    const isBrowser = (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari') || userAgent.includes('edge')) && !isExecutor;
+
+    if (isBrowser) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        const host = req.headers.host;
+        return res.status(200).send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Luarix | Loadstring</title>
+                <style>
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+                    .container { width: 100%; max-width: 850px; text-align: center; }
+                    .header { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; color: #f8fafc; }
+                    .header img { height: 40px; filter: drop-shadow(0 0 10px rgba(245, 197, 24, 0.3)); }
+                    .code-box { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; position: relative; text-align: left; overflow-x: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                    .code-content { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.95rem; line-height: 1.6; white-space: pre; padding-right: 50px; }
+                    .keyword { color: #f472b6; }
+                    .string { color: #10b981; }
+                    .comment { color: #64748b; font-style: italic; }
+                    .function { color: #3b82f6; }
+                    .copy-btn { position: absolute; top: 1.2rem; right: 1.2rem; background-color: #334155; color: #f8fafc; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+                    .copy-btn:hover { background-color: #475569; }
+                    .footer { margin-top: 1.5rem; font-size: 0.95rem; color: #94a3b8; line-height: 1.6; }
+                    .footer span { color: #f5c518; font-weight: 800; letter-spacing: 1px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <img src="https://${host}/logo.png" alt="Luarix Logo">
+                        Loadstring
+                    </div>
+                    <div class="code-box">
+                        <button class="copy-btn" onclick="copyCode()">Copy</button>
+                        <div class="code-content" id="luaCode"><span class="keyword">script_key</span> = <span class="string">"YOUR_KEY_HERE"</span>; <span class="comment">-- A key might be required, if not, delete this line.</span>
+<span class="function">loadstring</span>(game:<span class="function">HttpGet</span>(<span class="string">"https://${host}/api/loader/${id}"</span>))()</div>
+                    </div>
+                    <div class="footer">
+                        Contents cannot be displayed on browser.<br>
+                        <span>PROTECTED BY LUARIX</span>
+                    </div>
+                </div>
+                <script>
+                    function copyCode() {
+                        const code = document.getElementById('luaCode').innerText;
+                        navigator.clipboard.writeText(code).then(() => {
+                            const btn = document.querySelector('.copy-btn');
+                            btn.innerText = 'Copied!';
+                            btn.style.color = '#10b981';
+                            setTimeout(() => { btn.innerText = 'Copy'; btn.style.color = '#f8fafc'; }, 2000);
+                        });
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+    }
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
     try {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-        if (req.method === 'OPTIONS') {
-            return res.status(200).end();
+        const { data: script, error: scriptErr } = await supabase.from('scripts').select('*').eq('id', id).single();
+        if (scriptErr || !script) return res.status(404).send('-- Error: Script not found.');
+        
+        if (script.is_disabled) {
+            return res.status(200).send('warn("[Luarix] This script has been temporarily disabled by the owner.")\ngame.Players.LocalPlayer:Kick("Script Disabled")');
         }
 
-        const id = (req.query && req.query.id) ? String(req.query.id) : null;
-        const key = (req.query && req.query.key) ? String(req.query.key) : null;
-        const hwid = (req.query && req.query.hwid) ? String(req.query.hwid) : 'unknown';
-
-        if (!id) {
-            return res.status(400).send('-- [Luarix] Missing script ID');
+        // ✅ FIXED: Keyless scripts ko pehle check karo
+        if (script.keyless) {
+            try { await supabase.rpc('increment_executions', { script_id: id }); } catch(e) {}
+            return res.status(200).send(script.lua_code);
         }
 
-        const userAgent = String(req.headers['user-agent'] || '').toLowerCase();
-
-        const isExecutor = (
-            userAgent.includes('roblox') ||
-            userAgent.includes('delta') ||
-            userAgent.includes('arceus') ||
-            userAgent.includes('fluxus') ||
-            userAgent.includes('codex') ||
-            userAgent.includes('solara') ||
-            userAgent.includes('synapse') ||
-            userAgent.includes('script-ware') ||
-            userAgent.includes('wave') ||
-            userAgent.includes('oxygen') ||
-            userAgent.includes('krnl') ||
-            userAgent.includes('electron')
-        );
-
-        const isBrowser = (
-            (userAgent.includes('mozilla') || userAgent.includes('chrome') || userAgent.includes('safari') || userAgent.includes('edge') || userAgent.includes('firefox')) 
-            && !isExecutor
-        );
-
-        // ========== BROWSER ==========
-        if (isBrowser) {
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            const host = req.headers.host || 'getluarix.vercel.app';
-            return res.status(200).send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Luarix</title>
-<style>body{background:#0f172a;color:#f8fafc;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.box{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;max-width:800px;width:90%}
-code{color:#10b981;font-family:monospace;word-break:break-all}</style></head>
-<body><div class="box"><h2>Luarix Loadstring</h2>
-<code>script_key="YOUR_KEY_HERE";\nloadstring(game:HttpGet("https://${host}/api/loader/${id}"))()</code>
-<p style="margin-top:1rem;color:#94a3b8">Protected by Luarix</p></div></body></html>`);
-        }
-
-        // ========== EXECUTOR ==========
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-
-        // No key → wrapper
+        // Agar script keyless nahi hai aur user ne key nahi di, toh wrapper bhejo
         if (!key) {
-            const host = req.headers.host || 'getluarix.vercel.app';
-            const wrapper = `-- Luarix Loader
+            const wrapper = `
+-- Luarix Universal Loader (Mobile Fixed)
 local function getHWID()
-    local h = "unknown"
-    pcall(function() if gethwid then h = tostring(gethwid()) end end)
-    if h == "unknown" or h == "" then
-        pcall(function()
-            local s = game:GetService("RbxAnalyticsService")
-            if s then h = s:GetClientId() end
-        end)
-    end
-    if h == "unknown" or h == "" then
-        pcall(function()
-            local lp = game:GetService("Players").LocalPlayer
-            if lp then h = tostring(lp.UserId) .. "_uid" end
-        end)
-    end
-    return tostring(h)
-end
-
-local function httpGet(url)
-    local ok, result = pcall(function()
-        if syn and syn.request then
-            local r = syn.request({Url = url, Method = "GET"})
-            return r and r.Body
+    local hwid = "unknown_mobile"
+    pcall(function()
+        if gethwid then hwid = gethwid() end
+        if not hwid or hwid == "" or hwid == "unknown_mobile" then
+            local rbx = game:GetService("RbxAnalyticsService")
+            if rbx then hwid = rbx:GetClientId() end
         end
-        if http_request then
-            local r = http_request({Url = url, Method = "GET"})
-            return r and r.Body
-        end
-        if request then
-            local r = request({Url = url, Method = "GET"})
-            return r and r.Body
-        end
-        return game:HttpGet(url)
     end)
-    if ok then return result end
-    return nil
+    if not hwid or hwid == "" or hwid == "unknown_mobile" then
+        pcall(function() 
+            if game and game.Players and game.Players.LocalPlayer then
+                hwid = tostring(game.Players.LocalPlayer.UserId) .. "_mobile" 
+            end
+        end)
+    end
+    return tostring(hwid)
 end
 
-if type(script_key) ~= "string" or script_key == "" then
-    warn("[Luarix] Missing script_key")
-    pcall(function() game.Players.LocalPlayer:Kick("Luarix: Missing script_key") end)
-    return
+local function universalHttpGet(url)
+    local reqFunc = nil
+    if syn and syn.request then reqFunc = syn.request
+    elseif http and http.request then reqFunc = http.request
+    elseif http_request then reqFunc = http_request
+    elseif request then reqFunc = request
+    elseif fluxus and fluxus.request then reqFunc = fluxus.request
+    elseif getgenv().request then reqFunc = getgenv().request
+    end
+    
+    if reqFunc then
+        local ok, res = pcall(reqFunc, {Url = url, Method = "GET"})
+        if ok and res and res.Body then return res.Body end
+    end
+    
+    local ok, res = pcall(function() return game:HttpGet(url) end)
+    if ok then return res end
+    return ""
+end
+
+if not script_key or script_key == "" then
+    warn("[Luarix] Auth Error: You need a script_key to access this script.")
+    return game.Players.LocalPlayer:Kick("Auth Error: Missing script_key.")
 end
 
 local h = getHWID()
-local url = "https://${host}/api/loader/${id}?key=" .. tostring(script_key) .. "&hwid=" .. tostring(h)
-local code = httpGet(url)
+local url = "https://${req.headers.host}/api/loader/${id}?key="..script_key.."&hwid="..h
 
-if not code or code == "" then
-    warn("[Luarix] Empty response from server")
-    return
-end
+local success, err = pcall(function()
+    local code = universalHttpGet(url)
+    if not code or code == "" then return end
+    local func, loadErr = loadstring(code)
+    if func then func() else warn("[Luarix] Load error: "..tostring(loadErr)) end
+end)
 
-local fn, err = loadstring(code)
-if not fn then
-    warn("[Luarix] loadstring error: " .. tostring(err))
-    return
-end
-
-local ok2, runtimeErr = pcall(fn)
-if not ok2 then
-    warn("[Luarix] Runtime error: " .. tostring(runtimeErr))
+if not success then
+    warn("[Luarix] HTTP/Load error: "..tostring(err))
 end
 `;
             return res.status(200).send(wrapper);
         }
 
-        // ===== Authenticated path =====
-        if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-            return res.status(200).send('warn("[Luarix] Server misconfigured")');
+        const { data: keyData, error: keyErr } = await supabase.from('script_keys').select('*').eq('key', key).single();
+        if (keyErr || !keyData || keyData.script_id !== id) return sendAuthError(res, "Invalid script_key.");
+        if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) return sendAuthError(res, "This script_key has expired.");
+        if (keyData.banned) return sendAuthError(res, "This key has been banned.");
+
+        if (!keyData.hwid || keyData.hwid === "unknown" || keyData.hwid === "" || keyData.hwid.includes("_mobile") || keyData.hwid.includes("unknown_mobile")) {
+            await supabase.from('script_keys').update({ hwid: hwid }).eq('key', key);
+        } else if (keyData.hwid !== hwid && !hwid.includes("_mobile") && !hwid.includes("unknown_mobile")) {
+            return sendAuthError(res, "HWID Mismatch. This key is locked to another device.");
         }
 
-        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
-        // Get script
-        let script = null;
-        try {
-            const result = await supabase.from('scripts').select('*').eq('id', id).single();
-            script = result.data;
-            if (result.error || !script) {
-                return res.status(200).send('warn("[Luarix] Script not found")\ngame.Players.LocalPlayer:Kick("Script not found")');
-            }
-        } catch (e) {
-            return res.status(200).send('warn("[Luarix] Database error (script)")');
-        }
-
-        if (script.is_disabled) {
-            return res.status(200).send('warn("[Luarix] Script is disabled")\ngame.Players.LocalPlayer:Kick("Script Disabled")');
-        }
-
-        // Keyless
-        if (script.keyless === true) {
-            try { await supabase.rpc('increment_executions', { script_id: id }); } catch (e) {}
-            return res.status(200).send(script.lua_code || 'warn("[Luarix] Empty script")');
-        }
-
-        // Validate key
-        let keyData = null;
-        try {
-            const result = await supabase.from('script_keys').select('*').eq('key', key).single();
-            keyData = result.data;
-            if (result.error || !keyData || keyData.script_id !== id) {
-                return res.status(200).send('warn("[Luarix] Auth Error: Invalid script_key")\ngame.Players.LocalPlayer:Kick("Invalid script_key")');
-            }
-        } catch (e) {
-            return res.status(200).send('warn("[Luarix] Database error (key)")');
-        }
-
-        if (keyData.banned) {
-            return res.status(200).send('warn("[Luarix] Auth Error: Key banned")\ngame.Players.LocalPlayer:Kick("Key banned")');
-        }
-
-        if (keyData.expires_at) {
-            try {
-                if (new Date(keyData.expires_at) < new Date()) {
-                    return res.status(200).send('warn("[Luarix] Auth Error: Key expired")\ngame.Players.LocalPlayer:Kick("Key expired")');
-                }
-            } catch (e) {}
-        }
-
-        // HWID
-        const incoming = hwid || 'unknown';
-        const stored = (keyData.hwid || '').toString();
-
-        const isWeak = (h) => {
-            if (!h) return true;
-            const s = String(h);
-            return s === 'unknown' || s === '' || s.includes('_mobile') || s.includes('unknown_mobile') || s.includes('_uid');
-        };
-
-        try {
-            if (isWeak(stored)) {
-                await supabase.from('script_keys').update({ hwid: incoming }).eq('key', key);
-            } else if (stored !== incoming && !isWeak(incoming)) {
-                return res.status(200).send('warn("[Luarix] Auth Error: HWID Mismatch")\ngame.Players.LocalPlayer:Kick("HWID Mismatch")');
-            }
-        } catch (e) {
-            // ignore HWID update errors
-        }
-
-        // Count
-        try {
-            const newExecs = (keyData.executions || 0) + 1;
-            await supabase.from('script_keys').update({ executions: newExecs }).eq('key', key);
-        } catch (e) {}
-
-        try {
-            await supabase.rpc('increment_executions', { script_id: id });
-        } catch (e) {}
-
-        // Return code
-        if (!script.lua_code || String(script.lua_code).trim() === '') {
-            return res.status(200).send('warn("[Luarix] Script has no code. Re-upload from dashboard.")');
-        }
+        const newExecs = (keyData.executions || 0) + 1;
+        await supabase.from('script_keys').update({ executions: newExecs }).eq('key', key);
+        try { await supabase.rpc('increment_executions', { script_id: id }); } catch(e) {}
 
         return res.status(200).send(script.lua_code);
 
     } catch (err) {
-        console.error('Luarix fatal error:', err);
-        return res.status(200).send('-- [Luarix] Fatal: ' + (err && err.message ? err.message : 'Unknown error'));
+        return res.status(500).send('-- Server Exception: ' + err.message);
     }
+}
+
+function sendAuthError(res, message) {
+    res.status(200).send(`warn("[Luarix] Auth Error: ${message}")\ngame.Players.LocalPlayer:Kick("Auth Error: ${message}")`);
 }
