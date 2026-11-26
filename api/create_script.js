@@ -1,11 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { luarixNG } = require('../lib/obfuscator.js');
+import { luarixNG } from '../lib/obfuscator.js';
 
-const MAX_ORIGINAL_BYTES   = 1024 * 1024;      // 1 MB
-const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024;  // 4 MB
+const MAX_ORIGINAL_BYTES   = 1024 * 1024;
+const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024;
 const FREE_WEEKLY_LIMIT    = 20;
 
 function bytesOf(str) {
@@ -13,9 +11,9 @@ function bytesOf(str) {
 }
 
 export default async function handler(req, res) {
-  // CORS headers
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
@@ -28,11 +26,21 @@ export default async function handler(req, res) {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-  const api_key        = req.body?.api_key || req.query?.api_key;
-  const name           = req.body?.name || req.query?.name;
-  const keyless        = req.body?.keyless === true || req.query?.keyless === 'true';
-  const originalCode   = req.body?.original_code;
-  const store_original = req.body?.store_original === true;
+  // Safe body parsing
+  let body = req.body || {};
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      return res.status(400).json({ error: 'Invalid JSON body' });
+    }
+  }
+
+  const api_key        = body.api_key || req.query?.api_key;
+  const name           = body.name || req.query?.name;
+  const keyless        = body.keyless === true || req.query?.keyless === 'true';
+  const originalCode   = body.original_code;
+  const store_original = body.store_original === true;
 
   if (!api_key) {
     return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
@@ -53,7 +61,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Authenticate user
+    // Authenticate
     const { data: user, error: userErr } = await supabase
       .from('users')
       .select('*')
@@ -64,9 +72,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid API key' });
     }
 
-    // 2. Free plan quota
+    // Free plan limit
     if (user.plan === 'free') {
-      const now     = new Date();
+      const now = new Date();
       const resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
 
       if (now > resetAt) {
@@ -95,7 +103,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Obfuscate (same as before - luarixNG)
+    // Obfuscate
     let obfuscatedCode;
     try {
       obfuscatedCode = luarixNG(originalCode);
@@ -103,7 +111,7 @@ export default async function handler(req, res) {
       console.error('Obfuscation failed:', obfErr.message);
       return res.status(422).json({
         error: 'Obfuscation failed. Your script may contain unsupported syntax.',
-        detail: obfErr.message,
+        detail: obfErr.message
       });
     }
 
@@ -112,12 +120,10 @@ export default async function handler(req, res) {
     }
 
     if (bytesOf(obfuscatedCode) > MAX_OBFUSCATED_BYTES) {
-      return res.status(413).json({
-        error: 'Obfuscated output exceeds size limit.'
-      });
+      return res.status(413).json({ error: 'Obfuscated output exceeds size limit.' });
     }
 
-    // 4. Save to database
+    // Save
     const cleanId = crypto.randomBytes(16).toString('hex');
 
     const { data: newScript, error: insertErr } = await supabase
@@ -127,7 +133,7 @@ export default async function handler(req, res) {
         api_key: api_key,
         name: name || 'Untitled Script',
         lua_code: obfuscatedCode,
-        original_code: store_original ? (originalCode || null) : null,
+        original_code: store_original ? originalCode : null,
         keyless: keyless,
         obf_version: 'v8.0-ai-bait',
         created_at: new Date().toISOString(),
@@ -137,7 +143,6 @@ export default async function handler(req, res) {
 
     if (insertErr) throw insertErr;
 
-    // 5. Return success
     return res.status(200).json({
       success: true,
       script: newScript,
@@ -148,7 +153,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('Create Script Error:', err.message);
+    console.error('Create Script Error:', err);
     return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }
