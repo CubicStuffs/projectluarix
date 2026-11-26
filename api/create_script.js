@@ -1,5 +1,5 @@
 // create_script.js
-// Supabase Edge Function — Luarix NG v6.0
+// Supabase Edge Function — Luarix NG v6.5
 
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -13,19 +13,16 @@ function bytesOf(str) {
   return Buffer.byteLength(str, 'utf8');
 }
 
-// Simple CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 export default async function handler(req, res) {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  // Use Deno.env for Supabase Edge Functions
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_KEY');
 
@@ -38,7 +35,6 @@ export default async function handler(req, res) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Parse body safely
   let body;
   try {
     body = await req.json();
@@ -180,7 +176,7 @@ export default async function handler(req, res) {
         lua_code: obfuscatedCode,
         original_code: store_original ? (originalCode || null) : null,
         keyless: keyless,
-        obf_version: 'v6-vm',
+        obf_version: 'v6.5-anti-hook-vm',
         created_at: new Date().toISOString(),
       })
       .select()
@@ -188,22 +184,15 @@ export default async function handler(req, res) {
 
     if (insertErr) throw insertErr;
 
-    // 5. Return result (Streamed for large payloads)
-    // For mobile clients, we can stream the response if it's large.
-    // This example uses a simple JSON response, but you can implement
-    // ReadableStream for true streaming if needed.
-    const responsePayload = {
+    // 5. Return result
+    return new Response(JSON.stringify({
       success: true,
       script: newScript,
       id: newScript.id,
       obfuscated_code: obfuscatedCode,
       input_size: bytesOf(originalCode),
       output_size: bytesOf(obfuscatedCode),
-    };
-
-    // If the obfuscated code is very large, consider streaming it.
-    // For now, we return JSON. On mobile, the client-side can handle chunking.
-    return new Response(JSON.stringify(responsePayload), {
+    }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
