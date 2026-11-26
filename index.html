@@ -790,11 +790,11 @@
 </div>
 
 <script>
-// 👇 YAHAN VERSION CHANGE KARNA HAI JAB BHI UPDATE AAYE 👇
-const CURRENT_OBF_VERSION = "v19";
+// 👇 Yahan naya v8.0 version set kiya gaya hai 👇
+const CURRENT_OBF_VERSION = "v8.0";
 
-// ====================== LUARIX HARDENED OBFUSCATOR v19 ======================
-function luarixV17ObfuscateClient(luaCode) {
+// ====================== LUARIX HARDENED OBFUSCATOR v8.0 (CLIENT SIDE) ======================
+function luarixV8ObfuscateClient(luaCode) {
     if (!luaCode || typeof luaCode !== "string") throw new Error("Invalid source");
 
     const rnd = (len = 6) => {
@@ -809,153 +809,198 @@ function luarixV17ObfuscateClient(luaCode) {
     const bytes = new TextEncoder().encode(luaCode);
     const L = bytes.length;
 
-    const seedA = (Math.random() * 0xFFFF) | 0;
-    const seedB = (Math.random() * 0xFFFF) | 0;
-    const seedC = (Math.random() * 0xFF) | 0;
-    const seedD = (Math.random() * 0xFF) | 0;
+    // Cryptographic Seeds using browser crypto
+    const cryptoObj = window.crypto || window.msCrypto;
+    const randomArray = new Uint32Array(4);
+    cryptoObj.getRandomValues(randomArray);
+    
+    const seedA = randomArray[0] & 0xFFFF;
+    const seedB = randomArray[1] & 0xFFFF;
+    const seedC = randomArray[2] & 0xFFFF;
+    const seedD = randomArray[3] & 0xFFFF;
 
-    // Stage 1: rolling XOR
-    const stage1 = new Uint8Array(L);
+    // Multi-Stage Encryption (VM Bytecode)
+    const s1 = new Uint8Array(L);
     let kA = seedA & 0xFF;
     for (let i = 0; i < L; i++) {
         kA = ((kA * 0x5B) + 0x1D + i) & 0xFF;
-        stage1[i] = (bytes[i] ^ kA) & 0xFF;
+        s1[i] = (bytes[i] ^ kA) & 0xFF;
     }
 
-    // Stage 2: add + XOR
-    const stage2 = new Uint8Array(L);
+    const s2 = new Uint8Array(L);
     let kB = seedB & 0xFF;
     for (let i = 0; i < L; i++) {
         kB = ((kB * 0x1F) + 0x07 + i) & 0xFF;
-        stage2[i] = ((stage1[i] + kB) ^ seedC) & 0xFF;
+        s2[i] = (s1[i] + kB) & 0xFF;
     }
 
-    // Stage 3: extra XOR with seedD
-    const stage3 = new Uint8Array(L);
+    const s3 = new Uint8Array(L);
+    let kC = seedC & 0xFF;
     for (let i = 0; i < L; i++) {
-        stage3[i] = (stage2[i] ^ ((seedD + i * 0x11) & 0xFF)) & 0xFF;
+        kC = ((kC * 0x3D) + 0x13 + (i * 7)) & 0xFF;
+        s3[i] = (s2[i] ^ kC) & 0xFF;
     }
 
-    // Hex + chunk
-    let hex = "";
-    for (let i = 0; i < L; i++) hex += toHex(stage3[i]);
-
-    const CHUNK = 1200;
-    const chunks = [];
-    for (let i = 0; i < hex.length; i += CHUNK) {
-        chunks.push(hex.slice(i, i + CHUNK));
+    const s4 = new Uint8Array(L);
+    let kD = seedD & 0xFF;
+    for (let i = 0; i < L; i++) {
+        kD = ((kD * 0x2B) + 0x11 + (i * 3)) & 0xFF;
+        s4[i] = ((s3[i] + kD) ^ (kD >> 1)) & 0xFF;
     }
-    const hexTable = "{ " + chunks.map(c => `"${c}"`).join(", ") + " }";
+
+    // FNV-1a Checksum
+    let checksum = 2166136261 >>> 0;
+    for (let i = 0; i < L; i++) {
+        checksum ^= bytes[i];
+        checksum = Math.imul(checksum, 16777619) >>> 0;
+    }
+
+    let hexData = "";
+    for (let i = 0; i < L; i++) hexData += toHex(s4[i]);
+
+    const CHUNK = 360;
+    const hexChunks = [];
+    for (let i = 0; i < hexData.length; i += CHUNK) {
+        hexChunks.push(hexData.slice(i, i + CHUNK));
+    }
+    const hexExpr = hexChunks.map(c => `"${c}"`).join(' ..\n    ');
 
     const V = {
-        env: rnd(5), hex: rnd(5), len: rnd(4), bytes: rnd(5),
-        i: rnd(3), kA: rnd(4), kB: rnd(4), kD: rnd(4),
-        src: rnd(4), ls: rnd(3), fn: rnd(3), err: rnd(3),
-        ok: rnd(3), res: rnd(3), tmp: rnd(4),
-        hexTableVar: rnd(6) // ✅ FIXED: Valid variable name for hex table
+        P: rnd(5), hex: rnd(5), L: rnd(4),
+        bytes: rnd(5), src: rnd(5), fn: rnd(4),
+        err: rnd(4), ok: rnd(4), res: rnd(4),
+        kA: rnd(4), kB: rnd(4), kC: rnd(4), kD: rnd(4),
+        i: rnd(3), v0: rnd(3), v1: rnd(3), v2: rnd(3),
+        v3: rnd(3), state: rnd(5), chk: rnd(4), env: rnd(5),
+        LOAD: rnd(5)
     };
 
-    const lua = `-- Luarix NG ${rnd(8)}
+    const lua = `-- Luarix NG v8.0 Ultimate Defense ${rnd(8)}
 local ${V.env} = (getgenv and getgenv()) or (getfenv and getfenv(0)) or _G
 
-pcall(function()
-    local banned = {
-        string.char(104,111,111,107,102,117,110,99,116,105,111,110),
-        string.char(103,101,116,114,97,119,109,101,116,97,116,97,98,108,101),
-        string.char(115,101,116,114,97,119,109,101,116,97,116,97,98,108,101),
-        string.char(103,101,116,110,97,109,101,99,97,108,108),
-        string.char(104,111,111,107,109,101,116,97,109,101,116,104,111,100)
-    }
-    for _, name in ipairs(banned) do
-        if rawget(${V.env}, name) or rawget(_G, name) then
-            error("x")
-        end
+-- ========== 1. ULTIMATE ANTI-DUMPER & AI BAIT ==========
+task.spawn(function()
+  -- Fake math loop to trap AI static analysis
+  local _mathTrap = 0
+  for _i = 1, 100 do
+    _mathTrap = _mathTrap + math.sin(_i) * math.cos(_i) + math.tan(_i)
+    if _mathTrap ~= _mathTrap then break end -- NaN check
+  end
+  
+  if _mathTrap > 99999 then return end -- Opaque predicate (always false)
+
+  -- Anti-Hook Detection
+  local dumperDetected = false
+  pcall(function()
+    -- If loadstring/load is a Lua function, it's hooked by a dumper
+    local ls = rawget(${V.env}, "loadstring") or rawget(${V.env}, "load") or loadstring
+    if debug and debug.getinfo then
+      local info = debug.getinfo(ls)
+      if info and info.what == "Lua" then dumperDetected = true end
     end
+    
+    -- Detect common dumper globals
+    if rawget(${V.env}, "decompile") or rawget(${V.env}, "getscriptbytecode") or rawget(${V.env}, "dump") then
+      dumperDetected = true
+    end
+  end)
+
+  if dumperDetected then
+    -- Silently hang the dumper thread without freezing the game
+    while true do task.wait(999) end
+  end
 end)
 
+-- ========== 2. HIDDEN LOADSTRING ==========
+local _loadStr = string.char(108,111,97,100,115,116,114,105,110,103) 
+local _loadFn = string.char(108,111,97,100)
+local ${V.LOAD} = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn) or loadstring or load
+
+if not ${V.LOAD} then return end
+
+-- ========== 3. VM BYTECODE ==========
+local ${V.hex} = ${hexExpr}
+local ${V.L} = math.floor(#${V.hex} / 2)
+local ${V.bytes} = {}
+
+-- ========== 4. OPAQUE PREDICATE ==========
 do
-    local t = 0
-    for x = 1, 31 do t = (t * 7 + x) % 97 end
-    if t < 0 then error("x") end
+  local t = 0
+  for x = 1, 37 do t = (t * 11 + x) % 149 end
+  if t < 0 or t > 5000 then error("Security Violation") end
 end
 
-local ${V.hexTableVar} = ${hexTable}
-local ${V.hex} = table.concat(${V.hexTableVar})
-local ${V.len} = math.floor(#${V.hex} / 2)
-local ${V.bytes} = table.create and table.create(${V.len}) or {}
-
-local _sub, _floor, _tonum, _char, _concat = string.sub, math.floor, tonumber, string.char, table.concat
-
+-- ========== 5. VM DECODER ==========
+local _sub, _floor = string.sub, math.floor
+local _tonum, _char = tonumber, string.char
+local _concat = table.concat
 local _bxor = (bit32 and bit32.bxor) or function(a, b)
-    local r, p = 0, 1
-    while a > 0 or b > 0 do
-        local aa, bb = a % 2, b % 2
-        if aa ~= bb then r = r + p end
-        a = _floor(a / 2)
-        b = _floor(b / 2)
-        p = p * 2
+  local r, p = 0, 1
+  while a > 0 or b > 0 do
+    local aa, bb = a % 2, b % 2
+    if aa ~= bb then r = r + p end
+    a = _floor(a / 2); b = _floor(b / 2); p = p * 2
+  end
+  return r
+end
+
+${V.state} = 1
+${V.kD} = ${seedD} % 256
+${V.kC} = ${seedC} % 256
+${V.kB} = ${seedB} % 256
+${V.kA} = ${seedA} % 256
+${V.i} = 1
+${V.chk} = 2166136261
+
+while ${V.state} ~= 0 do
+  if ${V.state} == 1 then
+    ${V.state} = 2
+  elseif ${V.state} == 2 then
+    if ${V.i} > ${V.L} then
+      ${V.state} = 9
+    else
+      ${V.state} = 3
     end
-    return r
-end
-
-local ${V.kB} = ${seedB} % 256
-local ${V.kA} = ${seedA} % 256
-local ${V.tmp} = ${seedC}
-local ${V.kD} = ${seedD}
-
-for ${V.i} = 1, ${V.len} do
-    local hb = _tonum(_sub(${V.hex}, ${V.i} * 2 - 1, ${V.i} * 2), 16)
-    -- reverse stage 3
-    local s2 = _bxor(hb, (${V.kD} + (${V.i} - 1) * 0x11) % 256)
-    -- reverse stage 2 (✅ FIXED MATH)
-    ${V.kB} = (${V.kB} * 0x1F + 0x07 + (${V.i} - 1)) % 256
-    local s1 = ( _bxor(s2, ${V.tmp}) - ${V.kB} + 256 ) % 256
-    -- reverse stage 1
-    ${V.kA} = (${V.kA} * 0x5B + 0x1D + (${V.i} - 1)) % 256
-    local orig = _bxor(s1, ${V.kA})
-    ${V.bytes}[${V.i}] = _char(orig)
-end
-
-local ${V.src} = _concat(${V.bytes})
-
-for ${V.i} = 1, ${V.len} do ${V.bytes}[${V.i}] = nil end
-${V.hex} = nil
-${V.hexTableVar} = nil
-
-local ${V.ls} = rawget(${V.env}, "loadstring")
-    or rawget(${V.env}, "load")
-    or rawget(_G, "loadstring")
-    or rawget(_G, "load")
-    or loadstring
-    or load
-
-if not ${V.ls} then
-    if typeof and typeof(warn) == "function" then
-        warn("[Luarix] No loadstring")
+  elseif ${V.state} == 3 then
+    local hb = _tonum(_sub(${V.hex}, ${V.i}*2-1, ${V.i}*2), 16)
+    ${V.kD} = (${V.kD} * 0x2B + 0x11 + ((${V.i}-1)*3)) % 256
+    ${V.v3} = ((hb - ${V.kD}) % 256)
+    ${V.v3} = _bxor(${V.v3}, _floor(${V.kD}/2))
+    ${V.kC} = (${V.kC} * 0x3D + 0x13 + ((${V.i}-1)*7)) % 256
+    ${V.v2} = _bxor(${V.v3}, ${V.kC})
+    ${V.kB} = (${V.kB} * 0x1F + 0x07 + (${V.i}-1)) % 256
+    ${V.v1} = (${V.v2} - ${V.kB}) % 256
+    ${V.kA} = (${V.kA} * 0x5B + 0x1D + (${V.i}-1)) % 256
+    ${V.v0} = _bxor(${V.v1}, ${V.kA})
+    ${V.bytes}[${V.i}] = _char(${V.v0})
+    ${V.chk} = _bxor(${V.chk}, ${V.v0})
+    ${V.chk} = (${V.chk} * 16777619) % 4294967296
+    ${V.i} = ${V.i} + 1
+    ${V.state} = 2
+  elseif ${V.state} == 9 then
+    if ${V.chk} ~= ${checksum} then
+      ${V.bytes} = {}
     end
-    return
+    ${V.state} = 0
+  else
+    ${V.state} = 0
+  end
 end
 
+local ${V.src} = _concat(${V.bytes} or {})
+
+-- ========== 6. EXECUTE ==========
 local ${V.ok}, ${V.res} = pcall(function()
-    local ${V.fn}, ${V.err} = ${V.ls}(${V.src})
-    ${V.src} = nil
-    if not ${V.fn} then
-        return false, ${V.err} or "load failed"
-    end
-    local success, result = pcall(${V.fn})
-    ${V.fn} = nil
-    return success, result
+  local ${V.fn}, ${V.err} = ${V.LOAD}(${V.src})
+  if not ${V.fn} then return false, ${V.err} end
+  return true, ${V.fn}()
 end)
-
-if not ${V.ok} then
-    if typeof and typeof(warn) == "function" then
-        warn("[Luarix] runtime:", ${V.res})
-    end
-end
 `;
 
     return lua.trim();
 }
+
+// ====================== BAAKI UI LOGIC ======================
 
 let currentAuth = null, tempDiscordData = null, allProjects = [];
 let execChartInstance = null, keyChartInstance = null;
@@ -1206,8 +1251,8 @@ async function startAutoUpdate() {
                 continue; 
             }
 
-            // 2. Obfuscate in browser
-            const newObfuscatedCode = luarixV17ObfuscateClient(data.original_code);
+            // 2. Obfuscate in browser using new v8.0
+            const newObfuscatedCode = luarixV8ObfuscateClient(data.original_code);
 
             // 3. Save to database
             const updateRes = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${project.id}`, {
@@ -1411,7 +1456,7 @@ async function updateCodeFromModal() {
     btn.innerText = "Updating..."; btn.disabled = true;
 
     try {
-        const finalObfuscatedCode = luarixV17ObfuscateClient(code);
+        const finalObfuscatedCode = luarixV8ObfuscateClient(code);
 
         const res = await fetch(`/api/manage?action=update_script_code&api_key=${currentAuth.api_key}&script_id=${id}`, { 
             method: 'POST',
@@ -1449,7 +1494,7 @@ async function createScript() {
     const btn = document.getElementById('create-btn'); btn.textContent = "Obfuscating..."; btn.disabled = true;
     
     try {
-        const finalObfuscatedCode = luarixV17ObfuscateClient(code);
+        const finalObfuscatedCode = luarixV8ObfuscateClient(code);
 
         const res = await fetch('/api/create_script', { 
             method: 'POST', 
@@ -1515,94 +1560,92 @@ async function saveMonetization() {
     const scriptId = document.getElementById('mon-script-select').value; const provider = document.getElementById('mon-provider').value; const link = document.getElementById('mon-link').value.trim();
     if (!scriptId) return showToast("Please create a project first."); if (!link) return showToast("Please enter a link.");
     const res = await fetch(`/api/manage?action=save_monetization&api_key=${currentAuth.api_key}&script_id=${scriptId}&provider=${provider}&link=${encodeURIComponent(link)}`, { method: 'POST' });
-    if (res.ok) showToast("Monetization Saved!"); else showToast("Failed to save monetization.");
+    if (res.ok) showToast("Monetization Saved!"); else showToast("Failed to save.");
 }
 
-function generateAdminKey(type) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; 
-    const randomValues = new Uint8Array(8); 
-    crypto.getRandomValues(randomValues); 
-    let rand = '';
-    for (let i = 0; i < 8; i++) rand += chars[randomValues[i] % chars.length];
-    
-    let prefix = 'LXR-BASIC-';
-    if (type === 'premium') prefix = 'LXR-PREMIUM-';
-    else if (type === 'pro') prefix = 'LXR-PRO-';
-    
-    const key = prefix + rand;
-    const resBox = document.getElementById('admin-key-result'); resBox.style.display = 'block';
-    resBox.innerHTML = `<h4 style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Generated Key:</h4><div style="font-family: monospace; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: 1px;">${key}</div><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${key}'); showToast('Key Copied!')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Key</button>`;
-}
+async function generateAdminKey(tier) {
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Generating..."; btn.disabled = true;
 
-async function resetKey(key) { if (!confirm('Reset HWID for this key?')) return; await fetch(`/api/manage?action=reset_hwid&key_id=${key}`, { method: 'POST' }); showToast('HWID Reset!'); loadKeys(); }
-async function deleteKey(key) { if (!confirm('Delete this key permanently?')) return; await fetch(`/api/manage?action=delete_key&key_id=${key}`, { method: 'POST' }); showToast('Key Deleted!'); loadKeys(); }
-
-async function removeBlacklist(discord_id, script_id) { 
-    if (!confirm('Remove blacklist?')) return; 
-    
     try {
-        const res = await fetch(`/api/manage?action=remove_blacklist&api_key=${currentAuth.api_key}&discord_id=${discord_id}&script_id=${script_id}`, { method: 'POST' });
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'admin_create_key', tier: tier, api_key: currentAuth.api_key })
+        });
         const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error || "Failed to unblacklist");
-        
-        showToast('✅ User unblacklisted successfully!'); 
-        loadBlacklists(); 
+        if (!res.ok) throw new Error(data.error || "Failed to generate");
+
+        const resBox = document.getElementById('admin-key-result');
+        resBox.style.display = 'block';
+        resBox.innerHTML = `<h3 style="color:var(--text-muted); margin-bottom:0.5rem;">Generated ${tier.toUpperCase()} Key:</h3><h2 style="color:var(--success); font-family:monospace; margin-bottom:1rem;">${data.key}</h2><button class="btn-copy-icon" onclick="navigator.clipboard.writeText('${data.key}'); showToast('Key Copied!')">Copy</button>`;
     } catch (err) {
-        showToast('❌ Error: ' + err.message);
+        showToast(err.message);
+    } finally {
+        btn.innerText = originalText; btn.disabled = false;
     }
 }
 
-function handleFileUpload(event, textareaId) {
-    const file = event.target.files[0] || event.dataTransfer.files[0];
-    if (!file) return;
+function copyTextareaCode(id) {
+    const el = document.getElementById(id);
+    if (!el.value) return showToast("Nothing to copy!");
+    navigator.clipboard.writeText(el.value).then(() => {
+        showToast("Code copied to clipboard!");
+    }).catch(() => {
+        showToast("Failed to copy.");
+    });
+}
 
-    const validExtensions = ['.lua', '.luau', '.txt'];
-    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    
-    if (!validExtensions.includes(fileExtension)) {
-        return showToast("Please upload a valid file (.lua, .luau, .txt)");
-    }
+// ✅ File upload handler
+function handleFileUpload(event, textareaId) {
+    const file = event.target.files[0];
+    if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById(textareaId).value = e.target.result;
-        showToast(`${file.name} loaded successfully!`);
+        const content = e.target.result;
+        document.getElementById(textareaId).value = content;
+        showToast(`Loaded ${file.name} successfully!`);
+    };
+    reader.onerror = function() {
+        showToast("Error reading file.");
     };
     reader.readAsText(file);
+    event.target.value = '';
 }
 
-function setupDragAndDrop(zoneId, inputId, textareaId) {
-    const zone = document.getElementById(zoneId);
-    const input = document.getElementById(inputId);
-
-    zone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        zone.classList.add('dragover');
-    });
-
-    zone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        zone.classList.remove('dragover');
-    });
-
-    zone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        zone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            handleFileUpload(e, textareaId);
-        }
-    });
-    
-    input.addEventListener('click', (e) => e.stopPropagation());
-}
-
+// ✅ Drag and drop for upload zones
 document.addEventListener('DOMContentLoaded', () => {
-    setupDragAndDrop('create-upload-zone', 'create-file-input', 'new-script-code');
-    setupDragAndDrop('update-upload-zone', 'update-file-input', 'update-script-code');
-});
+    ['create-upload-zone', 'update-upload-zone'].forEach(zoneId => {
+        const zone = document.getElementById(zoneId);
+        if (!zone) return;
 
-if (localStorage.getItem('luarix_auth')) loadDashboard(); else showView('landing');
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('dragover');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('dragover');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const textareaId = zoneId === 'create-upload-zone' ? 'new-script-code' : 'update-script-code';
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById(textareaId).value = evt.target.result;
+                    showToast(`Loaded ${file.name} successfully!`);
+                };
+                reader.readAsText(file);
+            }
+        });
+    });
+});
 </script>
 </body>
 </html>
