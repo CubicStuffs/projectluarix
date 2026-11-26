@@ -1,5 +1,5 @@
 // create_script.js
-// Supabase Edge Function — Luarix NG v7.0
+// Supabase Edge Function — Luarix NG v8.0
 
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -172,7 +172,7 @@ export default async function handler(req, res) {
         lua_code: obfuscatedCode,
         original_code: store_original ? (originalCode || null) : null,
         keyless: keyless,
-        obf_version: 'v7.0-anti-hook',
+        obf_version: 'v8.0-ai-bait',
         created_at: new Date().toISOString(),
       })
       .select()
