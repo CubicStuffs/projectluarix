@@ -1,5 +1,5 @@
 // create_script.js
-// Supabase Edge Function — Luarix NG v6.5
+// Supabase Edge Function — Luarix NG v7.0
 
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -82,7 +82,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Authenticate
     const { data: user, error: userErr } = await supabase
       .from('users')
       .select('*')
@@ -96,7 +95,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Free plan quota
     if (user.plan === 'free') {
       const now     = new Date();
       const resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
@@ -133,7 +131,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Obfuscate with VM-based protection
     let obfuscatedCode;
     try {
       obfuscatedCode = luarixNG(originalCode);
@@ -164,7 +161,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 4. Save to database
     const cleanId = crypto.randomBytes(16).toString('hex');
 
     const { data: newScript, error: insertErr } = await supabase
@@ -176,7 +172,7 @@ export default async function handler(req, res) {
         lua_code: obfuscatedCode,
         original_code: store_original ? (originalCode || null) : null,
         keyless: keyless,
-        obf_version: 'v6.5-anti-hook-vm',
+        obf_version: 'v7.0-anti-hook',
         created_at: new Date().toISOString(),
       })
       .select()
@@ -184,7 +180,6 @@ export default async function handler(req, res) {
 
     if (insertErr) throw insertErr;
 
-    // 5. Return result
     return new Response(JSON.stringify({
       success: true,
       script: newScript,
