@@ -1,9 +1,8 @@
-// create_script.js
-// Supabase Edge Function — Luarix NG v8.0
-
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
-import { luarixNG } from '../lib/obfuscator.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { luarixNG } = require('../lib/obfuscator.js');
 
 const MAX_ORIGINAL_BYTES   = 1024 * 1024;      // 1 MB
 const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024;  // 4 MB
@@ -13,75 +12,48 @@ function bytesOf(str) {
   return Buffer.byteLength(str, 'utf8');
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return res.status(200).end();
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_KEY');
-
-  if (!supabaseUrl || !supabaseKey) {
-    return new Response(JSON.stringify({ error: 'Supabase environment variables are missing!' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    return res.status(500).json({ error: 'Supabase environment variables are missing!' });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-  let body;
-  try {
-    body = await req.json();
-  } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  const api_key        = body?.api_key || req.query?.api_key;
-  const name           = body?.name || req.query?.name;
-  const keyless        = body?.keyless === true || req.query?.keyless === 'true';
-  const originalCode   = body?.original_code;
-  const store_original = body?.store_original === true;
+  const api_key        = req.body?.api_key || req.query?.api_key;
+  const name           = req.body?.name || req.query?.name;
+  const keyless        = req.body?.keyless === true || req.query?.keyless === 'true';
+  const originalCode   = req.body?.original_code;
+  const store_original = req.body?.store_original === true;
 
   if (!api_key) {
-    return new Response(JSON.stringify({ error: 'Unauthorized: Missing API Key' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
   }
 
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Invalid method' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return res.status(400).json({ error: 'Invalid method' });
   }
 
   if (typeof originalCode !== 'string' || originalCode.length === 0) {
-    return new Response(JSON.stringify({ error: 'No original_code provided' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return res.status(400).json({ error: 'No original_code provided' });
   }
 
   if (bytesOf(originalCode) > MAX_ORIGINAL_BYTES) {
-    return new Response(JSON.stringify({
+    return res.status(413).json({
       error: `Script too large. Max ${MAX_ORIGINAL_BYTES / 1024} KB allowed.`
-    }), {
-      status: 413,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   try {
+    // 1. Authenticate user
     const { data: user, error: userErr } = await supabase
       .from('users')
       .select('*')
@@ -89,12 +61,10 @@ export default async function handler(req, res) {
       .single();
 
     if (userErr || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid API key' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return res.status(401).json({ error: 'Invalid API key' });
     }
 
+    // 2. Free plan quota
     if (user.plan === 'free') {
       const now     = new Date();
       const resetAt = user.obfuscation_reset_at ? new Date(user.obfuscation_reset_at) : new Date(0);
@@ -109,10 +79,7 @@ export default async function handler(req, res) {
 
       const used = user.obfuscations_used || 0;
       if (used >= FREE_WEEKLY_LIMIT) {
-        return new Response(JSON.stringify({ error: `Limit reached (${used}/${FREE_WEEKLY_LIMIT}).` }), {
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return res.status(403).json({ error: `Limit reached (${used}/${FREE_WEEKLY_LIMIT}).` });
       }
 
       const { data: bumped, error: bumpErr } = await supabase
@@ -124,43 +91,33 @@ export default async function handler(req, res) {
         .single();
 
       if (bumpErr || !bumped) {
-        return new Response(JSON.stringify({ error: 'Concurrent request detected, please retry' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return res.status(429).json({ error: 'Concurrent request detected, please retry' });
       }
     }
 
+    // 3. Obfuscate (same as before - luarixNG)
     let obfuscatedCode;
     try {
       obfuscatedCode = luarixNG(originalCode);
     } catch (obfErr) {
       console.error('Obfuscation failed:', obfErr.message);
-      return new Response(JSON.stringify({
+      return res.status(422).json({
         error: 'Obfuscation failed. Your script may contain unsupported syntax.',
         detail: obfErr.message,
-      }), {
-        status: 422,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (!obfuscatedCode || obfuscatedCode.length === 0) {
-      return new Response(JSON.stringify({ error: 'Obfuscator returned empty result' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Obfuscator returned empty result' });
     }
 
     if (bytesOf(obfuscatedCode) > MAX_OBFUSCATED_BYTES) {
-      return new Response(JSON.stringify({
+      return res.status(413).json({
         error: 'Obfuscated output exceeds size limit.'
-      }), {
-        status: 413,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // 4. Save to database
     const cleanId = crypto.randomBytes(16).toString('hex');
 
     const { data: newScript, error: insertErr } = await supabase
@@ -180,23 +137,18 @@ export default async function handler(req, res) {
 
     if (insertErr) throw insertErr;
 
-    return new Response(JSON.stringify({
+    // 5. Return success
+    return res.status(200).json({
       success: true,
       script: newScript,
       id: newScript.id,
       obfuscated_code: obfuscatedCode,
       input_size: bytesOf(originalCode),
       output_size: bytesOf(obfuscatedCode),
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (err) {
     console.error('Create Script Error:', err.message);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }
