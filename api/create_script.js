@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { luarixNG } from '../lib/obfuscator.js';
 
-const MAX_ORIGINAL_BYTES = 1024 * 1024;
-const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024;
+const MAX_ORIGINAL_BYTES = 1024 * 1024; // 1 MB
+const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024; // 4 MB
 const FREE_WEEKLY_LIMIT = 20;
 
 function bytesOf(str) {
@@ -42,6 +42,9 @@ export default async function handler(req, res) {
     const keyless = body.keyless === true;
     const originalCode = body.original_code;
     const store_original = body.store_original === true;
+    
+    // ✅ FIX: Frontend se obfuscated code uthao
+    let obfuscatedCode = body.obfuscated_code;
 
     if (!api_key) {
       return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
@@ -91,7 +94,6 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: `Weekly limit reached (${used}/${FREE_WEEKLY_LIMIT})` });
       }
 
-      // Atomic increment
       const { error: bumpErr } = await supabase
         .from('users')
         .update({ obfuscations_used: used + 1 })
@@ -103,16 +105,17 @@ export default async function handler(req, res) {
       }
     }
 
-    // ===== Obfuscate =====
-    let obfuscatedCode;
-    try {
-      obfuscatedCode = luarixNG(originalCode);
-    } catch (err) {
-      console.error('Obfuscation error:', err);
-      return res.status(422).json({
-        error: 'Obfuscation failed',
-        detail: err.message
-      });
+    // ===== Obfuscate (Only if not already obfuscated by frontend) =====
+    if (!obfuscatedCode) {
+      try {
+        obfuscatedCode = luarixNG(originalCode);
+      } catch (err) {
+        console.error('Obfuscation error:', err);
+        return res.status(422).json({
+          error: 'Obfuscation failed',
+          detail: err.message
+        });
+      }
     }
 
     if (!obfuscatedCode || obfuscatedCode.length < 10) {
@@ -158,7 +161,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('Create Script Fatal Error:', err);
-    // Always return JSON even on crash
     return res.status(500).json({
       error: 'Internal server error',
       detail: err.message || 'Unknown error'
