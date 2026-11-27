@@ -1,5 +1,14 @@
 {
   "rewrites": [
     { "source": "/api/loader/:id", "destination": "/api/loader?id=:id" }
-  ]
+  ],
+  "functions": {
+    "api/create_script.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/*.js": {
+      "maxDuration": 30
+    }
+  }
 }
