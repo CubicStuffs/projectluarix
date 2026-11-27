@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { luarixNG } from '../lib/obfuscator.js';
 
-const MAX_ORIGINAL_BYTES = 1024 * 1024;
-const MAX_OBFUSCATED_BYTES = 4 * 1024 * 1024;
+// Raised limits: 20 MB original + 25 MB obfuscated (supports large file uploads)
+const MAX_ORIGINAL_BYTES = 20 * 1024 * 1024;      // 20 MB
+const MAX_OBFUSCATED_BYTES = 25 * 1024 * 1024;    // 25 MB
 const FREE_WEEKLY_LIMIT = 20;
 
 function bytesOf(str) {
@@ -47,7 +48,7 @@ export default async function handler(req, res) {
     if (!api_key) return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
     if (typeof originalCode !== 'string' || originalCode.trim().length === 0) return res.status(400).json({ error: 'No original_code provided' });
-    if (bytesOf(originalCode) > MAX_ORIGINAL_BYTES) return res.status(413).json({ error: 'Script too large (max 1MB)' });
+    if (bytesOf(originalCode) > MAX_ORIGINAL_BYTES) return res.status(413).json({ error: 'Script too large (max 20MB)' });
 
     // Authenticate
     const { data: user, error: userErr } = await supabase.from('users').select('*').eq('api_key', api_key).single();
@@ -73,14 +74,14 @@ export default async function handler(req, res) {
     // Obfuscate (Only if not provided by frontend)
     if (!obfuscatedCode) {
       try {
-        obfuscatedCode = luarixNG(originalCode);
+        obfuscatedCode = luarixNG(originalCode, { maxSize: 22_000_000 });
       } catch (err) {
         return res.status(422).json({ error: 'Obfuscation failed', detail: err.message });
       }
     }
 
     if (!obfuscatedCode || obfuscatedCode.length < 10) return res.status(500).json({ error: 'Obfuscator returned empty result' });
-    if (bytesOf(obfuscatedCode) > MAX_OBFUSCATED_BYTES) return res.status(413).json({ error: 'Obfuscated code too large' });
+    if (bytesOf(obfuscatedCode) > MAX_OBFUSCATED_BYTES) return res.status(413).json({ error: 'Obfuscated code too large (max 25MB)' });
 
     // Generate ID (Works on both Node and Deno)
     let scriptId;
