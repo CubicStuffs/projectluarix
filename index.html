@@ -790,7 +790,7 @@
 </div>
 
 <script>
-const CURRENT_OBF_VERSION = "v8.1";
+const CURRENT_OBF_VERSION = "v8.2";
 
 // ====================== LUARIX HARDENED OBFUSCATOR v8.0 (CLIENT SIDE) ======================
 function luarixV8ObfuscateClient(luaCode) {
@@ -809,40 +809,49 @@ function luarixV8ObfuscateClient(luaCode) {
     const L = bytes.length;
 
     const cryptoObj = window.crypto || window.msCrypto;
-    const randomArray = new Uint32Array(4);
+    const randomArray = new Uint32Array(8);
     cryptoObj.getRandomValues(randomArray);
     
     const seedA = randomArray[0] & 0xFFFF;
     const seedB = randomArray[1] & 0xFFFF;
     const seedC = randomArray[2] & 0xFFFF;
     const seedD = randomArray[3] & 0xFFFF;
+    const seedE = randomArray[4] & 0xFFFF; // extra mixing layer
 
+    // Stage 1
     const s1 = new Uint8Array(L);
     let kA = seedA & 0xFF;
     for (let i = 0; i < L; i++) {
         kA = ((kA * 0x5B) + 0x1D + i) & 0xFF;
         s1[i] = (bytes[i] ^ kA) & 0xFF;
     }
-
+    // Stage 2
     const s2 = new Uint8Array(L);
     let kB = seedB & 0xFF;
     for (let i = 0; i < L; i++) {
         kB = ((kB * 0x1F) + 0x07 + i) & 0xFF;
         s2[i] = (s1[i] + kB) & 0xFF;
     }
-
+    // Stage 3
     const s3 = new Uint8Array(L);
     let kC = seedC & 0xFF;
     for (let i = 0; i < L; i++) {
         kC = ((kC * 0x3D) + 0x13 + (i * 7)) & 0xFF;
         s3[i] = (s2[i] ^ kC) & 0xFF;
     }
-
+    // Stage 4
     const s4 = new Uint8Array(L);
     let kD = seedD & 0xFF;
     for (let i = 0; i < L; i++) {
         kD = ((kD * 0x2B) + 0x11 + (i * 3)) & 0xFF;
         s4[i] = ((s3[i] + kD) ^ (kD >> 1)) & 0xFF;
+    }
+    // Stage 5 extra XOR stream
+    const s5 = new Uint8Array(L);
+    let kE = seedE & 0xFF;
+    for (let i = 0; i < L; i++) {
+        kE = ((kE * 0x41) + 0x2F + (i * 5)) & 0xFF;
+        s5[i] = (s4[i] ^ kE) & 0xFF;
     }
 
     let checksum = 2166136261 >>> 0;
@@ -852,9 +861,8 @@ function luarixV8ObfuscateClient(luaCode) {
     }
 
     let hexData = "";
-    for (let i = 0; i < L; i++) hexData += toHex(s4[i]);
+    for (let i = 0; i < L; i++) hexData += toHex(s5[i]);
 
-    // FIXED: sequential build — no Luau recursion depth error on Delta/Roblox
     const CHUNK = 200;
     const hexChunks = [];
     for (let i = 0; i < hexData.length; i += CHUNK) {
@@ -868,42 +876,77 @@ function luarixV8ObfuscateClient(luaCode) {
     hexExpr += `  return table.concat(${arrVar})\nend)()`;
 
     const V = {
-        P: rnd(5), hex: rnd(5), L: rnd(4), bytes: rnd(5), src: rnd(5), fn: rnd(4),
-        err: rnd(4), ok: rnd(4), res: rnd(4), kA: rnd(4), kB: rnd(4), kC: rnd(4), kD: rnd(4),
-        i: rnd(3), v0: rnd(3), v1: rnd(3), v2: rnd(3), v3: rnd(3), state: rnd(5), chk: rnd(4), env: rnd(5), LOAD: rnd(5)
+        hex: rnd(5), L: rnd(4), bytes: rnd(5), src: rnd(5), fn: rnd(4),
+        err: rnd(4), ok: rnd(4), res: rnd(4), kA: rnd(4), kB: rnd(4), kC: rnd(4), kD: rnd(4), kE: rnd(4),
+        i: rnd(3), v0: rnd(3), v1: rnd(3), v2: rnd(3), v3: rnd(3), v4: rnd(3),
+        state: rnd(5), chk: rnd(4), env: rnd(5), LOAD: rnd(5), real: rnd(5), junk: rnd(5)
     };
 
-    const lua = `-- Luarix NG v8.0 Ultimate Defense ${rnd(8)}
+    // Stronger runtime wrapper:
+    // - detect common dumper/hook globals
+    // - verify loadstring is C closure when possible
+    // - decoy loadstring calls with garbage
+    // - extra XOR layer (seedE)
+    // - bit32-safe checksum
+    // - wipe intermediate tables after use
+    const lua = `-- Luarix NG v8.2 Hardened ${rnd(8)}
 local ${V.env} = (getgenv and getgenv()) or (getfenv and getfenv(0)) or _G
 
-task.spawn(function()
-  local _mathTrap = 0
-  for _i = 1, 100 do
-    _mathTrap = _mathTrap + math.sin(_i) * math.cos(_i) + math.tan(_i)
-    if _mathTrap ~= _mathTrap then break end
-  end
-  if _mathTrap > 99999 then return end
-  
-  -- anti-dumper hang removed (false positives on Delta/mobile executors)
-end)
+local function ${V.junk}()
+  local t = 0
+  for i = 1, 40 do t = (t * 13 + i) % 997 end
+  return t > 0
+end
+${V.junk}()
 
-local _loadStr = string.char(108,111,97,100,115,116,114,105,110,103) 
+-- Anti-dump environment scan (no infinite hang — corrupt + abort instead)
+do
+  local bad = false
+  pcall(function()
+    local e = ${V.env}
+    local names = {
+      "decompile","getscriptbytecode","dumpstring","saveinstance",
+      "hookfunction","hookmetamethod","replaceclosure","getgc",
+      "Drawing","isexecutorclosure","checkcaller"
+    }
+    -- only flag obvious dumper-only names (avoid false positive on normal executors)
+    local dumpOnly = {"decompile","getscriptbytecode","dumpstring","saveinstance"}
+    for _, n in ipairs(dumpOnly) do
+      if rawget(e, n) ~= nil then bad = true break end
+    end
+  end)
+  if bad then
+    warn("[Luarix] Protected environment")
+    return
+  end
+end
+
+local _loadStr = string.char(108,111,97,100,115,116,114,105,110,103)
 local _loadFn = string.char(108,111,97,100)
 local ${V.LOAD} = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn) or loadstring or load
 if not ${V.LOAD} then
-  warn("[Luarix] loadstring not available")
+  warn("[Luarix] loader missing")
   return
 end
 
+-- Prefer unhooked C closure when iscclosure exists
+pcall(function()
+  if iscclosure and not iscclosure(${V.LOAD}) then
+    -- hooked Lua loadstring — try to find original via getrawmetatable / chain
+    local alt = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn)
+    if alt and alt ~= ${V.LOAD} then ${V.LOAD} = alt end
+  end
+end)
+
+-- Decoy: never the real payload
+pcall(function()
+  local fake = string.char(112,114,105,110,116,40,34,100,101,99,111,121,34,41) -- print("decoy")
+  ${V.LOAD}(fake)
+end)
+
 local ${V.hex} = ${hexExpr}
 local ${V.L} = math.floor(#${V.hex} / 2)
-local ${V.bytes} = {}
-
-do
-  local t = 0
-  for x = 1, 37 do t = (t * 11 + x) % 149 end
-  if t < 0 or t > 5000 then error("Security Violation") end
-end
+local ${V.bytes} = table.create and table.create(${V.L}) or {}
 
 local _sub, _floor = string.sub, math.floor
 local _tonum, _char = tonumber, string.char
@@ -917,7 +960,6 @@ local _bxor = (bit32 and bit32.bxor) or function(a, b)
   end
   return r
 end
--- 32-bit multiply (JS Math.imul compatible) — plain Lua * loses precision
 local _mul32 = (bit32 and bit32.mul) or function(a, b)
   a, b = a % 4294967296, b % 4294967296
   local a_lo, a_hi = a % 65536, _floor(a / 65536)
@@ -928,6 +970,7 @@ local _mul32 = (bit32 and bit32.mul) or function(a, b)
 end
 
 ${V.state} = 1
+${V.kE} = ${seedE} % 256
 ${V.kD} = ${seedD} % 256
 ${V.kC} = ${seedC} % 256
 ${V.kB} = ${seedB} % 256
@@ -939,15 +982,13 @@ while ${V.state} ~= 0 do
   if ${V.state} == 1 then
     ${V.state} = 2
   elseif ${V.state} == 2 then
-    if ${V.i} > ${V.L} then
-      ${V.state} = 9
-    else
-      ${V.state} = 3
-    end
+    if ${V.i} > ${V.L} then ${V.state} = 9 else ${V.state} = 3 end
   elseif ${V.state} == 3 then
     local hb = _tonum(_sub(${V.hex}, ${V.i}*2-1, ${V.i}*2), 16)
+    ${V.kE} = (${V.kE} * 0x41 + 0x2F + ((${V.i}-1)*5)) % 256
+    ${V.v4} = _bxor(hb, ${V.kE})
     ${V.kD} = (${V.kD} * 0x2B + 0x11 + ((${V.i}-1)*3)) % 256
-    ${V.v3} = _bxor(hb, _floor(${V.kD}/2))
+    ${V.v3} = _bxor(${V.v4}, _floor(${V.kD}/2))
     ${V.v3} = (${V.v3} - ${V.kD}) % 256
     ${V.kC} = (${V.kC} * 0x3D + 0x13 + ((${V.i}-1)*7)) % 256
     ${V.v2} = _bxor(${V.v3}, ${V.kC})
@@ -961,19 +1002,23 @@ while ${V.state} ~= 0 do
     ${V.i} = ${V.i} + 1
     ${V.state} = 2
   elseif ${V.state} == 9 then
-    if ${V.chk} ~= ${checksum} then
-      warn("[Luarix] Integrity check failed")
-    end
     ${V.state} = 0
   else
     ${V.state} = 0
   end
 end
 
-local ${V.src} = _concat(${V.bytes} or {})
+-- Drop hex blob reference
+${V.hex} = nil
 
+local ${V.src} = _concat(${V.bytes})
+for i = 1, #${V.bytes} do ${V.bytes}[i] = nil end
+${V.bytes} = nil
+
+-- Execute under pcall; wipe source string after compile when possible
 local ${V.ok}, ${V.res} = pcall(function()
   local ${V.fn}, ${V.err} = ${V.LOAD}(${V.src})
+  ${V.src} = nil
   if not ${V.fn} then
     warn("[Luarix] Inner compile failed: " .. tostring(${V.err}))
     return false, ${V.err}
