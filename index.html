@@ -938,8 +938,8 @@ while ${V.state} ~= 0 do
   elseif ${V.state} == 3 then
     local hb = _tonum(_sub(${V.hex}, ${V.i}*2-1, ${V.i}*2), 16)
     ${V.kD} = (${V.kD} * 0x2B + 0x11 + ((${V.i}-1)*3)) % 256
-    ${V.v3} = ((hb - ${V.kD}) % 256)
-    ${V.v3} = _bxor(${V.v3}, _floor(${V.kD}/2))
+    ${V.v3} = _bxor(hb, _floor(${V.kD}/2))
+    ${V.v3} = (${V.v3} - ${V.kD}) % 256
     ${V.kC} = (${V.kC} * 0x3D + 0x13 + ((${V.i}-1)*7)) % 256
     ${V.v2} = _bxor(${V.v3}, ${V.kC})
     ${V.kB} = (${V.kB} * 0x1F + 0x07 + (${V.i}-1)) % 256
@@ -954,6 +954,7 @@ while ${V.state} ~= 0 do
   elseif ${V.state} == 9 then
     if ${V.chk} ~= ${checksum} then
       ${V.bytes} = {}
+      warn("[Luarix] Integrity check failed")
     end
     ${V.state} = 0
   else
