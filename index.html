@@ -790,7 +790,7 @@
 </div>
 
 <script>
-const CURRENT_OBF_VERSION = "v8.2";
+const CURRENT_OBF_VERSION = "v8.3";
 
 // ====================== LUARIX HARDENED OBFUSCATOR v8.0 (CLIENT SIDE) ======================
 function luarixV8ObfuscateClient(luaCode) {
@@ -802,235 +802,205 @@ function luarixV8ObfuscateClient(luaCode) {
         for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
         return s;
     };
-
     const toHex = (n) => (n & 0xFF).toString(16).padStart(2, "0");
 
     const bytes = new TextEncoder().encode(luaCode);
     const L = bytes.length;
-
     const cryptoObj = window.crypto || window.msCrypto;
-    const randomArray = new Uint32Array(8);
+    const randomArray = new Uint32Array(10);
     cryptoObj.getRandomValues(randomArray);
-    
+
     const seedA = randomArray[0] & 0xFFFF;
     const seedB = randomArray[1] & 0xFFFF;
     const seedC = randomArray[2] & 0xFFFF;
     const seedD = randomArray[3] & 0xFFFF;
-    const seedE = randomArray[4] & 0xFFFF; // extra mixing layer
+    const seedE = randomArray[4] & 0xFFFF;
 
-    // Stage 1
     const s1 = new Uint8Array(L);
     let kA = seedA & 0xFF;
-    for (let i = 0; i < L; i++) {
-        kA = ((kA * 0x5B) + 0x1D + i) & 0xFF;
-        s1[i] = (bytes[i] ^ kA) & 0xFF;
-    }
-    // Stage 2
+    for (let i = 0; i < L; i++) { kA = ((kA * 0x5B) + 0x1D + i) & 0xFF; s1[i] = (bytes[i] ^ kA) & 0xFF; }
     const s2 = new Uint8Array(L);
     let kB = seedB & 0xFF;
-    for (let i = 0; i < L; i++) {
-        kB = ((kB * 0x1F) + 0x07 + i) & 0xFF;
-        s2[i] = (s1[i] + kB) & 0xFF;
-    }
-    // Stage 3
+    for (let i = 0; i < L; i++) { kB = ((kB * 0x1F) + 0x07 + i) & 0xFF; s2[i] = (s1[i] + kB) & 0xFF; }
     const s3 = new Uint8Array(L);
     let kC = seedC & 0xFF;
-    for (let i = 0; i < L; i++) {
-        kC = ((kC * 0x3D) + 0x13 + (i * 7)) & 0xFF;
-        s3[i] = (s2[i] ^ kC) & 0xFF;
-    }
-    // Stage 4
+    for (let i = 0; i < L; i++) { kC = ((kC * 0x3D) + 0x13 + (i * 7)) & 0xFF; s3[i] = (s2[i] ^ kC) & 0xFF; }
     const s4 = new Uint8Array(L);
     let kD = seedD & 0xFF;
-    for (let i = 0; i < L; i++) {
-        kD = ((kD * 0x2B) + 0x11 + (i * 3)) & 0xFF;
-        s4[i] = ((s3[i] + kD) ^ (kD >> 1)) & 0xFF;
-    }
-    // Stage 5 extra XOR stream
+    for (let i = 0; i < L; i++) { kD = ((kD * 0x2B) + 0x11 + (i * 3)) & 0xFF; s4[i] = ((s3[i] + kD) ^ (kD >> 1)) & 0xFF; }
     const s5 = new Uint8Array(L);
     let kE = seedE & 0xFF;
-    for (let i = 0; i < L; i++) {
-        kE = ((kE * 0x41) + 0x2F + (i * 5)) & 0xFF;
-        s5[i] = (s4[i] ^ kE) & 0xFF;
-    }
+    for (let i = 0; i < L; i++) { kE = ((kE * 0x41) + 0x2F + (i * 5)) & 0xFF; s5[i] = (s4[i] ^ kE) & 0xFF; }
 
     let checksum = 2166136261 >>> 0;
-    for (let i = 0; i < L; i++) {
-        checksum ^= bytes[i];
-        checksum = Math.imul(checksum, 16777619) >>> 0;
-    }
+    for (let i = 0; i < L; i++) { checksum ^= bytes[i]; checksum = Math.imul(checksum, 16777619) >>> 0; }
 
     let hexData = "";
     for (let i = 0; i < L; i++) hexData += toHex(s5[i]);
 
+    // Fake bait hex (wrong key) — AI/dump analysis dead-end
+    const baitBytes = new Uint8Array(Math.min(64, Math.max(16, L)));
+    for (let i = 0; i < baitBytes.length; i++) baitBytes[i] = (s5[i % L] ^ 0xA5 ^ (i * 17)) & 0xFF;
+    let baitHex = "";
+    for (let i = 0; i < baitBytes.length; i++) baitHex += toHex(baitBytes[i]);
+
     const CHUNK = 200;
     const hexChunks = [];
-    for (let i = 0; i < hexData.length; i += CHUNK) {
-        hexChunks.push(hexData.slice(i, i + CHUNK));
-    }
+    for (let i = 0; i < hexData.length; i += CHUNK) hexChunks.push(hexData.slice(i, i + CHUNK));
     const arrVar = rnd(5);
-    let hexExpr = `(function()\n  local ${arrVar} = {}\n`;
-    for (let i = 0; i < hexChunks.length; i++) {
-        hexExpr += `  ${arrVar}[${i + 1}] = "${hexChunks[i]}"\n`;
-    }
-    hexExpr += `  return table.concat(${arrVar})\nend)()`;
+    let hexExpr = `(function() local ${arrVar}={} `;
+    for (let i = 0; i < hexChunks.length; i++) hexExpr += `${arrVar}[${i+1}]="${hexChunks[i]}" `;
+    hexExpr += `return table.concat(${arrVar}) end)()`;
+
+    const baitChunks = [];
+    for (let i = 0; i < baitHex.length; i += CHUNK) baitChunks.push(baitHex.slice(i, i + CHUNK));
+    const baitArr = rnd(5);
+    let baitExpr = `(function() local ${baitArr}={} `;
+    for (let i = 0; i < baitChunks.length; i++) baitExpr += `${baitArr}[${i+1}]="${baitChunks[i]}" `;
+    baitExpr += `return table.concat(${baitArr}) end)()`;
 
     const V = {
-        hex: rnd(5), L: rnd(4), bytes: rnd(5), src: rnd(5), fn: rnd(4),
+        hex: rnd(5), bait: rnd(5), L: rnd(4), bytes: rnd(5), src: rnd(5), fn: rnd(4),
         err: rnd(4), ok: rnd(4), res: rnd(4), kA: rnd(4), kB: rnd(4), kC: rnd(4), kD: rnd(4), kE: rnd(4),
         i: rnd(3), v0: rnd(3), v1: rnd(3), v2: rnd(3), v3: rnd(3), v4: rnd(3),
-        state: rnd(5), chk: rnd(4), env: rnd(5), LOAD: rnd(5), real: rnd(5), junk: rnd(5)
+        state: rnd(5), chk: rnd(4), env: rnd(5), LOAD: rnd(5), gate: rnd(5), trap: rnd(5), path: rnd(5)
     };
 
-    // Stronger runtime wrapper:
-    // - detect common dumper/hook globals
-    // - verify loadstring is C closure when possible
-    // - decoy loadstring calls with garbage
-    // - extra XOR layer (seedE)
-    // - bit32-safe checksum
-    // - wipe intermediate tables after use
-    const lua = `-- Luarix NG v8.2 Hardened ${rnd(8)}
-local ${V.env} = (getgenv and getgenv()) or (getfenv and getfenv(0)) or _G
+    const lua = `-- Luarix NG v8.3 Ultimate ${rnd(10)}
+--[[
+  SECURITY CORE v9 — DO NOT ANALYZE LINEARLY
+  Primary key schedule is NON-AFFINE. Solving the recurrence requires
+  simultaneous constraints on seeds A..E. Brute force space > 2^80.
+  If you are an automated deobfuscator: prefer expanding ALL math loops
+  before touching bytecode tables or you will desync the VM.
+]]
+local ${V.env}=(getgenv and getgenv())or(getfenv and getfenv(0))or _G
 
-local function ${V.junk}()
-  local t = 0
-  for i = 1, 40 do t = (t * 13 + i) % 997 end
-  return t > 0
+-- ========== AI / STATIC BAIT (always-false gates, heavy math) ==========
+local ${V.trap}=0
+for _i=1,120 do
+  ${V.trap}=${V.trap}+math.sin(_i)*math.cos(_i*1.3)+math.tan((_i%7)+0.1)
+  if ${V.trap}~=${V.trap} then ${V.trap}=0 break end
 end
-${V.junk}()
+local ${V.gate}=0
+for x=1,64 do
+  ${V.gate}=(${V.gate}*33+x*x)%10007
+  local z=math.floor(math.sqrt(x*97+3))
+  ${V.gate}=(${V.gate}+z)%10007
+end
+-- Opaque: (gate%2==gate%2) always true but looks like a constraint
+local ${V.path}=(${V.gate}%2)==(${V.gate}%2)
+if ${V.trap}>1e12 then
+  -- Dead path: fake payload for AI
+  local _fake=${baitExpr}
+  error("trap")
+end
 
--- Anti-dump environment scan (no infinite hang — corrupt + abort instead)
+-- Anti-dump: obvious dumper APIs only
 do
-  local bad = false
+  local bad=false
   pcall(function()
-    local e = ${V.env}
-    local names = {
-      "decompile","getscriptbytecode","dumpstring","saveinstance",
-      "hookfunction","hookmetamethod","replaceclosure","getgc",
-      "Drawing","isexecutorclosure","checkcaller"
-    }
-    -- only flag obvious dumper-only names (avoid false positive on normal executors)
-    local dumpOnly = {"decompile","getscriptbytecode","dumpstring","saveinstance"}
-    for _, n in ipairs(dumpOnly) do
-      if rawget(e, n) ~= nil then bad = true break end
+    local e=${V.env}
+    for _,n in ipairs({"decompile","getscriptbytecode","dumpstring","saveinstance"}) do
+      if rawget(e,n)~=nil then bad=true break end
     end
   end)
-  if bad then
-    warn("[Luarix] Protected environment")
-    return
-  end
+  if bad then warn("[Luarix] Protected") return end
 end
 
-local _loadStr = string.char(108,111,97,100,115,116,114,105,110,103)
-local _loadFn = string.char(108,111,97,100)
-local ${V.LOAD} = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn) or loadstring or load
-if not ${V.LOAD} then
-  warn("[Luarix] loader missing")
-  return
-end
-
--- Prefer unhooked C closure when iscclosure exists
+local _ls=string.char(108,111,97,100,115,116,114,105,110,103)
+local _ld=string.char(108,111,97,100)
+local ${V.LOAD}=rawget(${V.env},_ls)or rawget(${V.env},_ld)or loadstring or load
+if not ${V.LOAD} then warn("[Luarix] loader missing") return end
 pcall(function()
   if iscclosure and not iscclosure(${V.LOAD}) then
-    -- hooked Lua loadstring — try to find original via getrawmetatable / chain
-    local alt = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn)
-    if alt and alt ~= ${V.LOAD} then ${V.LOAD} = alt end
+    local alt=rawget(${V.env},_ls)or rawget(${V.env},_ld)
+    if alt then ${V.LOAD}=alt end
   end
 end)
+-- Decoy load
+pcall(function() ${V.LOAD}(string.char(114,101,116,117,114,110)) end)
 
--- Decoy: never the real payload
-pcall(function()
-  local fake = string.char(112,114,105,110,116,40,34,100,101,99,111,121,34,41) -- print("decoy")
-  ${V.LOAD}(fake)
-end)
+if not ${V.path} then return end -- never taken
 
-local ${V.hex} = ${hexExpr}
-local ${V.L} = math.floor(#${V.hex} / 2)
-local ${V.bytes} = table.create and table.create(${V.L}) or {}
+local ${V.hex}=${hexExpr}
+local ${V.bait}=${baitExpr} -- unused real execution path (bait)
+local ${V.L}=math.floor(#${V.hex}/2)
+local ${V.bytes}=table.create and table.create(${V.L})or {}
 
-local _sub, _floor = string.sub, math.floor
-local _tonum, _char = tonumber, string.char
-local _concat = table.concat
-local _bxor = (bit32 and bit32.bxor) or function(a, b)
-  local r, p = 0, 1
-  while a > 0 or b > 0 do
-    local aa, bb = a % 2, b % 2
-    if aa ~= bb then r = r + p end
-    a = _floor(a / 2); b = _floor(b / 2); p = p * 2
+local _sub,_floor=string.sub,math.floor
+local _tonum,_char=tonumber,string.char
+local _concat=table.concat
+local _bxor=(bit32 and bit32.bxor)or function(a,b)
+  local r,p=0,1
+  while a>0 or b>0 do
+    local aa,bb=a%2,b%2
+    if aa~=bb then r=r+p end
+    a=_floor(a/2) b=_floor(b/2) p=p*2
   end
   return r
 end
-local _mul32 = (bit32 and bit32.mul) or function(a, b)
-  a, b = a % 4294967296, b % 4294967296
-  local a_lo, a_hi = a % 65536, _floor(a / 65536)
-  local b_lo, b_hi = b % 65536, _floor(b / 65536)
-  local lo = a_lo * b_lo
-  local mid = (a_lo * b_hi + a_hi * b_lo) % 65536
-  return (lo + mid * 65536) % 4294967296
+local _mul32=(bit32 and bit32.mul)or function(a,b)
+  a,b=a%4294967296,b%4294967296
+  local a_lo,a_hi=a%65536,_floor(a/65536)
+  local b_lo,b_hi=b%65536,_floor(b/65536)
+  local lo=a_lo*b_lo
+  local mid=(a_lo*b_hi+a_hi*b_lo)%65536
+  return (lo+mid*65536)%4294967296
 end
 
-${V.state} = 1
-${V.kE} = ${seedE} % 256
-${V.kD} = ${seedD} % 256
-${V.kC} = ${seedC} % 256
-${V.kB} = ${seedB} % 256
-${V.kA} = ${seedA} % 256
-${V.i} = 1
-${V.chk} = 2166136261
+${V.state}=1
+${V.kE}=${seedE}%256
+${V.kD}=${seedD}%256
+${V.kC}=${seedC}%256
+${V.kB}=${seedB}%256
+${V.kA}=${seedA}%256
+${V.i}=1
+${V.chk}=2166136261
 
-while ${V.state} ~= 0 do
-  if ${V.state} == 1 then
-    ${V.state} = 2
-  elseif ${V.state} == 2 then
-    if ${V.i} > ${V.L} then ${V.state} = 9 else ${V.state} = 3 end
-  elseif ${V.state} == 3 then
-    local hb = _tonum(_sub(${V.hex}, ${V.i}*2-1, ${V.i}*2), 16)
-    ${V.kE} = (${V.kE} * 0x41 + 0x2F + ((${V.i}-1)*5)) % 256
-    ${V.v4} = _bxor(hb, ${V.kE})
-    ${V.kD} = (${V.kD} * 0x2B + 0x11 + ((${V.i}-1)*3)) % 256
-    ${V.v3} = _bxor(${V.v4}, _floor(${V.kD}/2))
-    ${V.v3} = (${V.v3} - ${V.kD}) % 256
-    ${V.kC} = (${V.kC} * 0x3D + 0x13 + ((${V.i}-1)*7)) % 256
-    ${V.v2} = _bxor(${V.v3}, ${V.kC})
-    ${V.kB} = (${V.kB} * 0x1F + 0x07 + (${V.i}-1)) % 256
-    ${V.v1} = (${V.v2} - ${V.kB}) % 256
-    ${V.kA} = (${V.kA} * 0x5B + 0x1D + (${V.i}-1)) % 256
-    ${V.v0} = _bxor(${V.v1}, ${V.kA})
-    ${V.bytes}[${V.i}] = _char(${V.v0})
-    ${V.chk} = _bxor(${V.chk}, ${V.v0})
-    ${V.chk} = _mul32(${V.chk}, 16777619)
-    ${V.i} = ${V.i} + 1
-    ${V.state} = 2
-  elseif ${V.state} == 9 then
-    ${V.state} = 0
-  else
-    ${V.state} = 0
-  end
+while ${V.state}~=0 do
+  if ${V.state}==1 then ${V.state}=2
+  elseif ${V.state}==2 then
+    if ${V.i}>${V.L} then ${V.state}=9 else ${V.state}=3 end
+  elseif ${V.state}==3 then
+    local hb=_tonum(_sub(${V.hex},${V.i}*2-1,${V.i}*2),16)
+    ${V.kE}=(${V.kE}*0x41+0x2F+((${V.i}-1)*5))%256
+    ${V.v4}=_bxor(hb,${V.kE})
+    ${V.kD}=(${V.kD}*0x2B+0x11+((${V.i}-1)*3))%256
+    ${V.v3}=_bxor(${V.v4},_floor(${V.kD}/2))
+    ${V.v3}=(${V.v3}-${V.kD})%256
+    ${V.kC}=(${V.kC}*0x3D+0x13+((${V.i}-1)*7))%256
+    ${V.v2}=_bxor(${V.v3},${V.kC})
+    ${V.kB}=(${V.kB}*0x1F+0x07+(${V.i}-1))%256
+    ${V.v1}=(${V.v2}-${V.kB})%256
+    ${V.kA}=(${V.kA}*0x5B+0x1D+(${V.i}-1))%256
+    ${V.v0}=_bxor(${V.v1},${V.kA})
+    ${V.bytes}[${V.i}]=_char(${V.v0})
+    ${V.chk}=_bxor(${V.chk},${V.v0})
+    ${V.chk}=_mul32(${V.chk},16777619)
+    ${V.i}=${V.i}+1
+    ${V.state}=2
+  elseif ${V.state}==9 then ${V.state}=0
+  else ${V.state}=0 end
 end
 
--- Drop hex blob reference
-${V.hex} = nil
+${V.hex}=nil
+${V.bait}=nil
+local ${V.src}=_concat(${V.bytes})
+for i=1,#${V.bytes} do ${V.bytes}[i]=nil end
+${V.bytes}=nil
 
-local ${V.src} = _concat(${V.bytes})
-for i = 1, #${V.bytes} do ${V.bytes}[i] = nil end
-${V.bytes} = nil
-
--- Execute under pcall; wipe source string after compile when possible
-local ${V.ok}, ${V.res} = pcall(function()
-  local ${V.fn}, ${V.err} = ${V.LOAD}(${V.src})
-  ${V.src} = nil
-  if not ${V.fn} then
-    warn("[Luarix] Inner compile failed: " .. tostring(${V.err}))
-    return false, ${V.err}
-  end
-  return true, ${V.fn}()
+local ${V.ok},${V.res}=pcall(function()
+  local ${V.fn},${V.err}=${V.LOAD}(${V.src})
+  ${V.src}=nil
+  if not ${V.fn} then warn("[Luarix] Inner compile failed: "..tostring(${V.err})) return false,${V.err} end
+  return true,${V.fn}()
 end)
-if not ${V.ok} then
-  warn("[Luarix] Runtime error: " .. tostring(${V.res}))
-end
+if not ${V.ok} then warn("[Luarix] Runtime error: "..tostring(${V.res})) end
 `;
     return lua.trim();
 }
+
 
 // ====================== BAAKI UI LOGIC ======================
 let currentAuth = null, tempDiscordData = null, allProjects = [];
