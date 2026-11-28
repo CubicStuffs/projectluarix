@@ -790,7 +790,7 @@
 </div>
 
 <script>
-const CURRENT_OBF_VERSION = "v8.0";
+const CURRENT_OBF_VERSION = "v8.1";
 
 // ====================== LUARIX HARDENED OBFUSCATOR v8.0 (CLIENT SIDE) ======================
 function luarixV8ObfuscateClient(luaCode) {
@@ -854,12 +854,18 @@ function luarixV8ObfuscateClient(luaCode) {
     let hexData = "";
     for (let i = 0; i < L; i++) hexData += toHex(s4[i]);
 
-    const CHUNK = 360;
+    // FIXED: sequential build — no Luau recursion depth error on Delta/Roblox
+    const CHUNK = 200;
     const hexChunks = [];
     for (let i = 0; i < hexData.length; i += CHUNK) {
         hexChunks.push(hexData.slice(i, i + CHUNK));
     }
-    const hexExpr = hexChunks.map(c => `"${c}"`).join(' ..\n    ');
+    const arrVar = rnd(5);
+    let hexExpr = `(function()\n  local ${arrVar} = {}\n`;
+    for (let i = 0; i < hexChunks.length; i++) {
+        hexExpr += `  ${arrVar}[${i + 1}] = "${hexChunks[i]}"\n`;
+    }
+    hexExpr += `  return table.concat(${arrVar})\nend)()`;
 
     const V = {
         P: rnd(5), hex: rnd(5), L: rnd(4), bytes: rnd(5), src: rnd(5), fn: rnd(4),
@@ -878,27 +884,16 @@ task.spawn(function()
   end
   if _mathTrap > 99999 then return end
   
-  local dumperDetected = false
-  pcall(function()
-    local ls = rawget(${V.env}, "loadstring") or rawget(${V.env}, "load") or loadstring
-    if debug and debug.getinfo then
-      local info = debug.getinfo(ls)
-      if info and info.what == "Lua" then dumperDetected = true end
-    end
-    if rawget(${V.env}, "decompile") or rawget(${V.env}, "getscriptbytecode") or rawget(${V.env}, "dump") then
-      dumperDetected = true
-    end
-  end)
-
-  if dumperDetected then
-    while true do task.wait(999) end
-  end
+  -- anti-dumper hang removed (false positives on Delta/mobile executors)
 end)
 
 local _loadStr = string.char(108,111,97,100,115,116,114,105,110,103) 
 local _loadFn = string.char(108,111,97,100)
 local ${V.LOAD} = rawget(${V.env}, _loadStr) or rawget(${V.env}, _loadFn) or loadstring or load
-if not ${V.LOAD} then return end
+if not ${V.LOAD} then
+  warn("[Luarix] loadstring not available")
+  return
+end
 
 local ${V.hex} = ${hexExpr}
 local ${V.L} = math.floor(#${V.hex} / 2)
@@ -970,9 +965,15 @@ local ${V.src} = _concat(${V.bytes} or {})
 
 local ${V.ok}, ${V.res} = pcall(function()
   local ${V.fn}, ${V.err} = ${V.LOAD}(${V.src})
-  if not ${V.fn} then return false, ${V.err} end
+  if not ${V.fn} then
+    warn("[Luarix] Inner compile failed: " .. tostring(${V.err}))
+    return false, ${V.err}
+  end
   return true, ${V.fn}()
 end)
+if not ${V.ok} then
+  warn("[Luarix] Runtime error: " .. tostring(${V.res}))
+end
 `;
     return lua.trim();
 }
@@ -1338,7 +1339,7 @@ async function createScript() {
         try { data = await res.json(); } 
         catch (e) {
             // Agar Vercel crash hota hai toh HTML return karta hai
-            if (res.status === 413) throw new Error("Script is too large for the server (Max 4MB).");
+            if (res.status === 413) throw new Error("Script is too large for the server (Max 20MB).");
             if (res.status === 504) throw new Error("Server timed out. Please try a smaller script.");
             throw new Error(`Server error (${res.status}). Please check Vercel logs.`);
         }
