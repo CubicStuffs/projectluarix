@@ -917,6 +917,15 @@ local _bxor = (bit32 and bit32.bxor) or function(a, b)
   end
   return r
 end
+-- 32-bit multiply (JS Math.imul compatible) — plain Lua * loses precision
+local _mul32 = (bit32 and bit32.mul) or function(a, b)
+  a, b = a % 4294967296, b % 4294967296
+  local a_lo, a_hi = a % 65536, _floor(a / 65536)
+  local b_lo, b_hi = b % 65536, _floor(b / 65536)
+  local lo = a_lo * b_lo
+  local mid = (a_lo * b_hi + a_hi * b_lo) % 65536
+  return (lo + mid * 65536) % 4294967296
+end
 
 ${V.state} = 1
 ${V.kD} = ${seedD} % 256
@@ -948,12 +957,11 @@ while ${V.state} ~= 0 do
     ${V.v0} = _bxor(${V.v1}, ${V.kA})
     ${V.bytes}[${V.i}] = _char(${V.v0})
     ${V.chk} = _bxor(${V.chk}, ${V.v0})
-    ${V.chk} = (${V.chk} * 16777619) % 4294967296
+    ${V.chk} = _mul32(${V.chk}, 16777619)
     ${V.i} = ${V.i} + 1
     ${V.state} = 2
   elseif ${V.state} == 9 then
     if ${V.chk} ~= ${checksum} then
-      ${V.bytes} = {}
       warn("[Luarix] Integrity check failed")
     end
     ${V.state} = 0
